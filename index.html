@@ -1,148 +1,107 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="MedAudit AI — prototipe audit kelengkapan rekam medis dan kualitas data menggunakan data sintetis.">
-  <title>MedAudit AI | Medical Records Audit</title>
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10243a">
+<title>MedAudit AI | Audit Rekam Medis</title>
+<style>
+:root{--navy:#10243a;--blue:#2463eb;--bg:#f3f6fa;--ink:#172334;--muted:#64748b;--line:#e2e8f0;--green:#15803d;--red:#b91c1c;--amber:#b45309}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--navy);color:white;padding:22px max(18px,calc((100% - 1100px)/2))}
+header h1{margin:0;font-size:23px}header p{margin:4px 0 0;color:#cbd5e1;font-size:13px}
+main{max-width:1100px;margin:22px auto;padding:0 16px}.notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:13px}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tab{border:1px solid var(--line);background:white;border-radius:10px;padding:9px 13px;color:var(--ink);font-weight:600}.tab.active{background:var(--blue);color:white;border-color:var(--blue)}
+.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px #0f172a08}
+h2{font-size:18px;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.metric{padding:14px;border:1px solid var(--line);border-radius:12px}.metric strong{display:block;font-size:25px}.metric span{color:var(--muted);font-size:12px}
+label{display:block;font-weight:600;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px;font:inherit;background:white}textarea{min-height:72px;resize:vertical}
+button{cursor:pointer;border:0;border-radius:9px;padding:10px 14px;font:600 14px system-ui;background:var(--blue);color:white}.secondary{background:#eaf0f8;color:#1e293b}.danger{background:#fee2e2;color:#991b1b}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:700}
+.status{font-weight:700}.ok{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}.muted{color:var(--muted)}
+.hidden{display:none}.empty{text-align:center;color:var(--muted);padding:24px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:12px 0 30px}
+@media(max-width:600px){header{padding:18px}main{margin-top:14px}.panel{padding:14px}table{min-width:650px}.table-wrap{overflow-x:auto}}
+</style>
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar" id="sidebar">
-      <a class="brand" href="#" aria-label="MedAudit AI beranda">
-        <span class="brand-mark">M</span>
-        <span><strong>MedAudit</strong><small>AI · HEALTH DATA QUALITY</small></span>
-      </a>
-      <div class="nav-label">WORKSPACE</div>
-      <nav class="nav">
-        <button class="nav-item active" data-view="dashboard"><span>▦</span> Dashboard</button>
-        <button class="nav-item" data-view="records"><span>▤</span> Medical Records</button>
-        <button class="nav-item" data-view="audit"><span>◉</span> Audit & Data Quality</button>
-      </nav>
-      <div class="nav-label">SYSTEM</div>
-      <nav class="nav">
-        <button class="nav-item" data-view="settings"><span>⚙</span> Settings & Backup</button>
-      </nav>
-      <div class="sidebar-bottom">
-        <span class="status-dot"></span>
-        <span>Local demo environment</span>
-        <small>v0.2.1 · MVP</small>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <button class="menu-btn" id="menuBtn" aria-label="Buka navigasi">☰</button>
-        <div><span class="eyebrow">HEALTH INFORMATION MANAGEMENT</span><h1 id="pageTitle">Dashboard</h1></div>
-        <div class="top-actions">
-          <span class="demo-pill">SYNTHETIC DATA</span>
-          <div class="avatar">SA</div>
-        </div>
-      </header>
-
-      <section class="view active" id="view-dashboard">
-        <div class="welcome-row">
-          <div><h2>Medical Records Overview</h2><p>Pantau kelengkapan dokumentasi dan kualitas data kunjungan.</p></div>
-          <button class="btn primary" id="addRecordTop">＋ Tambah Kunjungan</button>
-        </div>
-        <div class="notice"><strong>Mode demonstrasi.</strong> Seluruh data pada aplikasi ini adalah data sintetis. Jangan memasukkan identitas atau data pasien nyata.</div>
-        <div class="kpi-grid">
-          <article class="kpi-card"><span class="kpi-label">Total Kunjungan</span><strong id="kpiTotal">0</strong><span class="kpi-foot">Data tersimpan di perangkat ini</span></article>
-          <article class="kpi-card"><span class="kpi-label">Lulus Pemeriksaan</span><strong id="kpiPassed">0</strong><span class="kpi-foot">Tidak ditemukan aturan yang dilanggar</span></article>
-          <article class="kpi-card"><span class="kpi-label">Perlu Review</span><strong id="kpiReview">0</strong><span class="kpi-foot">Memiliki satu atau lebih temuan</span></article>
-          <article class="kpi-card"><span class="kpi-label">Total Temuan</span><strong id="kpiIssues">0</strong><span class="kpi-foot">Hasil pemeriksaan rule-based</span></article>
-        </div>
-        <div class="content-grid">
-          <article class="panel">
-            <div class="panel-head"><div><h3>Audit Status</h3><p>Distribusi hasil pemeriksaan saat ini</p></div><span class="panel-icon">◔</span></div>
-            <div class="status-chart">
-              <div class="donut" id="donut"><div><strong id="donutPct">0%</strong><small>lulus</small></div></div>
-              <div class="legend"><div><i class="legend-dot pass"></i><span>Lulus</span><strong id="legendPass">0</strong></div><div><i class="legend-dot review"></i><span>Perlu review</span><strong id="legendReview">0</strong></div></div>
-            </div>
-          </article>
-          <article class="panel">
-            <div class="panel-head"><div><h3>Recent Findings</h3><p>Temuan terbaru berdasarkan data tersimpan</p></div><button class="text-btn" data-goto="audit">Lihat audit →</button></div>
-            <div id="recentFindings" class="finding-list"></div>
-          </article>
-        </div>
-        <article class="panel table-panel">
-          <div class="panel-head"><div><h3>Recent Visits</h3><p>Lima kunjungan terakhir</p></div><button class="text-btn" data-goto="records">Semua kunjungan →</button></div>
-          <div class="table-wrap"><table><thead><tr><th>ID KUNJUNGAN</th><th>PASIEN</th><th>TANGGAL</th><th>DIAGNOSIS UTAMA</th><th>STATUS AUDIT</th></tr></thead><tbody id="recentTable"></tbody></table></div>
-        </article>
-      </section>
-
-      <section class="view" id="view-records">
-        <div class="welcome-row"><div><h2>Medical Records</h2><p>Kelola data kunjungan demonstrasi dan lakukan pemeriksaan awal.</p></div><button class="btn primary" id="addRecord">＋ Tambah Kunjungan</button></div>
-        <article class="panel">
-          <div class="toolbar"><label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Cari ID, pasien, atau diagnosis..."></label><select id="statusFilter" aria-label="Filter status"><option value="all">Semua status</option><option value="pass">Lulus</option><option value="review">Perlu review</option></select></div>
-          <div class="table-wrap"><table><thead><tr><th>ID KUNJUNGAN</th><th>PASIEN</th><th>TANGGAL MASUK</th><th>DIAGNOSIS UTAMA</th><th>TEMUAN</th><th>AKSI</th></tr></thead><tbody id="recordsTable"></tbody></table></div>
-          <div class="table-foot" id="recordCount">0 kunjungan</div>
-        </article>
-      </section>
-
-      <section class="view" id="view-audit">
-        <div class="welcome-row"><div><h2>Audit & Data Quality</h2><p>Pemeriksaan berbasis aturan untuk membantu menemukan data yang perlu ditinjau.</p></div><button class="btn primary" id="runAudit">↻ Jalankan Audit</button></div>
-        <div class="notice"><strong>Catatan metodologi:</strong> pemeriksaan ini adalah validasi administratif sederhana, bukan penetapan diagnosis, validasi klinis, atau pengganti verifikasi koder/DPJP.</div>
-        <article class="panel">
-          <div class="panel-head"><div><h3>Rule Engine Findings</h3><p>Daftar temuan dari seluruh kunjungan</p></div><span class="count-chip" id="auditFindingCount">0 temuan</span></div>
-          <div id="auditResults" class="audit-results"></div>
-        </article>
-        <article class="panel rules-panel">
-          <div class="panel-head"><div><h3>Aturan Pemeriksaan MVP</h3><p>Aturan transparan yang dijalankan di browser</p></div></div>
-          <div class="rules-grid">
-            <div><b>DQ-01</b><span>Identitas/ID kunjungan kosong</span></div>
-            <div><b>DQ-02</b><span>Tanggal masuk tidak valid atau di masa depan</span></div>
-            <div><b>DQ-03</b><span>Tanggal keluar lebih awal dari tanggal masuk</span></div>
-            <div><b>DQ-04</b><span>Diagnosis utama belum diisi</span></div>
-            <div><b>DQ-05</b><span>Format kode diagnosis tidak sesuai pola umum ICD-10</span></div>
-            <div><b>DQ-06</b><span>Kelas rawat belum dipilih</span></div>
-            <div><b>DQ-07</b><span>Resume medis belum ditandai lengkap</span></div>
-            <div><b>DQ-08</b><span>Autentikasi DPJP belum ditandai lengkap</span></div>
-          </div>
-        </article>
-      </section>
-
-      <section class="view" id="view-settings">
-        <div class="welcome-row"><div><h2>Settings & Backup</h2><p>Data disimpan di LocalStorage browser pada perangkat ini.</p></div></div>
-        <div class="settings-grid">
-          <article class="panel"><div class="panel-head"><div><h3>Data Management</h3><p>Cadangkan atau pulihkan data demonstrasi.</p></div></div>
-            <div class="setting-actions"><button class="btn primary" id="exportBtn">↓ Export JSON</button><label class="btn secondary file-btn">↑ Import JSON<input type="file" id="importFile" accept="application/json"></label><button class="btn danger-outline" id="resetBtn">Reset Data Demo</button></div>
-            <p class="help-text">Export menyimpan salinan data sebagai file JSON. Simpan file backup di tempat aman. Import akan mengganti seluruh data lokal saat ini.</p>
-          </article>
-          <article class="panel"><div class="panel-head"><div><h3>Environment</h3><p>Informasi teknis aplikasi</p></div></div>
-            <dl class="info-list"><div><dt>Application</dt><dd>MedAudit AI</dd></div><div><dt>Version</dt><dd>0.2.1 MVP</dd></div><div><dt>Storage</dt><dd>Browser LocalStorage</dd></div><div><dt>Audit engine</dt><dd>Rule-based JavaScript</dd></div><div><dt>Backend / Cloud</dt><dd>Belum digunakan</dd></div><div><dt>Dataset</dt><dd>Synthetic / fictional</dd></div></dl>
-          </article>
-        </div>
-      </section>
-
-      <footer class="footer">MedAudit AI · Prototype for portfolio demonstration <span>Built with HTML, CSS & Vanilla JavaScript</span></footer>
-    </main>
-  </div>
-
-  <dialog id="recordDialog" class="record-dialog">
-    <form id="recordForm" method="dialog">
-      <div class="dialog-head"><div><span class="eyebrow">MEDICAL RECORD DATA</span><h2 id="dialogTitle">Tambah Kunjungan</h2></div><button type="button" class="close-btn" id="closeDialog" aria-label="Tutup">×</button></div>
-      <input type="hidden" id="recordId">
-      <div class="form-grid">
-        <label>ID Kunjungan <input id="visitId" required maxlength="24" placeholder="VIS-2026-001"></label>
-        <label>Nama Pasien (inisial fiktif) <input id="patient" required maxlength="40" placeholder="Pasien A"></label>
-        <label>Tanggal Masuk <input id="admissionDate" type="date" required></label>
-        <label>Tanggal Keluar <input id="dischargeDate" type="date"></label>
-        <label>Diagnosis Utama <input id="diagnosis" placeholder="Contoh: Gastritis"></label>
-        <label>Kode ICD-10 <input id="icdCode" maxlength="8" placeholder="K29.7"></label>
-        <label>Kelas Rawat <select id="classRoom"><option value="">Pilih kelas</option><option value="Kelas 1">Kelas 1</option><option value="Kelas 2">Kelas 2</option><option value="Kelas 3">Kelas 3</option><option value="VIP">VIP</option><option value="Tidak berlaku">Tidak berlaku</option></select></label>
-        <label class="check-field"><input id="resumeComplete" type="checkbox"> Resume medis lengkap</label>
-        <label class="check-field"><input id="dpjpSigned" type="checkbox"> Autentikasi DPJP lengkap</label>
-      </div>
-      <div class="form-note">Gunakan nama/inisial fiktif. Jangan memasukkan data pasien nyata.</div>
-      <div class="dialog-actions"><button type="button" class="btn secondary" id="cancelDialog">Batal</button><button type="submit" class="btn primary">Simpan Kunjungan</button></div>
-    </form>
-  </dialog>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="js/demo-data.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/audit.js"></script>
-  <script src="js/ui.js"></script>
-</body>
-</html>
+<header><h1>MedAudit AI</h1><p>AI-Assisted Medical Records Audit &amp; Data Quality System · Prototype v0.2</p></header>
+<main>
+<div class="notice"><b>Mode demonstrasi:</b> gunakan data sintetis/fiktif saja. Aplikasi ini berjalan lokal di browser dan menyimpan data pada perangkat melalui LocalStorage. Bukan sistem produksi dan bukan pengganti verifikasi koder/DPJP.</div>
+<nav>
+<button class="tab active" data-tab="dashboard">Dashboard</button>
+<button class="tab" data-tab="input">Input Data</button>
+<button class="tab" data-tab="audit">Hasil Audit</button>
+<button class="tab" data-tab="about">Tentang</button>
+</nav>
+<section id="dashboard" class="view">
+<div class="grid">
+<div class="metric"><strong id="total">0</strong><span>Total data demo</span></div>
+<div class="metric"><strong id="passed">0</strong><span>Lolos pemeriksaan dasar</span></div>
+<div class="metric"><strong id="issues">0</strong><span>Perlu ditinjau</span></div>
+<div class="metric"><strong id="rate">0%</strong><span>Persentase tanpa temuan</span></div>
+</div>
+<div class="panel" style="margin-top:16px"><h2>Ringkasan pemeriksaan</h2><p class="muted">Pemeriksaan dasar mencakup kelengkapan identitas, tanggal masuk/keluar, diagnosis utama, format kode ICD-10, dan konsistensi tanggal.</p><div id="summary" class="empty">Belum ada data. Tambahkan data demonstrasi untuk memulai.</div><div class="actions"><button id="seed">Muat data demo</button><button class="secondary" id="export">Ekspor CSV</button></div></div>
+</section>
+<section id="input" class="view hidden">
+<div class="panel"><h2>Tambah kasus demonstrasi</h2>
+<form id="caseForm">
+<div class="grid">
+<div><label for="mrn">Nomor rekam medis (fiktif)</label><input id="mrn" required placeholder="DEMO-001"></div>
+<div><label for="name">Nama pasien (fiktif)</label><input id="name" required placeholder="Pasien Demo"></div>
+<div><label for="admit">Tanggal masuk</label><input id="admit" type="date" required></div>
+<div><label for="discharge">Tanggal keluar</label><input id="discharge" type="date"></div>
+<div><label for="mainDx">Diagnosis utama</label><input id="mainDx" required placeholder="Contoh: Demam"></div>
+<div><label for="code">Kode ICD-10</label><input id="code" required placeholder="Contoh: A09"></div>
+</div>
+<label for="notes">Catatan audit</label><textarea id="notes" placeholder="Catatan tambahan (opsional)"></textarea>
+<div class="actions"><button type="submit">Simpan &amp; audit</button><button type="reset" class="secondary">Bersihkan</button></div>
+</form></div>
+</section>
+<section id="audit" class="view hidden">
+<div class="panel"><h2>Daftar hasil audit</h2><p class="muted">Klik detail untuk melihat temuan pemeriksaan otomatis.</p><div class="table-wrap"><table><thead><tr><th>No. RM</th><th>Diagnosis</th><th>Kode</th><th>Status</th><th>Temuan</th><th>Aksi</th></tr></thead><tbody id="rows"><tr><td colspan="6" class="empty">Belum ada data.</td></tr></tbody></table></div></div>
+</section>
+<section id="about" class="view hidden">
+<div class="panel"><h2>Ruang lingkup dan batasan</h2>
+<ul><li>Prototype portofolio untuk demonstrasi audit kelengkapan dan kualitas data rekam medis.</li><li>Mesin audit menggunakan aturan sederhana (rule-based), bukan model AI/LLM.</li><li>Validasi kode ICD-10 hanya memeriksa pola penulisan dasar, bukan memastikan kode resmi, diagnosis, atau ketepatan klinis.</li><li>Data disimpan di LocalStorage browser perangkat ini; hapus data browser dapat menghilangkannya.</li><li>Jangan masukkan data pasien nyata, NIK, alamat, nomor telepon, atau informasi kesehatan yang dapat mengidentifikasi seseorang.</li></ul>
+<p class="muted">Dikembangkan sebagai proyek demonstrasi pembelajaran informatika kesehatan.</p>
+</div></section>
+<footer>MedAudit AI · Prototype v0.2 · Data sintetis saja</footer>
+</main>
+<script>
+const KEY='medaudit_ai_cases_v02';
+const $=id=>document.getElementById(id);
+let cases=[];
+try{cases=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){cases=[]}
+function save(){localStorage.setItem(KEY,JSON.stringify(cases));render()}
+function audit(c){
+ const issues=[];
+ if(!c.mrn.trim())issues.push('Nomor RM kosong');
+ if(!c.name.trim())issues.push('Nama pasien kosong');
+ if(!c.admit)issues.push('Tanggal masuk kosong');
+ if(!c.mainDx.trim())issues.push('Diagnosis utama kosong');
+ if(!c.code.trim())issues.push('Kode ICD-10 kosong');
+ else if(!/^[A-Z][0-9]{2}(\\.[0-9A-Z]{1,4})?$/.test(c.code.trim().toUpperCase()))issues.push('Format kode ICD-10 perlu diperiksa');
+ if(c.admit&&c.discharge&&c.discharge<c.admit)issues.push('Tanggal keluar lebih awal dari tanggal masuk');
+ const today=new Date().toISOString().slice(0,10);
+ if(c.admit>today)issues.push('Tanggal masuk berada di masa depan');
+ if(c.discharge>today)issues.push('Tanggal keluar berada di masa depan');
+ return issues;
+}
+function render(){
+ const results=cases.map(c=>({...c,issues:audit(c)}));
+ const clean=results.filter(x=>!x.issues.length).length;
+ $('total').textContent=cases.length;$('passed').textContent=clean;$('issues').textContent=cases.length-clean;
+ $('rate').textContent=(cases.length?Math.round(clean/cases.length*100):0)+'%';
+ $('summary').textContent=cases.length?`${clean} kasus tanpa temuan dasar · ${cases.length-clean} kasus perlu ditinjau.`:'Belum ada data. Tambahkan data demonstrasi untuk memulai.';
+ $('rows').innerHTML=results.length?results.map((c,i)=>`<tr><td>${esc(c.mrn)}</td><td>${esc(c.mainDx)}</td><td>${esc(c.code)}</td><td class="status ${c.issues.length?'bad':'ok'}">${c.issues.length?'Perlu ditinjau':'Lolos dasar'}</td><td>${c.issues.length?c.issues.length+' temuan':'Tidak ada'}</td><td><button class="secondary" onclick="detail(${i})">Detail</button> <button class="danger" onclick="removeCase(${i})">Hapus</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Belum ada data.</td></tr>';
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+window.detail=i=>{const c=cases[i],issues=audit(c);alert('No. RM: '+c.mrn+'\\nDiagnosis: '+c.mainDx+'\\nKode: '+c.code+'\\n\\n'+(issues.length?issues.map((x,n)=>(n+1)+'. '+x).join('\\n'):'Tidak ditemukan masalah pada pemeriksaan dasar.'))};
+window.removeCase=i=>{if(confirm('Hapus data demo ini?')){cases.splice(i,1);save()}};
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==b.dataset.tab))}));
+$('caseForm').addEventListener('submit',e=>{e.preventDefault();const c={mrn:$('mrn').value.trim(),name:$('name').value.trim(),admit:$('admit').value,discharge:$('discharge').value,mainDx:$('mainDx').value.trim(),code:$('code').value.trim().toUpperCase(),notes:$('notes').value.trim()};if(cases.some(x=>x.mrn===c.mrn)){alert('Nomor RM demo sudah digunakan.');return}cases.unshift(c);save();e.target.reset();document.querySelector('[data-tab="audit"]').click();});
+$('seed').addEventListener('click',()=>{const demo=[{mrn:'DEMO-001',name:'Pasien Contoh A',admit:'2026-10-10',discharge:'2026-10-12',mainDx:'Gastroenteritis',code:'A09',notes:'Data sintetis'},{mrn:'DEMO-002',name:'Pasien Contoh B',admit:'2026-11-12',discharge:'2026-11-11',mainDx:'Demam',code:'123',notes:'Contoh dengan temuan'}];demo.forEach(d=>{if(!cases.some(x=>x.mrn===d.mrn))cases.push(d)});save()});
+$('export').addEventListener('click',()=>{const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Temuan'];const lines=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,audit(c).join('; ')])].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\\n');const blob=new Blob(['\\ufeff'+lines],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MedAudit-AI-audit-demo.csv';a.click();URL.revokeObjectURL(a.href)});
+render();
+</script>
+</body></html>
