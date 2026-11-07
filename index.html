@@ -96,7 +96,20 @@ function render(){
  $('rows').innerHTML=results.length?results.map((c,i)=>`<tr><td>${esc(c.mrn)}</td><td>${esc(c.mainDx)}</td><td>${esc(c.code)}</td><td class="status ${c.issues.length?'bad':'ok'}">${c.issues.length?'Perlu ditinjau':'Lolos dasar'}</td><td>${c.issues.length?c.issues.length+' temuan':'Tidak ada'}</td><td><button class="secondary" onclick="detail(${i})">Detail</button> <button class="danger" onclick="removeCase(${i})">Hapus</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Belum ada data.</td></tr>';
 }
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-window.detail=i=>{const c=cases[i],issues=audit(c);alert('No. RM: '+c.mrn+'\\nDiagnosis: '+c.mainDx+'\\nKode: '+c.code+'\\n\\n'+(issues.length?issues.map((x,n)=>(n+1)+'. '+x).join('\\n'):'Tidak ditemukan masalah pada pemeriksaan dasar.'))};
+
+window.detail=i=>{
+  const c=cases[i],issues=audit(c);
+  alert(
+    'No. RM: '+c.mrn+
+    '\nDiagnosis: '+c.mainDx+
+    '\nKode: '+c.code+
+    '\n\n'+
+    (issues.length
+      ? issues.map((x,n)=>(n+1)+'. '+x).join('\n')
+      : 'Tidak ditemukan masalah pada pemeriksaan dasar.')
+  );
+};
+
 window.removeCase=i=>{if(confirm('Hapus data demo ini?')){cases.splice(i,1);save()}};
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==b.dataset.tab))}));
 $('caseForm').addEventListener('submit',e=>{e.preventDefault();const c={mrn:$('mrn').value.trim(),name:$('name').value.trim(),admit:$('admit').value,discharge:$('discharge').value,mainDx:$('mainDx').value.trim(),code:$('code').value.trim().toUpperCase(),notes:$('notes').value.trim()};if(cases.some(x=>x.mrn===c.mrn)){alert('Nomor RM demo sudah digunakan.');return}cases.unshift(c);save();e.target.reset();document.querySelector('[data-tab="audit"]').click();});
