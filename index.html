@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MedAudit AI — prototipe audit kelengkapan rekam medis dan kualitas data menggunakan data sintetis.">
+  <title>MedAudit AI | Medical Records Audit</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="MedAudit AI beranda">
+        <span class="brand-mark">M</span>
+        <span><strong>MedAudit</strong><small>AI · HEALTH DATA QUALITY</small></span>
+      </a>
+      <div class="nav-label">WORKSPACE</div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard"><span>▦</span> Dashboard</button>
+        <button class="nav-item" data-view="records"><span>▤</span> Medical Records</button>
+        <button class="nav-item" data-view="audit"><span>◉</span> Audit & Data Quality</button>
+      </nav>
+      <div class="nav-label">SYSTEM</div>
+      <nav class="nav">
+        <button class="nav-item" data-view="settings"><span>⚙</span> Settings & Backup</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <span class="status-dot"></span>
+        <span>Local demo environment</span>
+        <small>v0.2.1 · MVP</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Buka navigasi">☰</button>
+        <div><span class="eyebrow">HEALTH INFORMATION MANAGEMENT</span><h1 id="pageTitle">Dashboard</h1></div>
+        <div class="top-actions">
+          <span class="demo-pill">SYNTHETIC DATA</span>
+          <div class="avatar">SA</div>
+        </div>
+      </header>
+
+      <section class="view active" id="view-dashboard">
+        <div class="welcome-row">
+          <div><h2>Medical Records Overview</h2><p>Pantau kelengkapan dokumentasi dan kualitas data kunjungan.</p></div>
+          <button class="btn primary" id="addRecordTop">＋ Tambah Kunjungan</button>
+        </div>
+        <div class="notice"><strong>Mode demonstrasi.</strong> Seluruh data pada aplikasi ini adalah data sintetis. Jangan memasukkan identitas atau data pasien nyata.</div>
+        <div class="kpi-grid">
+          <article class="kpi-card"><span class="kpi-label">Total Kunjungan</span><strong id="kpiTotal">0</strong><span class="kpi-foot">Data tersimpan di perangkat ini</span></article>
+          <article class="kpi-card"><span class="kpi-label">Lulus Pemeriksaan</span><strong id="kpiPassed">0</strong><span class="kpi-foot">Tidak ditemukan aturan yang dilanggar</span></article>
+          <article class="kpi-card"><span class="kpi-label">Perlu Review</span><strong id="kpiReview">0</strong><span class="kpi-foot">Memiliki satu atau lebih temuan</span></article>
+          <article class="kpi-card"><span class="kpi-label">Total Temuan</span><strong id="kpiIssues">0</strong><span class="kpi-foot">Hasil pemeriksaan rule-based</span></article>
+        </div>
+        <div class="content-grid">
+          <article class="panel">
+            <div class="panel-head"><div><h3>Audit Status</h3><p>Distribusi hasil pemeriksaan saat ini</p></div><span class="panel-icon">◔</span></div>
+            <div class="status-chart">
+              <div class="donut" id="donut"><div><strong id="donutPct">0%</strong><small>lulus</small></div></div>
+              <div class="legend"><div><i class="legend-dot pass"></i><span>Lulus</span><strong id="legendPass">0</strong></div><div><i class="legend-dot review"></i><span>Perlu review</span><strong id="legendReview">0</strong></div></div>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><h3>Recent Findings</h3><p>Temuan terbaru berdasarkan data tersimpan</p></div><button class="text-btn" data-goto="audit">Lihat audit →</button></div>
+            <div id="recentFindings" class="finding-list"></div>
+          </article>
+        </div>
+        <article class="panel table-panel">
+          <div class="panel-head"><div><h3>Recent Visits</h3><p>Lima kunjungan terakhir</p></div><button class="text-btn" data-goto="records">Semua kunjungan →</button></div>
+          <div class="table-wrap"><table><thead><tr><th>ID KUNJUNGAN</th><th>PASIEN</th><th>TANGGAL</th><th>DIAGNOSIS UTAMA</th><th>STATUS AUDIT</th></tr></thead><tbody id="recentTable"></tbody></table></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-records">
+        <div class="welcome-row"><div><h2>Medical Records</h2><p>Kelola data kunjungan demonstrasi dan lakukan pemeriksaan awal.</p></div><button class="btn primary" id="addRecord">＋ Tambah Kunjungan</button></div>
+        <article class="panel">
+          <div class="toolbar"><label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Cari ID, pasien, atau diagnosis..."></label><select id="statusFilter" aria-label="Filter status"><option value="all">Semua status</option><option value="pass">Lulus</option><option value="review">Perlu review</option></select></div>
+          <div class="table-wrap"><table><thead><tr><th>ID KUNJUNGAN</th><th>PASIEN</th><th>TANGGAL MASUK</th><th>DIAGNOSIS UTAMA</th><th>TEMUAN</th><th>AKSI</th></tr></thead><tbody id="recordsTable"></tbody></table></div>
+          <div class="table-foot" id="recordCount">0 kunjungan</div>
+        </article>
+      </section>
+
+      <section class="view" id="view-audit">
+        <div class="welcome-row"><div><h2>Audit & Data Quality</h2><p>Pemeriksaan berbasis aturan untuk membantu menemukan data yang perlu ditinjau.</p></div><button class="btn primary" id="runAudit">↻ Jalankan Audit</button></div>
+        <div class="notice"><strong>Catatan metodologi:</strong> pemeriksaan ini adalah validasi administratif sederhana, bukan penetapan diagnosis, validasi klinis, atau pengganti verifikasi koder/DPJP.</div>
+        <article class="panel">
+          <div class="panel-head"><div><h3>Rule Engine Findings</h3><p>Daftar temuan dari seluruh kunjungan</p></div><span class="count-chip" id="auditFindingCount">0 temuan</span></div>
+          <div id="auditResults" class="audit-results"></div>
+        </article>
+        <article class="panel rules-panel">
+          <div class="panel-head"><div><h3>Aturan Pemeriksaan MVP</h3><p>Aturan transparan yang dijalankan di browser</p></div></div>
+          <div class="rules-grid">
+            <div><b>DQ-01</b><span>Identitas/ID kunjungan kosong</span></div>
+            <div><b>DQ-02</b><span>Tanggal masuk tidak valid atau di masa depan</span></div>
+            <div><b>DQ-03</b><span>Tanggal keluar lebih awal dari tanggal masuk</span></div>
+            <div><b>DQ-04</b><span>Diagnosis utama belum diisi</span></div>
+            <div><b>DQ-05</b><span>Format kode diagnosis tidak sesuai pola umum ICD-10</span></div>
+            <div><b>DQ-06</b><span>Kelas rawat belum dipilih</span></div>
+            <div><b>DQ-07</b><span>Resume medis belum ditandai lengkap</span></div>
+            <div><b>DQ-08</b><span>Autentikasi DPJP belum ditandai lengkap</span></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="view" id="view-settings">
+        <div class="welcome-row"><div><h2>Settings & Backup</h2><p>Data disimpan di LocalStorage browser pada perangkat ini.</p></div></div>
+        <div class="settings-grid">
+          <article class="panel"><div class="panel-head"><div><h3>Data Management</h3><p>Cadangkan atau pulihkan data demonstrasi.</p></div></div>
+            <div class="setting-actions"><button class="btn primary" id="exportBtn">↓ Export JSON</button><label class="btn secondary file-btn">↑ Import JSON<input type="file" id="importFile" accept="application/json"></label><button class="btn danger-outline" id="resetBtn">Reset Data Demo</button></div>
+            <p class="help-text">Export menyimpan salinan data sebagai file JSON. Simpan file backup di tempat aman. Import akan mengganti seluruh data lokal saat ini.</p>
+          </article>
+          <article class="panel"><div class="panel-head"><div><h3>Environment</h3><p>Informasi teknis aplikasi</p></div></div>
+            <dl class="info-list"><div><dt>Application</dt><dd>MedAudit AI</dd></div><div><dt>Version</dt><dd>0.2.1 MVP</dd></div><div><dt>Storage</dt><dd>Browser LocalStorage</dd></div><div><dt>Audit engine</dt><dd>Rule-based JavaScript</dd></div><div><dt>Backend / Cloud</dt><dd>Belum digunakan</dd></div><div><dt>Dataset</dt><dd>Synthetic / fictional</dd></div></dl>
+          </article>
+        </div>
+      </section>
+
+      <footer class="footer">MedAudit AI · Prototype for portfolio demonstration <span>Built with HTML, CSS & Vanilla JavaScript</span></footer>
+    </main>
+  </div>
+
+  <dialog id="recordDialog" class="record-dialog">
+    <form id="recordForm" method="dialog">
+      <div class="dialog-head"><div><span class="eyebrow">MEDICAL RECORD DATA</span><h2 id="dialogTitle">Tambah Kunjungan</h2></div><button type="button" class="close-btn" id="closeDialog" aria-label="Tutup">×</button></div>
+      <input type="hidden" id="recordId">
+      <div class="form-grid">
+        <label>ID Kunjungan <input id="visitId" required maxlength="24" placeholder="VIS-2026-001"></label>
+        <label>Nama Pasien (inisial fiktif) <input id="patient" required maxlength="40" placeholder="Pasien A"></label>
+        <label>Tanggal Masuk <input id="admissionDate" type="date" required></label>
+        <label>Tanggal Keluar <input id="dischargeDate" type="date"></label>
+        <label>Diagnosis Utama <input id="diagnosis" placeholder="Contoh: Gastritis"></label>
+        <label>Kode ICD-10 <input id="icdCode" maxlength="8" placeholder="K29.7"></label>
+        <label>Kelas Rawat <select id="classRoom"><option value="">Pilih kelas</option><option value="Kelas 1">Kelas 1</option><option value="Kelas 2">Kelas 2</option><option value="Kelas 3">Kelas 3</option><option value="VIP">VIP</option><option value="Tidak berlaku">Tidak berlaku</option></select></label>
+        <label class="check-field"><input id="resumeComplete" type="checkbox"> Resume medis lengkap</label>
+        <label class="check-field"><input id="dpjpSigned" type="checkbox"> Autentikasi DPJP lengkap</label>
+      </div>
+      <div class="form-note">Gunakan nama/inisial fiktif. Jangan memasukkan data pasien nyata.</div>
+      <div class="dialog-actions"><button type="button" class="btn secondary" id="cancelDialog">Batal</button><button type="submit" class="btn primary">Simpan Kunjungan</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="js/demo-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/audit.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
