@@ -22,6 +22,13 @@ h2{font-size:18px;margin:0 0 14px}.grid{display:grid;grid-template-columns:repea
 .metric:nth-child(3){border-top:4px solid var(--red)}
 .metric:nth-child(4){border-top:4px solid #7c3aed}
 
+@media(max-width:600px){
+#dashboard .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#dashboard .metric{padding:12px}
+#dashboard .metric strong{font-size:24px}
+#dashboard .metric span{font-size:11px}
+}
+
 label{display:block;font-weight:600;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px;font:inherit;background:white}textarea{min-height:72px;resize:vertical}
 button{cursor:pointer;border:0;border-radius:9px;padding:10px 14px;font:600 14px system-ui;background:var(--blue);color:white}.secondary{background:#eaf0f8;color:#1e293b}.danger{background:#fee2e2;color:#991b1b}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:700}
