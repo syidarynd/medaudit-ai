@@ -8,113 +8,151 @@
 <style>
 :root{--navy:#10243a;--blue:#2463eb;--bg:#f3f6fa;--ink:#172334;--muted:#64748b;--line:#e2e8f0;--green:#15803d;--red:#b91c1c;--amber:#b45309}
 *{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
-header{background:var(--navy);color:white;padding:22px max(18px,calc((100% - 1100px)/2))}
+header{background:var(--navy);color:white;padding:20px max(18px,calc((100% - 1100px)/2))}
 header h1{margin:0;font-size:23px}header p{margin:4px 0 0;color:#cbd5e1;font-size:13px}
-main{max-width:1100px;margin:22px auto;padding:0 16px}.notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:13px}
+main{max-width:1100px;margin:20px auto;padding:0 16px}.notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px 14px;border-radius:12px;margin-bottom:14px;font-size:13px}
+.notice.info{background:#eff6ff;border-color:#bfdbfe;color:#1e40af}.notice.error{background:#fef2f2;border-color:#fecaca;color:#991b1b}
 nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tab{border:1px solid var(--line);background:white;border-radius:10px;padding:9px 13px;color:var(--ink);font-weight:600}.tab.active{background:var(--blue);color:white;border-color:var(--blue)}
 .panel{background:white;border:1px solid var(--line);border-radius:15px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px #0f172a08}
 h2{font-size:18px;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-.metric{padding:18px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#fff,#f8fbff);box-shadow:0 4px 14px #0f172a0a}
-.metric strong{display:block;font-size:30px;line-height:1.2;margin-bottom:6px}
-.metric span{color:var(--muted);font-size:12px;font-weight:600}
-.metric:nth-child(1){border-top:4px solid var(--blue)}
-.metric:nth-child(2){border-top:4px solid var(--green)}
-.metric:nth-child(3){border-top:4px solid var(--red)}
-.metric:nth-child(4){border-top:4px solid #7c3aed}
-@media(max-width:600px){#dashboard .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#dashboard .metric{padding:12px}#dashboard .metric strong{font-size:24px}#dashboard .metric span{font-size:11px}}
-.detail-panel{margin-top:16px;padding:16px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:12px;background:#f8fbff}
-.detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.detail-head h3{font-size:16px;margin:0}
-.detail-list{margin:10px 0 0;padding-left:22px}.detail-list li{margin:6px 0}.detail-ok{color:var(--green);font-weight:600}.detail-meta{color:var(--muted);font-size:13px;margin:8px 0}
-label{display:block;font-weight:600;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px;font:inherit;background:white}textarea{min-height:72px;resize:vertical}
-button{cursor:pointer;border:0;border-radius:9px;padding:10px 14px;font:600 14px system-ui;background:var(--blue);color:white}.secondary{background:#eaf0f8;color:#1e293b}.danger{background:#fee2e2;color:#991b1b}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:700}
+.metric{padding:17px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#fff,#f8fbff);box-shadow:0 4px 14px #0f172a0a}
+.metric strong{display:block;font-size:29px;line-height:1.2;margin-bottom:6px}.metric span{color:var(--muted);font-size:12px;font-weight:600}
+.metric:nth-child(1){border-top:4px solid var(--blue)}.metric:nth-child(2){border-top:4px solid var(--green)}.metric:nth-child(3){border-top:4px solid var(--red)}.metric:nth-child(4){border-top:4px solid #7c3aed}
+@media(max-width:600px){#dashboard .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}#dashboard .metric{padding:12px}#dashboard .metric strong{font-size:24px}#dashboard .metric span{font-size:11px}}
+label{display:block;font-weight:650;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px;font:inherit;background:white;color:var(--ink)}textarea{min-height:72px;resize:vertical}
+.checkrow{display:flex;gap:9px;align-items:center;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:9px}.checkrow input{width:auto}.checkrow label{margin:0}
+button{cursor:pointer;border:0;border-radius:9px;padding:10px 13px;font:600 13px system-ui;background:var(--blue);color:white}.secondary{background:#eaf0f8;color:#1e293b}.danger{background:#fee2e2;color:#991b1b}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.toolbar{display:grid;grid-template-columns:minmax(180px,1fr) 190px auto;gap:9px;margin:12px 0}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px;min-width:690px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:700;white-space:nowrap}
 .status{font-weight:700}.ok{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}.muted{color:var(--muted)}
-.hidden{display:none}.empty{text-align:center;color:var(--muted);padding:24px}
+.hidden{display:none!important}.empty{text-align:center;color:var(--muted);padding:24px}
+.detail-panel{margin-top:16px;padding:16px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:12px;background:#f8fbff}
+.detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.detail-head h3{font-size:16px;margin:0}.detail-list{margin:10px 0 0;padding-left:22px}.detail-list li{margin:6px 0}.detail-meta{color:var(--muted);font-size:13px;margin:8px 0}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:12px 0 30px}
-@media(max-width:600px){header{padding:18px}main{margin-top:14px}.panel{padding:14px}table{min-width:650px}.table-wrap{overflow-x:auto}}
+@media(max-width:650px){header{padding:17px}main{margin-top:13px}.panel{padding:14px}.toolbar{grid-template-columns:1fr}.actions button{flex:1}}
 </style>
 </head>
 <body>
-<header><h1>MedAudit AI</h1><p>AI-Assisted Medical Records Audit &amp; Data Quality System · Prototype v0.2.1</p></header>
+<header><h1>MedAudit AI</h1><p>Healthcare Data Quality &amp; Medical Records Audit · Prototype v0.3.0</p></header>
 <main>
-<div class="notice"><b>Mode demonstrasi:</b> gunakan data sintetis/fiktif saja. Aplikasi ini berjalan lokal di browser dan menyimpan data pada perangkat melalui LocalStorage. Bukan sistem produksi dan bukan pengganti verifikasi koder/DPJP.</div>
+<div class="notice"><b>Mode demonstrasi:</b> gunakan data sintetis/fiktif saja. Data disimpan di browser melalui LocalStorage. Bukan sistem produksi, bukan database klinis, dan bukan pengganti verifikasi koder/DPJP.</div>
+<div id="appMessage" class="notice info hidden" role="status"></div>
 <nav>
-<button class="tab active" data-tab="dashboard">Dashboard</button>
-<button class="tab" data-tab="input">Input Data</button>
-<button class="tab" data-tab="audit">Hasil Audit</button>
-<button class="tab" data-tab="about">Tentang</button>
+<button class="tab active" data-tab="dashboard">Dashboard</button><button class="tab" data-tab="input">Input Data</button><button class="tab" data-tab="audit">Hasil Audit</button><button class="tab" data-tab="backup">Backup Data</button><button class="tab" data-tab="about">Tentang</button>
 </nav>
 <section id="dashboard" class="view">
 <div class="grid">
-<div class="metric"><strong id="total">0</strong><span>Total data demo</span></div>
-<div class="metric"><strong id="passed">0</strong><span>Lolos pemeriksaan dasar</span></div>
+<div class="metric"><strong id="total">0</strong><span>Total data kunjungan</span></div>
+<div class="metric"><strong id="passed">0</strong><span>Lolos aturan dasar</span></div>
 <div class="metric"><strong id="issues">0</strong><span>Perlu ditinjau</span></div>
 <div class="metric"><strong id="rate">0%</strong><span>Persentase tanpa temuan</span></div>
 </div>
-<div class="panel" style="margin-top:16px"><h2>Ringkasan pemeriksaan</h2><p class="muted">Pemeriksaan dasar mencakup kelengkapan identitas, tanggal masuk/keluar, diagnosis utama, format kode ICD-10, dan konsistensi tanggal.</p><div id="summary" class="empty">Belum ada data. Tambahkan data demonstrasi untuk memulai.</div><div class="actions"><button id="seed">Muat data demo</button><button class="secondary" id="export">Ekspor CSV</button></div></div>
+<div class="panel" style="margin-top:16px"><h2>Ringkasan pemeriksaan</h2><p class="muted">Audit mencakup kelengkapan data, kronologi tanggal, format dasar kode ICD-10, kelas rawat, kelengkapan resume, dan autentikasi DPJP.</p><div id="summary" class="empty">Belum ada data.</div><div class="actions"><button id="seed">Muat data demo</button><button class="secondary" id="csvExport">Ekspor CSV</button><button class="secondary" id="jsonExport">Backup JSON</button></div></div>
 </section>
 <section id="input" class="view hidden">
-<div class="panel"><h2>Tambah kasus demonstrasi</h2>
+<div class="panel"><h2 id="formTitle">Tambah kasus demonstrasi</h2>
 <form id="caseForm">
+<input type="hidden" id="recordId">
 <div class="grid">
-<div><label for="mrn">Nomor rekam medis (fiktif)</label><input id="mrn" required placeholder="DEMO-001"></div>
-<div><label for="name">Nama pasien (fiktif)</label><input id="name" required placeholder="Pasien Demo"></div>
-<div><label for="admit">Tanggal masuk</label><input id="admit" type="date" required></div>
+<div><label for="mrn">Nomor rekam medis (fiktif) *</label><input id="mrn" required maxlength="40" placeholder="DEMO-006"></div>
+<div><label for="name">Nama/inisial fiktif *</label><input id="name" required maxlength="80" placeholder="Pasien Demo"></div>
+<div><label for="admit">Tanggal masuk *</label><input id="admit" type="date" required></div>
 <div><label for="discharge">Tanggal keluar</label><input id="discharge" type="date"></div>
-<div><label for="mainDx">Diagnosis utama</label><input id="mainDx" required placeholder="Contoh: Demam"></div>
-<div><label for="code">Kode ICD-10</label><input id="code" required placeholder="Contoh: A09"></div>
+<div><label for="mainDx">Diagnosis utama *</label><input id="mainDx" required maxlength="120" placeholder="Contoh: Demam"></div>
+<div><label for="code">Kode ICD-10 *</label><input id="code" required maxlength="8" placeholder="Contoh: R50.9"></div>
+<div><label for="kelas">Kelas rawat</label><select id="kelas"><option value="">-- Pilih kelas --</option><option value="Kelas 1">Kelas 1</option><option value="Kelas 2">Kelas 2</option><option value="Kelas 3">Kelas 3</option><option value="Non-kelas">Non-kelas / lainnya</option></select></div>
 </div>
-<label for="notes">Catatan audit</label><textarea id="notes" placeholder="Catatan tambahan (opsional)"></textarea>
-<div class="actions"><button type="submit">Simpan &amp; audit</button><button type="reset" class="secondary">Bersihkan</button></div>
+<div class="grid">
+<div class="checkrow"><input type="checkbox" id="resumeComplete"><label for="resumeComplete">Resume medis lengkap</label></div>
+<div class="checkrow"><input type="checkbox" id="dpjpSigned"><label for="dpjpSigned">Autentikasi DPJP tersedia</label></div>
+</div>
+<label for="notes">Catatan audit (opsional)</label><textarea id="notes" maxlength="1000" placeholder="Catatan tambahan"></textarea>
+<div class="actions"><button type="submit" id="saveBtn">Simpan &amp; audit</button><button type="button" class="secondary" id="cancelEdit">Bersihkan / batal edit</button></div>
+<p class="muted">Kolom kelas rawat, resume medis, dan autentikasi DPJP dapat dibiarkan kosong/tidak dicentang untuk menguji temuan kelengkapan.</p>
 </form></div>
 </section>
 <section id="audit" class="view hidden">
-<div class="panel"><h2>Daftar hasil audit</h2><p class="muted">Klik detail untuk melihat temuan pemeriksaan otomatis.</p><div class="table-wrap"><table><thead><tr><th>No. RM</th><th>Diagnosis</th><th>Kode</th><th>Status</th><th>Temuan</th><th>Aksi</th></tr></thead><tbody id="rows"><tr><td colspan="6" class="empty">Belum ada data.</td></tr></tbody></table></div><div id="detailPanel" class="detail-panel hidden" aria-live="polite"><div class="detail-head"><h3>Detail temuan audit</h3><button type="button" class="secondary" id="closeDetail">Tutup</button></div><div id="detailContent"></div></div></div>
-</section>
-<section id="about" class="view hidden">
-<div class="panel"><h2>Ruang lingkup dan batasan</h2>
-<ul><li>Prototype portofolio untuk demonstrasi audit kelengkapan dan kualitas data rekam medis.</li><li>Mesin audit menggunakan aturan sederhana (rule-based), bukan model AI/LLM.</li><li>Validasi kode ICD-10 hanya memeriksa pola penulisan dasar, bukan memastikan kode resmi, diagnosis, atau ketepatan klinis.</li><li>Data disimpan di LocalStorage browser perangkat ini; hapus data browser dapat menghilangkannya.</li><li>Jangan masukkan data pasien nyata, NIK, alamat, nomor telepon, atau informasi kesehatan yang dapat mengidentifikasi seseorang.</li></ul>
-<p class="muted">Dikembangkan sebagai proyek demonstrasi pembelajaran informatika kesehatan.</p>
+<div class="panel"><h2>Daftar hasil audit</h2><p class="muted">Cari berdasarkan nomor RM, nama fiktif, diagnosis, atau kode. Filter status dapat digunakan bersamaan dengan pencarian.</p>
+<div class="toolbar"><input id="searchBox" type="search" placeholder="Cari RM, nama, diagnosis, kode…"><select id="statusFilter"><option value="all">Semua status</option><option value="clean">Lolos aturan dasar</option><option value="review">Perlu ditinjau</option></select><button type="button" class="secondary" id="clearSearch">Reset</button></div>
+<div class="table-wrap"><table><thead><tr><th>No. RM</th><th>Diagnosis</th><th>Kode</th><th>Status</th><th>Temuan</th><th>Aksi</th></tr></thead><tbody id="rows"><tr><td colspan="6" class="empty">Belum ada data.</td></tr></tbody></table></div>
+<div id="detailPanel" class="detail-panel hidden" aria-live="polite"><div class="detail-head"><h3>Detail temuan audit</h3><button type="button" class="secondary" id="closeDetail">Tutup</button></div><div id="detailContent"></div></div>
 </div></section>
-<footer>MedAudit AI · Prototype v0.2.1 · Data sintetis saja</footer>
+<section id="backup" class="view hidden">
+<div class="panel"><h2>Backup dan pemulihan data</h2><p class="muted">Ekspor JSON membuat salinan data lokal. Impor JSON akan mengganti seluruh data yang tersimpan setelah struktur dan ID diperiksa. Simpan backup sebelum melakukan impor.</p>
+<div class="actions"><button id="backupExport">Unduh backup JSON</button><button class="secondary" id="csvExport2">Ekspor CSV</button></div>
+<label for="jsonFile">Pilih file backup JSON untuk diimpor</label><input id="jsonFile" type="file" accept=".json,application/json">
+<div class="actions"><button id="importJson">Validasi &amp; impor JSON</button></div>
+<p class="muted">Format yang didukung: array record JSON atau objek JSON dengan properti <code>records</code>. File yang tidak valid tidak akan mengganti data saat ini.</p>
+</div></section>
+<section id="about" class="view hidden"><div class="panel"><h2>Ruang lingkup dan batasan</h2>
+<ul><li>Prototype portofolio untuk demonstrasi audit kelengkapan dan kualitas data rekam medis.</li><li>Mesin audit menggunakan aturan sederhana (rule-based), bukan model AI/LLM.</li><li>Validasi kode ICD-10 hanya memeriksa pola penulisan dasar, bukan memastikan kode resmi atau ketepatan klinis.</li><li>Data disimpan di LocalStorage browser perangkat ini; hapus data situs/browser dapat menghilangkannya.</li><li>Aturan kelengkapan merupakan indikator review, bukan keputusan klinis atau keputusan klaim otomatis.</li><li>Jangan masukkan data pasien nyata, NIK, alamat, nomor telepon, atau informasi yang dapat mengidentifikasi seseorang.</li></ul>
+<p class="muted">Dikembangkan sebagai proyek demonstrasi pembelajaran informatika kesehatan. Keputusan klinis dan kodifikasi akhir tetap memerlukan validasi profesional.</p></div></section>
+<footer>MedAudit AI · Prototype v0.3.0 · Data sintetis saja</footer>
 </main>
 <script>
+'use strict';
 const KEY='medaudit_ai_cases_v02';
 const $=id=>document.getElementById(id);
 let cases=[];
-try{cases=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){cases=[]}
-function save(){localStorage.setItem(KEY,JSON.stringify(cases));render()}
-function isBasicIcd10Format(code){const normalized=String(code||'').trim().toUpperCase();return /^[A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?$/.test(normalized)}
+let selectedDetailId=null;
+let storageWarning='';
+function makeId(){return 'case-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)}
+function normalizeRecord(c){
+ const mrn=String(c.mrn??'').trim();
+ return {id:String(c.id||mrn||makeId()),mrn,name:String(c.name??'').trim(),admit:String(c.admit??''),discharge:String(c.discharge??''),mainDx:String(c.mainDx??'').trim(),code:String(c.code??'').trim().toUpperCase(),notes:String(c.notes??''),kelas:String(c.kelas??''),resumeComplete:c.resumeComplete===true,dpjpSigned:c.dpjpSigned===true};
+}
+try{const raw=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(raw))cases=raw.map(normalizeRecord);else storageWarning='Struktur data lokal tidak dikenali. Data belum dimuat.';}catch(e){storageWarning='Data lokal tidak dapat dibaca. Periksa penyimpanan browser.';}
+function showMessage(message,type='info'){const el=$('appMessage');el.textContent=message;el.className='notice '+type;el.classList.remove('hidden');}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(cases));storageWarning='';}catch(e){storageWarning='Penyimpanan browser gagal. Data hanya bertahan selama halaman ini terbuka; ekspor backup jika masih dapat dilakukan.';showMessage(storageWarning,'error');}render();}
+function todayLocal(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
+function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s))&&new Date(s+'T00:00:00').toISOString().slice(0,10)===s;}
+function isBasicIcd10Format(code){return /^[A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?$/.test(String(code||'').trim().toUpperCase());}
 function audit(c){
  const issues=[];
- if(!c.mrn.trim())issues.push('Nomor RM kosong');
- if(!c.name.trim())issues.push('Nama pasien kosong');
- if(!c.admit)issues.push('Tanggal masuk kosong');
- if(!c.mainDx.trim())issues.push('Diagnosis utama kosong');
- if(!c.code.trim())issues.push('Kode ICD-10 kosong');
- else if(!isBasicIcd10Format(c.code))issues.push('Format kode ICD-10 perlu diperiksa');
- if(c.admit&&c.discharge&&c.discharge<c.admit)issues.push('Tanggal keluar lebih awal dari tanggal masuk');
- const today=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
- if(c.admit>today)issues.push('Tanggal masuk berada di masa depan');
- if(c.discharge>today)issues.push('Tanggal keluar berada di masa depan');
+ if(!String(c.mrn||'').trim())issues.push({code:'DQ-01',text:'Nomor RM kosong'});
+ if(!String(c.name||'').trim())issues.push({code:'DQ-01',text:'Nama/inisial fiktif kosong'});
+ if(!c.admit)issues.push({code:'DQ-02',text:'Tanggal masuk kosong'});
+ else if(!validDate(c.admit))issues.push({code:'DQ-02',text:'Tanggal masuk tidak valid'});
+ else if(c.admit>todayLocal())issues.push({code:'DQ-02',text:'Tanggal masuk berada di masa depan'});
+ if(c.discharge){if(!validDate(c.discharge))issues.push({code:'DQ-03',text:'Tanggal keluar tidak valid'});else if(validDate(c.admit)&&c.discharge<c.admit)issues.push({code:'DQ-03',text:'Tanggal keluar lebih awal dari tanggal masuk'});}
+ if(!String(c.mainDx||'').trim())issues.push({code:'DQ-04',text:'Diagnosis utama belum diisi'});
+ if(!String(c.code||'').trim())issues.push({code:'DQ-05',text:'Kode ICD-10 kosong'});else if(!isBasicIcd10Format(c.code))issues.push({code:'DQ-05',text:'Format kode ICD-10 perlu diperiksa'});
+ if(!String(c.kelas||'').trim())issues.push({code:'DQ-06',text:'Kelas rawat belum dipilih'});
+ if(c.resumeComplete!==true)issues.push({code:'DQ-07',text:'Resume medis belum ditandai lengkap'});
+ if(c.dpjpSigned!==true)issues.push({code:'DQ-08',text:'Autentikasi DPJP belum ditandai tersedia'});
  return issues;
 }
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function render(){
  const results=cases.map(c=>({...c,issues:audit(c)}));
  const clean=results.filter(x=>!x.issues.length).length;
- $('total').textContent=cases.length;$('passed').textContent=clean;$('issues').textContent=cases.length-clean;
- $('rate').textContent=(cases.length?Math.round(clean/cases.length*100):0)+'%';
- $('summary').textContent=cases.length?`${clean} kasus tanpa temuan dasar · ${cases.length-clean} kasus perlu ditinjau.`:'Belum ada data. Tambahkan data demonstrasi untuk memulai.';
- $('rows').innerHTML=results.length?results.map((c,i)=>`<tr><td>${esc(c.mrn)}</td><td>${esc(c.mainDx)}</td><td>${esc(c.code)}</td><td class="status ${c.issues.length?'bad':'ok'}">${c.issues.length?'Perlu ditinjau':'Lolos dasar'}</td><td>${c.issues.length?c.issues.length+' temuan':'Tidak ada'}</td><td><button class="secondary" onclick="detail(${i})">Detail</button> <button class="danger" onclick="removeCase(${i})">Hapus</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Belum ada data.</td></tr>';
+ $('total').textContent=cases.length;$('passed').textContent=clean;$('issues').textContent=cases.length-clean;$('rate').textContent=(cases.length?Math.round(clean/cases.length*100):0)+'%';
+ $('summary').textContent=cases.length?`${clean} kunjungan tanpa temuan dasar · ${cases.length-clean} kunjungan perlu ditinjau.`:'Belum ada data. Tambahkan data demonstrasi untuk memulai.';
+ const q=$('searchBox').value.trim().toLowerCase(),filter=$('statusFilter').value;
+ const shown=results.filter(c=>{const match=[c.mrn,c.name,c.mainDx,c.code].some(v=>String(v||'').toLowerCase().includes(q));const cleanStatus=!c.issues.length;return match&&(filter==='all'||(filter==='clean'&&cleanStatus)||(filter==='review'&&!cleanStatus));});
+ $('rows').innerHTML=shown.length?shown.map(c=>`<tr><td>${esc(c.mrn)}</td><td>${esc(c.mainDx)}</td><td>${esc(c.code)}</td><td class="status ${c.issues.length?'bad':'ok'}">${c.issues.length?'Perlu ditinjau':'Lolos aturan dasar'}</td><td>${c.issues.length?c.issues.length+' temuan':'Tidak ada'}</td><td><button class="secondary" data-action="detail" data-id="${esc(c.id)}">Detail</button> <button class="secondary" data-action="edit" data-id="${esc(c.id)}">Edit</button> <button class="danger" data-action="delete" data-id="${esc(c.id)}">Hapus</button></td></tr>`).join(''):`<tr><td colspan="6" class="empty">${results.length?'Tidak ada data yang cocok dengan pencarian/filter.':'Belum ada data.'}</td></tr>`;
+ if(storageWarning)showMessage(storageWarning,'error');
 }
-function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-window.detail=i=>{const c=cases[i],issues=audit(c);$('detailContent').innerHTML='<div class="detail-meta"><b>No. RM:</b> '+esc(c.mrn)+' &nbsp; <b>Diagnosis:</b> '+esc(c.mainDx)+' &nbsp; <b>Kode:</b> '+esc(c.code)+'</div>'+(issues.length?'<ol class="detail-list">'+issues.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>':'<p class="detail-ok">Tidak ditemukan masalah pada pemeriksaan dasar.</p>');$('detailPanel').classList.remove('hidden');$('detailPanel').scrollIntoView({behavior:'smooth',block:'nearest'});};
+function switchTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==name));}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+function openDetail(id){const c=cases.find(x=>x.id===id);if(!c)return;selectedDetailId=id;const issues=audit(c);$('detailContent').innerHTML=`<div class="detail-meta"><b>No. RM:</b> ${esc(c.mrn)} &nbsp; <b>Diagnosis:</b> ${esc(c.mainDx)} &nbsp; <b>Kode:</b> ${esc(c.code)}</div>`+(issues.length?'<ol class="detail-list">'+issues.map(x=>`<li><b>${x.code}</b> — ${esc(x.text)}</li>`).join('')+'</ol>':'<p class="status ok">Tidak ditemukan masalah pada aturan dasar yang aktif.</p>');$('detailPanel').classList.remove('hidden');}
 $('closeDetail').addEventListener('click',()=>$('detailPanel').classList.add('hidden'));
-window.removeCase=i=>{if(confirm('Hapus data demo ini?')){cases.splice(i,1);save()}};
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==b.dataset.tab))}));
-$('caseForm').addEventListener('submit',e=>{e.preventDefault();const c={mrn:$('mrn').value.trim(),name:$('name').value.trim(),admit:$('admit').value,discharge:$('discharge').value,mainDx:$('mainDx').value.trim(),code:$('code').value.trim().toUpperCase(),notes:$('notes').value.trim()};if(cases.some(x=>x.mrn===c.mrn)){alert('Nomor RM demo sudah digunakan.');return}cases.unshift(c);save();e.target.reset();document.querySelector('[data-tab="audit"]').click();});
-$('seed').addEventListener('click',()=>{const demo=[{mrn:'DEMO-001',name:'Pasien Contoh A',admit:'2026-10-10',discharge:'2026-10-12',mainDx:'Gastroenteritis',code:'A09',notes:'Data sintetis'},{mrn:'DEMO-002',name:'Pasien Contoh B',admit:'2026-11-12',discharge:'2026-11-11',mainDx:'Demam',code:'123',notes:'Contoh dengan temuan'}];demo.forEach(d=>{if(!cases.some(x=>x.mrn===d.mrn))cases.push(d)});save()});
-$('export').addEventListener('click',()=>{const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Temuan'];const lines=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,audit(c).join('; ')])].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob(['\uFEFF'+lines],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MedAudit-AI-audit-demo.csv';a.click();URL.revokeObjectURL(a.href)});
+function resetForm(){ $('caseForm').reset();$('recordId').value='';$('formTitle').textContent='Tambah kasus demonstrasi';$('saveBtn').textContent='Simpan & audit';}
+function editRecord(id){const c=cases.find(x=>x.id===id);if(!c)return;switchTab('input');$('recordId').value=c.id;$('mrn').value=c.mrn;$('name').value=c.name;$('admit').value=c.admit;$('discharge').value=c.discharge;$('mainDx').value=c.mainDx;$('code').value=c.code;$('kelas').value=c.kelas;$('resumeComplete').checked=c.resumeComplete;$('dpjpSigned').checked=c.dpjpSigned;$('notes').value=c.notes;$('formTitle').textContent='Edit kasus demonstrasi';$('saveBtn').textContent='Simpan perubahan';window.scrollTo({top:0,behavior:'smooth'});}
+$('rows').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b)return;const id=b.dataset.id,action=b.dataset.action;if(action==='detail')openDetail(id);if(action==='edit')editRecord(id);if(action==='delete'){const c=cases.find(x=>x.id===id);if(c&&confirm('Hapus data demo '+c.mrn+'?')){cases=cases.filter(x=>x.id!==id);$('detailPanel').classList.add('hidden');save();}}});
+$('caseForm').addEventListener('submit',e=>{e.preventDefault();const id=$('recordId').value;const c=normalizeRecord({id:id||makeId(),mrn:$('mrn').value,name:$('name').value,admit:$('admit').value,discharge:$('discharge').value,mainDx:$('mainDx').value,code:$('code').value,kelas:$('kelas').value,resumeComplete:$('resumeComplete').checked,dpjpSigned:$('dpjpSigned').checked,notes:$('notes').value});if(cases.some(x=>x.mrn.toLowerCase()===c.mrn.toLowerCase()&&x.id!==id)){showMessage('Nomor RM demo sudah digunakan. Gunakan nomor RM fiktif yang berbeda.','error');return;}if(id){const i=cases.findIndex(x=>x.id===id);if(i<0){showMessage('Data yang akan diedit tidak ditemukan.','error');return;}cases[i]=c;}else cases.unshift(c);save();resetForm();switchTab('audit');showMessage('Data berhasil disimpan dan diperiksa dengan aturan audit.','info');});
+$('cancelEdit').addEventListener('click',resetForm);
+$('searchBox').addEventListener('input',render);$('statusFilter').addEventListener('change',render);$('clearSearch').addEventListener('click',()=>{$('searchBox').value='';$('statusFilter').value='all';render();});
+function demoRecords(){return [{mrn:'DEMO-001',name:'Pasien Contoh A',admit:'2026-10-10',discharge:'2026-10-12',mainDx:'Gastroenteritis',code:'A09',notes:'Data sintetis',kelas:'Kelas 2',resumeComplete:true,dpjpSigned:true},{mrn:'DEMO-002',name:'Pasien Contoh B',admit:'2026-11-12',discharge:'2026-11-11',mainDx:'Demam',code:'123',notes:'Contoh dengan temuan',kelas:'',resumeComplete:false,dpjpSigned:false}].map(normalizeRecord);}
+$('seed').addEventListener('click',()=>{const demo=demoRecords();demo.forEach(d=>{if(!cases.some(x=>x.mrn===d.mrn))cases.push(d)});save();showMessage('Data demo ditambahkan tanpa menggandakan nomor RM yang sudah ada.','info');});
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"';}
+function exportCsv(){const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Kelas Rawat','Resume Lengkap','Autentikasi DPJP','Temuan Audit'];const rows=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,c.kelas,c.resumeComplete?'Ya':'Tidak',c.dpjpSigned?'Ya':'Tidak',audit(c).map(x=>x.code+': '+x.text).join('; ')])];const csv='\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'MedAudit-AI-audit-v0.3.0.csv');}
+function exportJson(){const payload={app:'MedAudit AI',version:'0.3.0',exportedAt:new Date().toISOString(),records:cases};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'MedAudit-AI-backup-v0.3.0.json');}
+$('csvExport').addEventListener('click',exportCsv);$('csvExport2').addEventListener('click',exportCsv);$('jsonExport').addEventListener('click',exportJson);$('backupExport').addEventListener('click',exportJson);
+function validateImport(parsed){const records=Array.isArray(parsed)?parsed:parsed&&Array.isArray(parsed.records)?parsed.records:null;if(!records)throw new Error('Format JSON harus berupa array atau objek dengan properti records.');const seenIds=new Set(),seenMrn=new Set();const out=records.map((r,i)=>{if(!r||typeof r!=='object'||Array.isArray(r))throw new Error('Record ke-'+(i+1)+' bukan objek yang valid.');for(const k of ['mrn','name','admit','discharge','mainDx','code','notes'])if(r[k]!==undefined&&typeof r[k]!=='string')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa teks.');for(const k of ['resumeComplete','dpjpSigned'])if(r[k]!==undefined&&typeof r[k]!=='boolean')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa boolean.');const c=normalizeRecord(r);if(!c.id)throw new Error('ID record kosong pada baris '+(i+1)+'.');if(seenIds.has(c.id))throw new Error('ID record ganda: '+c.id);if(c.mrn&&seenMrn.has(c.mrn.toLowerCase()))throw new Error('Nomor RM ganda: '+c.mrn);seenIds.add(c.id);if(c.mrn)seenMrn.add(c.mrn.toLowerCase());return c;});return out;}
+$('importJson').addEventListener('click',async()=>{const file=$('jsonFile').files[0];if(!file){showMessage('Pilih file backup JSON terlebih dahulu.','error');return;}try{const parsed=JSON.parse(await file.text());const imported=validateImport(parsed);if(!confirm('Impor '+imported.length+' record dan mengganti seluruh data lokal saat ini? Pastikan sudah memiliki backup.'))return;const old=cases;cases=imported;try{localStorage.setItem(KEY,JSON.stringify(cases));storageWarning='';}catch(err){cases=old;throw new Error('Penyimpanan gagal. Data lokal lama dipertahankan.');}resetForm();$('jsonFile').value='';render();showMessage('Impor berhasil. '+cases.length+' record telah dimuat.','info');}catch(err){showMessage('Impor dibatalkan: '+err.message,'error');}});
 render();
 </script>
-</body></html>
+</body>
+</html>
