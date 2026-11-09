@@ -105,7 +105,9 @@ try{const raw=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(raw))
 function showMessage(message,type='info'){const el=$('appMessage');el.textContent=message;el.className='notice '+type;el.classList.remove('hidden');}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(cases));storageWarning='';}catch(e){storageWarning='Penyimpanan browser gagal. Data hanya bertahan selama halaman ini terbuka; ekspor backup jika masih dapat dilakukan.';showMessage(storageWarning,'error');}render();}
 function todayLocal(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
-function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s))&&new Date(s+'T00:00:00').toISOString().slice(0,10)===s;}
+
+function validDate(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(s||'')))return false;const [y,m,d]=s.split('-').map(Number);const date=new Date(y,m-1,d);return date.getFullYear()===y&&date.getMonth()===m-1&&date.getDate()===d;}
+
 function isBasicIcd10Format(code){return /^[A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?$/.test(String(code||'').trim().toUpperCase());}
 function audit(c){
  const issues=[];
