@@ -21,14 +21,10 @@ h2{font-size:18px;margin:0 0 14px}.grid{display:grid;grid-template-columns:repea
 .metric:nth-child(2){border-top:4px solid var(--green)}
 .metric:nth-child(3){border-top:4px solid var(--red)}
 .metric:nth-child(4){border-top:4px solid #7c3aed}
-
-@media(max-width:600px){
-#dashboard .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-#dashboard .metric{padding:12px}
-#dashboard .metric strong{font-size:24px}
-#dashboard .metric span{font-size:11px}
-}
-
+@media(max-width:600px){#dashboard .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#dashboard .metric{padding:12px}#dashboard .metric strong{font-size:24px}#dashboard .metric span{font-size:11px}}
+.detail-panel{margin-top:16px;padding:16px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:12px;background:#f8fbff}
+.detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.detail-head h3{font-size:16px;margin:0}
+.detail-list{margin:10px 0 0;padding-left:22px}.detail-list li{margin:6px 0}.detail-ok{color:var(--green);font-weight:600}.detail-meta{color:var(--muted);font-size:13px;margin:8px 0}
 label{display:block;font-weight:600;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px;font:inherit;background:white}textarea{min-height:72px;resize:vertical}
 button{cursor:pointer;border:0;border-radius:9px;padding:10px 14px;font:600 14px system-ui;background:var(--blue);color:white}.secondary{background:#eaf0f8;color:#1e293b}.danger{background:#fee2e2;color:#991b1b}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:700}
@@ -39,7 +35,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:12px 0 30px}
 </style>
 </head>
 <body>
-<header><h1>MedAudit AI</h1><p>AI-Assisted Medical Records Audit &amp; Data Quality System · Prototype v0.2</p></header>
+<header><h1>MedAudit AI</h1><p>AI-Assisted Medical Records Audit &amp; Data Quality System · Prototype v0.2.1</p></header>
 <main>
 <div class="notice"><b>Mode demonstrasi:</b> gunakan data sintetis/fiktif saja. Aplikasi ini berjalan lokal di browser dan menyimpan data pada perangkat melalui LocalStorage. Bukan sistem produksi dan bukan pengganti verifikasi koder/DPJP.</div>
 <nav>
@@ -73,14 +69,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:12px 0 30px}
 </form></div>
 </section>
 <section id="audit" class="view hidden">
-<div class="panel"><h2>Daftar hasil audit</h2><p class="muted">Klik detail untuk melihat temuan pemeriksaan otomatis.</p><div class="table-wrap"><table><thead><tr><th>No. RM</th><th>Diagnosis</th><th>Kode</th><th>Status</th><th>Temuan</th><th>Aksi</th></tr></thead><tbody id="rows"><tr><td colspan="6" class="empty">Belum ada data.</td></tr></tbody></table></div></div>
+<div class="panel"><h2>Daftar hasil audit</h2><p class="muted">Klik detail untuk melihat temuan pemeriksaan otomatis.</p><div class="table-wrap"><table><thead><tr><th>No. RM</th><th>Diagnosis</th><th>Kode</th><th>Status</th><th>Temuan</th><th>Aksi</th></tr></thead><tbody id="rows"><tr><td colspan="6" class="empty">Belum ada data.</td></tr></tbody></table></div><div id="detailPanel" class="detail-panel hidden" aria-live="polite"><div class="detail-head"><h3>Detail temuan audit</h3><button type="button" class="secondary" id="closeDetail">Tutup</button></div><div id="detailContent"></div></div></div>
 </section>
 <section id="about" class="view hidden">
 <div class="panel"><h2>Ruang lingkup dan batasan</h2>
 <ul><li>Prototype portofolio untuk demonstrasi audit kelengkapan dan kualitas data rekam medis.</li><li>Mesin audit menggunakan aturan sederhana (rule-based), bukan model AI/LLM.</li><li>Validasi kode ICD-10 hanya memeriksa pola penulisan dasar, bukan memastikan kode resmi, diagnosis, atau ketepatan klinis.</li><li>Data disimpan di LocalStorage browser perangkat ini; hapus data browser dapat menghilangkannya.</li><li>Jangan masukkan data pasien nyata, NIK, alamat, nomor telepon, atau informasi kesehatan yang dapat mengidentifikasi seseorang.</li></ul>
 <p class="muted">Dikembangkan sebagai proyek demonstrasi pembelajaran informatika kesehatan.</p>
 </div></section>
-<footer>MedAudit AI · Prototype v0.2 · Data sintetis saja</footer>
+<footer>MedAudit AI · Prototype v0.2.1 · Data sintetis saja</footer>
 </main>
 <script>
 const KEY='medaudit_ai_cases_v02';
@@ -88,6 +84,7 @@ const $=id=>document.getElementById(id);
 let cases=[];
 try{cases=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){cases=[]}
 function save(){localStorage.setItem(KEY,JSON.stringify(cases));render()}
+function isBasicIcd10Format(code){const normalized=String(code||'').trim().toUpperCase();return /^[A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?$/.test(normalized)}
 function audit(c){
  const issues=[];
  if(!c.mrn.trim())issues.push('Nomor RM kosong');
@@ -95,7 +92,7 @@ function audit(c){
  if(!c.admit)issues.push('Tanggal masuk kosong');
  if(!c.mainDx.trim())issues.push('Diagnosis utama kosong');
  if(!c.code.trim())issues.push('Kode ICD-10 kosong');
- else if(!/^[A-Z][0-9]{2}(\.[0-9A-Z]{1,4})?$/.test(c.code.trim().toUpperCase()))issues.push('Format kode ICD-10 perlu diperiksa');
+ else if(!isBasicIcd10Format(c.code))issues.push('Format kode ICD-10 perlu diperiksa');
  if(c.admit&&c.discharge&&c.discharge<c.admit)issues.push('Tanggal keluar lebih awal dari tanggal masuk');
  const today=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
  if(c.admit>today)issues.push('Tanggal masuk berada di masa depan');
@@ -111,25 +108,13 @@ function render(){
  $('rows').innerHTML=results.length?results.map((c,i)=>`<tr><td>${esc(c.mrn)}</td><td>${esc(c.mainDx)}</td><td>${esc(c.code)}</td><td class="status ${c.issues.length?'bad':'ok'}">${c.issues.length?'Perlu ditinjau':'Lolos dasar'}</td><td>${c.issues.length?c.issues.length+' temuan':'Tidak ada'}</td><td><button class="secondary" onclick="detail(${i})">Detail</button> <button class="danger" onclick="removeCase(${i})">Hapus</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Belum ada data.</td></tr>';
 }
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-
-window.detail=i=>{
-  const c=cases[i],issues=audit(c);
-  alert(
-    'No. RM: '+c.mrn+
-    '\nDiagnosis: '+c.mainDx+
-    '\nKode: '+c.code+
-    '\n\n'+
-    (issues.length
-      ? issues.map((x,n)=>(n+1)+'. '+x).join('\n')
-      : 'Tidak ditemukan masalah pada pemeriksaan dasar.')
-  );
-};
-
+window.detail=i=>{const c=cases[i],issues=audit(c);$('detailContent').innerHTML='<div class="detail-meta"><b>No. RM:</b> '+esc(c.mrn)+' &nbsp; <b>Diagnosis:</b> '+esc(c.mainDx)+' &nbsp; <b>Kode:</b> '+esc(c.code)+'</div>'+(issues.length?'<ol class="detail-list">'+issues.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>':'<p class="detail-ok">Tidak ditemukan masalah pada pemeriksaan dasar.</p>');$('detailPanel').classList.remove('hidden');$('detailPanel').scrollIntoView({behavior:'smooth',block:'nearest'});};
+$('closeDetail').addEventListener('click',()=>$('detailPanel').classList.add('hidden'));
 window.removeCase=i=>{if(confirm('Hapus data demo ini?')){cases.splice(i,1);save()}};
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==b.dataset.tab))}));
 $('caseForm').addEventListener('submit',e=>{e.preventDefault();const c={mrn:$('mrn').value.trim(),name:$('name').value.trim(),admit:$('admit').value,discharge:$('discharge').value,mainDx:$('mainDx').value.trim(),code:$('code').value.trim().toUpperCase(),notes:$('notes').value.trim()};if(cases.some(x=>x.mrn===c.mrn)){alert('Nomor RM demo sudah digunakan.');return}cases.unshift(c);save();e.target.reset();document.querySelector('[data-tab="audit"]').click();});
 $('seed').addEventListener('click',()=>{const demo=[{mrn:'DEMO-001',name:'Pasien Contoh A',admit:'2026-10-10',discharge:'2026-10-12',mainDx:'Gastroenteritis',code:'A09',notes:'Data sintetis'},{mrn:'DEMO-002',name:'Pasien Contoh B',admit:'2026-11-12',discharge:'2026-11-11',mainDx:'Demam',code:'123',notes:'Contoh dengan temuan'}];demo.forEach(d=>{if(!cases.some(x=>x.mrn===d.mrn))cases.push(d)});save()});
-$('export').addEventListener('click',()=>{const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Temuan'];const lines=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,audit(c).join('; ')])].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\\n');const blob=new Blob(['\\ufeff'+lines],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MedAudit-AI-audit-demo.csv';a.click();URL.revokeObjectURL(a.href)});
+$('export').addEventListener('click',()=>{const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Temuan'];const lines=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,audit(c).join('; ')])].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob(['\uFEFF'+lines],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MedAudit-AI-audit-demo.csv';a.click();URL.revokeObjectURL(a.href)});
 render();
 </script>
 </body></html>
