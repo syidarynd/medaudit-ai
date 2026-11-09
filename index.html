@@ -70,6 +70,44 @@ margin-top:16px
 <div class="metric"><strong id="rate">0%</strong><span>Persentase tanpa temuan</span></div>
 </div>
 <div class="panel" style="margin-top:16px"><h2>Ringkasan pemeriksaan</h2><p class="muted">Audit mencakup kelengkapan data, kronologi tanggal, format dasar kode ICD-10, kelas rawat, kelengkapan resume, dan autentikasi DPJP.</p><div id="summary" class="empty">Belum ada data.</div><div class="actions"><button id="seed">Muat data demo</button><button class="secondary" id="csvExport">Ekspor CSV</button><button class="secondary" id="jsonExport">Backup JSON</button></div></div>
+<div class="dashboard-grid">
+  <div class="panel">
+    <h2>Distribusi Status Audit</h2>
+    <div class="chart-box">
+      <canvas id="statusChart"></canvas>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Temuan Berdasarkan Kode DQ</h2>
+    <div class="chart-box">
+      <canvas id="findingChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="panel recent-table">
+  <h2>Kunjungan Terbaru</h2>
+  <p class="muted">Lima data kunjungan terbaru berdasarkan tanggal masuk.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>No. RM</th>
+          <th>Diagnosis</th>
+          <th>Kode ICD-10</th>
+          <th>Tanggal Masuk</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="recentRows">
+        <tr>
+          <td colspan="5" class="empty">Belum ada data.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 </section>
 <section id="input" class="view hidden">
 <div class="panel"><h2 id="formTitle">Tambah kasus demonstrasi</h2>
