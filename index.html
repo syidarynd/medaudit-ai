@@ -194,6 +194,62 @@ function render(){
  const shown=results.filter(c=>{const match=[c.mrn,c.name,c.mainDx,c.code].some(v=>String(v||'').toLowerCase().includes(q));const cleanStatus=!c.issues.length;return match&&(filter==='all'||(filter==='clean'&&cleanStatus)||(filter==='review'&&!cleanStatus));});
  $('rows').innerHTML=shown.length?shown.map(c=>`<tr><td>${esc(c.mrn)}</td><td>${esc(c.mainDx)}</td><td>${esc(c.code)}</td><td class="status ${c.issues.length?'bad':'ok'}">${c.issues.length?'Perlu ditinjau':'Lolos aturan dasar'}</td><td>${c.issues.length?c.issues.length+' temuan':'Tidak ada'}</td><td><button class="secondary" data-action="detail" data-id="${esc(c.id)}">Detail</button> <button class="secondary" data-action="edit" data-id="${esc(c.id)}">Edit</button> <button class="danger" data-action="delete" data-id="${esc(c.id)}">Hapus</button></td></tr>`).join(''):`<tr><td colspan="6" class="empty">${results.length?'Tidak ada data yang cocok dengan pencarian/filter.':'Belum ada data.'}</td></tr>`;
  if(storageWarning)showMessage(storageWarning,'error');
+   const findingCounts={};
+  results.forEach(c=>c.issues.forEach(issue=>{
+    findingCounts[issue.code]=(findingCounts[issue.code]||0)+1;
+  }));
+
+  const recent=[...results].sort((a,b)=>
+    String(b.admit||'').localeCompare(String(a.admit||''))
+  ).slice(0,5);
+
+  $('recentRows').innerHTML=recent.length
+    ?recent.map(c=>`<tr>
+      <td>${esc(c.mrn)}</td>
+      <td>${esc(c.mainDx||'—')}</td>
+      <td>${esc(c.code||'—')}</td>
+      <td>${esc(c.admit||'—')}</td>
+      <td class="status ${c.issues.length?'bad':'ok'}">
+        ${c.issues.length?'Perlu ditinjau':'Lolos aturan dasar'}
+      </td>
+    </tr>`).join('')
+    :'<tr><td colspan="5" class="empty">Belum ada data.</td></tr>';
+
+  if(typeof Chart!=='undefined'){
+    if(window.statusChartInstance)window.statusChartInstance.destroy();
+    if(window.findingChartInstance)window.findingChartInstance.destroy();
+
+    window.statusChartInstance=new Chart($('statusChart'),{
+      type:'doughnut',
+      data:{
+        labels:['Lolos aturan dasar','Perlu ditinjau'],
+        datasets:[{
+          data:[clean,cases.length-clean],
+          backgroundColor:['#15803d','#d97706']
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false}
+    });
+
+    const labels=Object.keys(findingCounts).sort();
+
+    window.findingChartInstance=new Chart($('findingChart'),{
+      type:'bar',
+      data:{
+        labels:labels.length?labels:['Belum ada temuan'],
+        datasets:[{
+          label:'Jumlah temuan',
+          data:labels.length?labels.map(k=>findingCounts[k]):[0],
+          backgroundColor:'#2463eb'
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        scales:{y:{beginAtZero:true,ticks:{precision:0}}}
+      }
+    });
+  }
 }
 function switchTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==name));}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
