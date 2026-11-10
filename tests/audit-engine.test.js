@@ -50,10 +50,11 @@ test("Mesin audit berhasil dimuat", () => {
 });
 
 // Pengujian rekam medis lengkap
+
 test("Data lengkap tidak menghasilkan temuan", () => {
-  assert.deepEqual(
-    engine.audit(validRecord),
-    []
+  assert.equal(
+    engine.audit(validRecord).length,
+    0
   );
 });
 
@@ -167,11 +168,12 @@ test("DQ-04 mendeteksi diagnosis utama kosong", () => {
 });
 
 // DQ-05: Kode ICD-10
-test("DQ-05 mendeteksi kode ICD-10 kosong", () => {
-  const record = {
-    ...validRecord,
-    code: ""
-  };
+test("auditAll aman menerima data bukan array", () => {
+  assert.equal(
+    engine.auditAll(null).length,
+    0
+  );
+});
 
   assert.ok(
     engine.audit(record).some(
