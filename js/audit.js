@@ -1,91 +1,135 @@
 
+/* MedAudit AI v0.4.0
+ * Mesin audit terpusat.
+ * Format data mengikuti formulir dan LocalStorage index.html.
+ * Pemeriksaan berbasis aturan (rule-based), bukan validasi klinis
+ * atau validasi kode ICD-10 resmi.
+ */
+
 (() => {
-  const isValidDate = value => {
-    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  "use strict";
+
+  // Memeriksa validitas tanggal YYYY-MM-DD
+  const isValidDate = (value) => {
+    if (
+      typeof value !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(value)
+    ) {
+      return false;
+    }
+
     const [year, month, day] = value.split("-").map(Number);
-    const date = new Date(Date.UTC(year, month - 1, day));
-    return date.getUTCFullYear() === year &&
-      date.getUTCMonth() === month - 1 &&
-      date.getUTCDate() === day;
+    const date = new Date(year, month - 1, day);
+
+    return (
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day
+    );
   };
 
-  const today = () => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  // Mendapatkan tanggal lokal hari ini
+  const todayLocal = () => {
+    const date = new Date();
+    date.setMinutes(
+      date.getMinutes() - date.getTimezoneOffset()
+    );
+
+    return date.toISOString().slice(0, 10);
   };
 
-  function audit(record) {
+  // Memeriksa pola dasar format kode ICD-10
+  const isBasicIcd10Format = (code) => {
+    return /^[A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?$/.test(
+      String(code ?? "").trim().toUpperCase()
+    );
+  };
+
+  // Fungsi audit satu rekam medis
+  function audit(record = {}) {
     const findings = [];
-    const add = (code, title, detail) =>
-      findings.push({
-        code,
-        title,
-        detail,
-        visitId: record.visitId || "(tanpa ID)",
-        patient: record.patient || "(tanpa nama)"
-      });
 
-    if (!String(record.visitId ?? "").trim() ||
-        !String(record.patient ?? "").trim()) {
-      add("DQ-01", "Identitas kunjungan belum lengkap",
-        "ID kunjungan dan/atau nama inisial pasien belum diisi.");
+    const add = (code, text) => {
+      findings.push({ code, text });
+    };
+
+    // DQ-01: Identitas pasien
+    if (!String(record.mrn ?? "").trim()) {
+      add("DQ-01", "Nomor RM kosong");
     }
 
-    if (!isValidDate(record.admissionDate)) {
-      add("DQ-02", "Tanggal masuk tidak valid",
-        "Tanggal masuk kosong atau tidak menggunakan tanggal kalender yang valid.");
-    } else if (record.admissionDate > today()) {
-      add("DQ-02", "Tanggal masuk di masa depan",
-        "Periksa kembali tanggal masuk kunjungan.");
+    if (!String(record.name ?? "").trim()) {
+      add("DQ-01", "Nama/inisial fiktif kosong");
     }
 
-    if (record.dischargeDate) {
-      if (!isValidDate(record.dischargeDate)) {
-        add("DQ-03", "Tanggal keluar tidak valid",
-          "Tanggal keluar diisi tetapi bukan tanggal kalender yang valid.");
-      } else if (isValidDate(record.admissionDate) &&
-                 record.dischargeDate < record.admissionDate) {
-        add("DQ-03", "Tanggal keluar lebih awal",
-          "Tanggal keluar tercatat sebelum tanggal masuk.");
+    // DQ-02: Tanggal masuk
+    if (!record.admit) {
+      add("DQ-02", "Tanggal masuk kosong");
+    } else if (!isValidDate(record.admit)) {
+      add("DQ-02", "Tanggal masuk tidak valid");
+    } else if (record.admit > todayLocal()) {
+      add("DQ-02", "Tanggal masuk berada di masa depan");
+    }
+
+    // DQ-03: Tanggal keluar
+    if (record.discharge) {
+      if (!isValidDate(record.discharge)) {
+        add("DQ-03", "Tanggal keluar tidak valid");
+      } else if (
+        isValidDate(record.admit) &&
+        record.discharge < record.admit
+      ) {
+        add(
+          "DQ-03",
+          "Tanggal keluar lebih awal dari tanggal masuk"
+        );
       }
     }
 
-    if (!String(record.diagnosis ?? "").trim()) {
-      add("DQ-04", "Diagnosis utama belum diisi",
-        "Lengkapi diagnosis utama berdasarkan dokumentasi klinis.");
+    // DQ-04: Diagnosis utama
+    if (!String(record.mainDx ?? "").trim()) {
+      add("DQ-04", "Diagnosis utama belum diisi");
     }
 
-    if (String(record.icdCode ?? "").trim() &&
-        !/^[A-Z][0-9][0-9](\.[0-9A-Z]{1,4})?$/.test(
-          String(record.icdCode).trim().toUpperCase()
-        )) {
-      add("DQ-05", "Format kode perlu diperiksa",
-        "Format kode tidak sesuai pola umum. Verifikasi ke indeks dan tabular ICD-10.");
+    // DQ-05: Kode ICD-10
+    if (!String(record.code ?? "").trim()) {
+      add("DQ-05", "Kode ICD-10 kosong");
+    } else if (!isBasicIcd10Format(record.code)) {
+      add("DQ-05", "Format kode ICD-10 perlu diperiksa");
     }
 
-    if (!String(record.classRoom ?? "").trim()) {
-      add("DQ-06", "Kelas rawat belum dipilih",
-        "Pilih kelas rawat atau status tidak berlaku sesuai konteks pelayanan.");
+    // DQ-06: Kelas rawat
+    if (!String(record.kelas ?? "").trim()) {
+      add("DQ-06", "Kelas rawat belum dipilih");
     }
 
+    // DQ-07: Kelengkapan resume medis
     if (record.resumeComplete !== true) {
-      add("DQ-07", "Resume medis belum lengkap",
-        "Status kelengkapan resume medis belum dikonfirmasi.");
+      add("DQ-07", "Resume medis belum ditandai lengkap");
     }
 
+    // DQ-08: Autentikasi DPJP
     if (record.dpjpSigned !== true) {
-      add("DQ-08", "Autentikasi DPJP belum lengkap",
-        "Status autentikasi DPJP belum dikonfirmasi.");
+      add(
+        "DQ-08",
+        "Autentikasi DPJP belum ditandai tersedia"
+      );
     }
 
     return findings;
   }
 
-  window.MedAuditEngine = {
+  // Menyediakan mesin audit untuk aplikasi
+  window.MedAuditEngine = Object.freeze({
     audit,
+
     auditAll(records) {
-      return records.flatMap(audit);
+      return (
+        Array.isArray(records) ? records : []
+      ).flatMap(audit);
     },
-    isValidDate
-  };
+
+    isValidDate,
+    isBasicIcd10Format
+  });
 })();
