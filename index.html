@@ -149,6 +149,7 @@ margin-top:16px
 <p class="muted">Dikembangkan sebagai proyek demonstrasi pembelajaran informatika kesehatan. Keputusan klinis dan kodifikasi akhir tetap memerlukan validasi profesional.</p></div></section>
 <footer>MedAudit AI · Prototype v0.3.0 · Data sintetis saja</footer>
 </main>
+<script src="js/audit.js"></script>
 <script>
 'use strict';
 const KEY='medaudit_ai_cases_v02';
@@ -166,24 +167,19 @@ function showMessage(message,type='info'){const el=$('appMessage');el.textConten
 function save(){try{localStorage.setItem(KEY,JSON.stringify(cases));storageWarning='';}catch(e){storageWarning='Penyimpanan browser gagal. Data hanya bertahan selama halaman ini terbuka; ekspor backup jika masih dapat dilakukan.';showMessage(storageWarning,'error');}render();}
 function todayLocal(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
 
-function validDate(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(s||'')))return false;const [y,m,d]=s.split('-').map(Number);const date=new Date(y,m-1,d);return date.getFullYear()===y&&date.getMonth()===m-1&&date.getDate()===d;}
 
-function isBasicIcd10Format(code){return /^[A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?$/.test(String(code||'').trim().toUpperCase());}
-function audit(c){
- const issues=[];
- if(!String(c.mrn||'').trim())issues.push({code:'DQ-01',text:'Nomor RM kosong'});
- if(!String(c.name||'').trim())issues.push({code:'DQ-01',text:'Nama/inisial fiktif kosong'});
- if(!c.admit)issues.push({code:'DQ-02',text:'Tanggal masuk kosong'});
- else if(!validDate(c.admit))issues.push({code:'DQ-02',text:'Tanggal masuk tidak valid'});
- else if(c.admit>todayLocal())issues.push({code:'DQ-02',text:'Tanggal masuk berada di masa depan'});
- if(c.discharge){if(!validDate(c.discharge))issues.push({code:'DQ-03',text:'Tanggal keluar tidak valid'});else if(validDate(c.admit)&&c.discharge<c.admit)issues.push({code:'DQ-03',text:'Tanggal keluar lebih awal dari tanggal masuk'});}
- if(!String(c.mainDx||'').trim())issues.push({code:'DQ-04',text:'Diagnosis utama belum diisi'});
- if(!String(c.code||'').trim())issues.push({code:'DQ-05',text:'Kode ICD-10 kosong'});else if(!isBasicIcd10Format(c.code))issues.push({code:'DQ-05',text:'Format kode ICD-10 perlu diperiksa'});
- if(!String(c.kelas||'').trim())issues.push({code:'DQ-06',text:'Kelas rawat belum dipilih'});
- if(c.resumeComplete!==true)issues.push({code:'DQ-07',text:'Resume medis belum ditandai lengkap'});
- if(c.dpjpSigned!==true)issues.push({code:'DQ-08',text:'Autentikasi DPJP belum ditandai tersedia'});
- return issues;
+ // Menggunakan mesin audit terpusat dari js/audit.js
+if (!window.MedAuditEngine) {
+  throw new Error(
+    "Mesin audit MedAudit AI gagal dimuat. Periksa js/audit.js."
+  );
 }
+
+const audit = window.MedAuditEngine.audit;
+const validDate = window.MedAuditEngine.isValidDate;
+const isBasicIcd10Format =
+  window.MedAuditEngine.isBasicIcd10Format;
+
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function render(){
  const results=cases.map(c=>({...c,issues:audit(c)}));
