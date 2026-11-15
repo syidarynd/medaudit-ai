@@ -77,7 +77,7 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
       return status.includes("Selesai.") || status.includes("Gagal memproses");
     }, { timeout: 30000 });
     const importStatus = await page.locator("#icdIndexStatus").innerText();
-    assert.match(importStatus, /Selesai\\./, "PDF import failed: " + importStatus + " | page errors: " + pageErrors.join("; "));
+    assert.match(importStatus, /Selesai\./, "PDF import failed: " + importStatus + " | page errors: " + pageErrors.join("; "));
     await page.locator("#indexSearchInput").fill("brain");
     await page.locator("#searchIcdIndex").click();
     const results = await page.locator("#indexResults").innerText();
