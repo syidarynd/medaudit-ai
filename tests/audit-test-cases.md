@@ -3,7 +3,7 @@
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System
 
-**Versi target:** Prototype v0.4.0
+**Versi target:** Prototype v0.5.0
 
 **Jenis dokumen:** Daftar kasus pengujian fungsional dan regresi
 
@@ -160,6 +160,18 @@ Tanggal keluar yang kosong diperbolehkan untuk kunjungan yang masih berlangsung.
 
 **Catatan:** DQ-10 merupakan pemeriksaan silang daftar contoh terbatas untuk demonstrasi. Bukan encoder, validasi resmi ICD-10, atau penilaian klinis. Verifikasi tetap harus menggunakan indeks dan tabular resmi.
 
+
+### 4.11 Pengujian Pencarian Indeks ICD-10 (manual)
+
+| ID | Skenario | Hasil yang Diharapkan | Status |
+|---|---|---|---|
+| TC-IDX-01 | Memuat PDF Alphabetical Index dan Tabular TXT | Referensi diproses di browser dan jumlah entri ditampilkan | Belum diuji browser |
+| TC-IDX-02 | Cari istilah utama dan subistilah | Hasil mempertahankan konteks hierarki dan halaman sumber | Belum diuji browser |
+| TC-IDX-03 | Cari istilah dengan rujukan silang | Label see / see also dan target rujukan ditampilkan | Belum diuji browser |
+| TC-IDX-04 | Kode terminal ada pada Tabular 2019 | Status pembanding terminal ditampilkan | Belum diuji browser |
+| TC-IDX-05 | Kode tidak ditemukan pada Tabular 2019 | Status perlu telaah ditampilkan, bukan dinyatakan invalid | Belum diuji browser |
+| TC-IDX-06 | Muat ulang halaman | File referensi harus dipilih dan diproses ulang; tidak tersimpan di LocalStorage | Belum diuji browser |
+
 ## 5. PENGUJIAN FUNGSIONAL APLIKASI
 
 ### 5.1 Dashboard
@@ -263,14 +275,14 @@ Pengujian dinyatakan berhasil apabila:
 | DQ-10 | 3 |
 | Pengujian Fungsional | 20 |
 | Pengujian Regresi | 5 |
-| **TOTAL** | **53** |
+| **TOTAL** | **59** |
 
 | Status | Jumlah |
 |---|---:|
 | PASS | Diisi setelah pengujian |
 | FAIL | Diisi setelah pengujian |
 | BLOCKED | Diisi setelah pengujian |
-| Belum diuji | 53 |
+| Belum diuji | 59 |
 
 ---
 
@@ -278,21 +290,9 @@ Pengujian dinyatakan berhasil apabila:
 
 *AI-Assisted Medical Records Audit & Data Quality System*
 
-**Dokumentasi Pengujian Prototype v0.4.0**
+**Dokumentasi Pengujian Prototype v0.5.0**
 
 
 ## 10. Unit Test Otomatis
 
 File `tests/audit.test.cjs` berisi pengujian untuk validasi tanggal, data bersih, DQ-09, DQ-10, dan agregasi temuan. Jalankan dengan `node --test tests/audit.test.cjs`. Hasil aktual harus dibaca dari GitHub Actions; jangan menganggap test lulus hanya karena workflow telah dibuat.
-
-
-### 4.11 Pengujian Pencarian Indeks ICD-10 (manual)
-
-| ID | Skenario | Hasil yang Diharapkan | Status |
-|---|---|---|---|
-| TC-IDX-01 | Memuat PDF Alphabetical Index dan Tabular TXT | Referensi diproses di browser dan jumlah entri ditampilkan | Belum diuji browser |
-| TC-IDX-02 | Cari istilah utama dan subistilah | Hasil mempertahankan konteks hierarki dan halaman sumber | Belum diuji browser |
-| TC-IDX-03 | Cari istilah dengan rujukan silang | Label see / see also dan target rujukan ditampilkan | Belum diuji browser |
-| TC-IDX-04 | Kode terminal ada pada Tabular 2019 | Status pembanding terminal ditampilkan | Belum diuji browser |
-| TC-IDX-05 | Kode tidak ditemukan pada Tabular 2019 | Status perlu telaah ditampilkan, bukan dinyatakan invalid | Belum diuji browser |
-| TC-IDX-06 | Muat ulang halaman | File referensi harus dipilih dan diproses ulang; tidak tersimpan di LocalStorage | Belum diuji browser |
