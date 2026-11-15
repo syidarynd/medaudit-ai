@@ -21,4 +21,4 @@ jobs:
         with:
           node-version: 22
       - name: Run audit engine tests
-        run: node --test tests/audit.test.cjs
+        run: node --test tests/audit.test.cjs tests/icd10-index.test.cjs
