@@ -311,8 +311,8 @@ const indexStatusLabels={matched:"Ditemukan sebagai kode terminal pada Tabular W
 function setIndexStatus(message,type="muted"){$("icdIndexStatus").textContent=message;$("icdIndexStatus").className=type;}
 function pdfPageLines(items){
  let text="";
- for(const item of items){if(!item.str)continue;text+=item.str+(item.hasEOL?"\\n":" ");}
- return text.split(/\\r?\\n/).map(line=>line.trim()).filter(Boolean);
+ for(const item of items){if(!item.str)continue;text+=item.str+(item.hasEOL?"\n":" ");}
+ return text.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
 }
 async function loadIcdReferences(){
  const pdfFile=$("indexPdfFile").files[0],tabularFile=$("tabularFile").files[0],button=$("loadIcdReferences"),progress=$("icdIndexProgress");
