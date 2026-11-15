@@ -151,5 +151,8 @@ Prototype untuk demonstrasi dan portofolio informatika kesehatan.
 
 - DQ-09 membandingkan nomor RM antar-record dan mengabaikan perbedaan kapitalisasi.
 - DQ-10 hanya membandingkan beberapa pasangan diagnosis-kode demonstrasi yang ditentukan secara eksplisit; diagnosis lain tidak dinilai.
-- Unit test mesin audit dijalankan dengan `node --test tests/audit.test.cjs tests/icd10-index.test.cjs` melalui GitHub Actions.
+- Unit test mesin audit dan parser indeks serta browser smoke test Chromium dijalankan melalui GitHub Actions.
+- Perintah lokal: `npm install --no-save --no-package-lock playwright@1.58.2`, `npx playwright install chromium`, lalu `node --test tests/audit.test.cjs tests/icd10-index.test.cjs tests/browser-smoke.test.cjs`.
+- Pada commit rilis v0.5.0, seluruh 16 tes otomatis lulus (9 mesin audit, 6 parser indeks, 1 browser smoke test).
+- Browser smoke test menggunakan viewport seluler 390×844; uji pada perangkat Android fisik tetap disarankan.
 - Pengujian ini tidak membuktikan ketepatan klinis atau validitas kode ICD-10 secara menyeluruh.
