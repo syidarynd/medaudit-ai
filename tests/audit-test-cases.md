@@ -284,3 +284,15 @@ Pengujian dinyatakan berhasil apabila:
 ## 10. Unit Test Otomatis
 
 File `tests/audit.test.cjs` berisi pengujian untuk validasi tanggal, data bersih, DQ-09, DQ-10, dan agregasi temuan. Jalankan dengan `node --test tests/audit.test.cjs`. Hasil aktual harus dibaca dari GitHub Actions; jangan menganggap test lulus hanya karena workflow telah dibuat.
+
+
+### 4.11 Pengujian Pencarian Indeks ICD-10 (manual)
+
+| ID | Skenario | Hasil yang Diharapkan | Status |
+|---|---|---|---|
+| TC-IDX-01 | Memuat PDF Alphabetical Index dan Tabular TXT | Referensi diproses di browser dan jumlah entri ditampilkan | Belum diuji browser |
+| TC-IDX-02 | Cari istilah utama dan subistilah | Hasil mempertahankan konteks hierarki dan halaman sumber | Belum diuji browser |
+| TC-IDX-03 | Cari istilah dengan rujukan silang | Label see / see also dan target rujukan ditampilkan | Belum diuji browser |
+| TC-IDX-04 | Kode terminal ada pada Tabular 2019 | Status pembanding terminal ditampilkan | Belum diuji browser |
+| TC-IDX-05 | Kode tidak ditemukan pada Tabular 2019 | Status perlu telaah ditampilkan, bukan dinyatakan invalid | Belum diuji browser |
+| TC-IDX-06 | Muat ulang halaman | File referensi harus dipilih dan diproses ulang; tidak tersimpan di LocalStorage | Belum diuji browser |
