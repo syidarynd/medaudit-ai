@@ -32,3 +32,27 @@ test("searches hierarchy context and codes", () => {
   assert.equal(index.searchEntries(entries,"kidney with calculus",5).length,1);
   assert.equal(index.searchEntries(entries,"N20.0",5).length,1);
 });
+
+test("stops at Section III so drug table rows are not mislabeled as index entries", () => {
+  const state = { section: "external_causes", stack: {} };
+  const entries = index.parseIndexLines([
+    "Wrong fluid in infusion Y65.1",
+    "SECTION III - Table of drugs and chemicals",
+    "Abrine T62.2 X49.- X69.-"
+  ], 1718, state);
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].section, "external_causes");
+  assert.equal(state.finished, true);
+});
+
+test("direct index term results rank ahead of see-also references", () => {
+  const entries = index.parseIndexLines([
+    "Abscess",
+    "-brain G06.0",
+    "Empyema",
+    "-ventricular (see also Abscess, brain) G06.0"
+  ], 30, { section: "diseases", stack: {} });
+  const results = index.searchEntries(entries, "abscess brain", 10);
+  assert.equal(results[0].term, "brain G06.0");
+  assert.equal(results[0].parent, "Abscess");
+});
