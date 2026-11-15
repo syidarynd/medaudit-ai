@@ -13,7 +13,7 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 |---|---|
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
-| Versi saat ini | Prototype v0.5.0 |
+| Versi saat ini | Prototype v0.6.0 |
 | Target pengembangan | v0.6.0 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
@@ -38,8 +38,9 @@ https://syidarynd.github.io/medaudit-ai/
 - Pencarian berdasarkan nomor rekam medis, nama/inisial fiktif, diagnosis, dan kode.
 - Filter berdasarkan status audit.
 - Pemeriksaan kualitas data berbasis aturan DQ-01 sampai DQ-10.
-- Pencarian istilah melalui Alphabetical Index ICD-10 dari PDF lokal.
-- Pembandingan kode indeks dengan daftar kode terminal/non-terminal pada Tabular WHO 2019 yang dipilih pengguna.
+- Pencarian istilah melalui Alphabetical Index ICD-10 yang disiapkan satu kali dari file sumber lokal.
+- Referensi hasil ekstraksi disimpan di IndexedDB dan dimuat otomatis pada kunjungan berikutnya di browser/perangkat yang sama.
+- Pembandingan kode indeks dengan daftar kode terminal/non-terminal pada Tabular WHO 2019.
 - Ekspor laporan ke CSV.
 - Backup dan pemulihan data melalui JSON.
 - Penyimpanan lokal menggunakan LocalStorage.
@@ -65,7 +66,7 @@ DQ-09 mendeteksi nomor RM duplikat antar-kunjungan. DQ-10 membandingkan pasangan
 - Alphabetical Index: ICD-10 2e Volume 3 (2013), dipilih dan diproses secara lokal oleh pengguna.
 - Tabular pembanding: WHO ICD-10 2019, file TXT dipilih secara lokal.
 - Karena edisinya berbeda, status cocok/tidak cocok hanya pembanding teknis dan tidak menetapkan validitas kode Indonesia/BPJS.
-- Dataset sumber tidak disertakan dalam repositori; aplikasi tidak mengunggah atau menyimpan file referensi ke LocalStorage.
+- PDF/TXT sumber tidak disertakan dalam repositori atau diunggah ke server. Hasil ekstraksi terstruktur disimpan lokal di IndexedDB pada perangkat pengguna; tidak tersinkron antarperangkat.
 
 ## 5. Teknologi
 
@@ -157,7 +158,7 @@ Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengu
 
 ## 10. Roadmap Pengembangan
 
-1. Uji langsung pada perangkat Android pengguna untuk memastikan unggah PDF dan pencarian berjalan pada browser ponsel.
+1. Uji langsung pada perangkat Android pengguna untuk memastikan penyiapan satu kali, penyimpanan IndexedDB, dan pemuatan otomatis referensi berjalan.
 2. Uji performa dan penggunaan memori saat memproses PDF besar.
 3. Perluas cakupan aksesibilitas, keamanan, dan pengujian regresi.
 4. Evaluasi sumber ICD-10 dengan edisi yang seragam dan ketentuan lisensi yang jelas sebelum integrasi lebih lanjut.

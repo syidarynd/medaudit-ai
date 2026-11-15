@@ -85,6 +85,19 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     assert.match(results, /Abscess/);
     assert.match(results, /Ditemukan sebagai kode terminal/);
     assert.doesNotMatch(results, /Drug sample/);
+
+    // Cached parsed references must survive a reload and restore without file selection.
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => window.MedAuditIndex && document.querySelector("#icdIndexStatus").textContent.includes("Referensi dimuat otomatis"), { timeout: 10000 });
+    await page.locator('button[data-tab="icd10"]').click();
+    assert.equal(await page.locator("#indexPdfFile").inputValue(), "");
+    assert.equal(await page.locator("#tabularFile").inputValue(), "");
+    await page.locator("#indexSearchInput").fill("brain");
+    await page.locator("#searchIcdIndex").click();
+    const restoredResults = await page.locator("#indexResults").innerText();
+    assert.match(restoredResults, /brain G06\.0/);
+    assert.match(restoredResults, /Ditemukan sebagai kode terminal/);
+
     const gridColumns = await page.locator(".index-toolbar").first().evaluate(
       element => getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).length
     );
