@@ -71,7 +71,7 @@ Ruang lingkup pengujian:
 
 ## 5. Pengujian Referensi Indeks ICD-10
 
-Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, hierarki istilah, rujukan silang, pemisahan kode terminal/non-terminal, dan pencarian konteks. Pengujian ekstraksi PDF langsung di browser serta kompatibilitas perangkat masih memerlukan uji manual.
+Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, hierarki istilah, rujukan silang, pemisahan kode terminal/non-terminal, pencarian konteks, serta batas Section III. Browser smoke test otomatis menggunakan Chromium viewport seluler menguji unggah PDF lokal, pembacaan Tabular, pencarian kode, dan layout responsif. Pengujian pada perangkat Android fisik pengguna masih memerlukan uji langsung.
 
 **Batasan:** Alphabetical Index yang dipakai berlabel Volume 3 edisi 2013, sedangkan Tabular pembanding adalah WHO 2019. Kode yang tidak ditemukan pada versi pembanding tidak otomatis invalid.
 
