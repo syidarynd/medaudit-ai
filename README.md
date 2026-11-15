@@ -154,10 +154,10 @@ Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengu
 
 1. Menguji pengalaman pencarian indeks pada berbagai browser/perangkat dan memperbaiki ekstraksi PDF bila diperlukan.
 2. Memperluas cakupan unit test dan pengujian browser/regresi.
-3. Menyempurnakan pemeriksaan duplikasi nomor rekam medis (DQ-09).
-4. Memperluas daftar contoh DQ-10 hanya setelah ditinjau menggunakan referensi ICD-10 resmi.
-5. Meningkatkan responsivitas, aksesibilitas, dan pengalaman pengguna.
-6. Melengkapi dokumentasi teknis dan pengujian regresi.
+3. Menjalankan uji browser manual untuk impor dan pencarian PDF pada Android serta desktop.
+4. Memperluas cakupan unit test, aksesibilitas, dan pengujian regresi.
+5. Menilai sumber ICD-10 yang lebih seragam versinya dan sesuai ketentuan lisensi sebelum integrasi lebih lanjut.
+6. Meningkatkan responsivitas dan dokumentasi teknis.
 
 ## 11. Lisensi dan Penggunaan
 
