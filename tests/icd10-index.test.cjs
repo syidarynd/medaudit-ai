@@ -78,7 +78,7 @@ test("coordinate-grouped index rows retain their own codes", () => {
     { str: "G04.9", transform: [1,0,0,1,132,670], width: 25 }
   ], 500);
   const entries = index.parseIndexLines(lines, 858, { section: "diseases", stack: {} });
-  assert.equal(entries[1].term, "-brain G06.0".replace(/^-/, "brain G06.0"));
+  assert.equal(entries[1].term, "brain G06.0");
   assert.deepEqual(entries[1].codes, ["G06.0"]);
   assert.deepEqual(entries[2].codes, ["G04.9"]);
 });
