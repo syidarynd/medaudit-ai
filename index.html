@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#10243a">
 <title>MedAudit AI | Audit Rekam Medis</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>window.pdfjsReady=import("https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/pdf.min.mjs").then(lib=>{window.pdfjsLib=lib;return lib;}).catch(error=>{window.pdfjsLoadError=error;return null;});</script>
 <style>
 :root{--navy:#10243a;--blue:#2463eb;--bg:#f3f6fa;--ink:#172334;--muted:#64748b;--line:#e2e8f0;--green:#15803d;--red:#b91c1c;--amber:#b45309}
 *{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
@@ -317,7 +317,8 @@ function pdfPageLines(items){
 async function loadIcdReferences(){
  const pdfFile=$("indexPdfFile").files[0],tabularFile=$("tabularFile").files[0],button=$("loadIcdReferences"),progress=$("icdIndexProgress");
  if(!pdfFile||!tabularFile){setIndexStatus("Pilih kedua file: PDF Alphabetical Index dan Tabular TXT.","error");return;}
- if(!window.pdfjsLib||!window.MedAuditIndex){setIndexStatus("Library PDF.js atau modul indeks gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.","error");return;}
+ const pdfjsLib=window.pdfjsLib||(window.pdfjsReady?await window.pdfjsReady:null);
+ if(!pdfjsLib||!window.MedAuditIndex){setIndexStatus("Library PDF.js atau modul indeks gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.","error");return;}
  button.disabled=true;progress.classList.remove("hidden");progress.value=0;icdIndexEntries=[];icdTabularCodes=new Map();
  try{
   setIndexStatus("Membaca file Tabular WHO 2019…");
@@ -325,7 +326,7 @@ async function loadIcdReferences(){
   const parsedTabular=MedAuditIndex.parseTabularText(tabularText);
   icdTabularCodes=parsedTabular.codeMap;
   setIndexStatus("Membuka PDF dan mengekstrak teks indeks…");
-  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/pdf.worker.min.mjs";
   const pdf=await pdfjsLib.getDocument({data:await pdfFile.arrayBuffer()}).promise;
   const pageLimit=Math.min(pdf.numPages,ICD_INDEX_PAGE_LIMIT);
   const parserState={section:"diseases",stack:{},letter:""};
