@@ -64,7 +64,9 @@ Ruang lingkup pengujian:
 | DQ-05 | Format dasar kode ICD-10 | Kode kosong atau format tidak sesuai pola dasar |
 | DQ-06 | Kelengkapan kelas rawat | Kelas rawat kosong |
 | DQ-07 | Kelengkapan resume medis | Resume belum ditandai lengkap |
-| DQ-08 | Autentikasi DPJP | Autentikasi belum ditandai tersedia |\n| DQ-09 | Duplikasi nomor RM | Dua kunjungan berbeda menggunakan nomor RM sama (case-insensitive) |\n| DQ-10 | Konsistensi diagnosis-kode | Diagnosis yang termasuk daftar contoh memiliki kode berbeda dari pasangan contoh |
+| DQ-08 | Autentikasi DPJP | Autentikasi belum ditandai tersedia |
+| DQ-09 | Duplikasi nomor RM | Dua kunjungan berbeda menggunakan nomor RM sama (case-insensitive) |
+| DQ-10 | Konsistensi diagnosis-kode | Diagnosis yang termasuk daftar contoh memiliki kode berbeda dari pasangan contoh |
 
 ## 5. Hasil Pengujian Dataset Sintetis
 
@@ -138,4 +140,11 @@ Pengembangan berikutnya difokuskan pada peningkatan aturan audit, pengujian otom
 Prototype untuk demonstrasi dan portofolio informatika kesehatan.
 
 **Peringatan:** Aplikasi ini bukan sistem produksi. Jangan memasukkan data pasien nyata. Hasil pemeriksaan tidak menggantikan keputusan klinis maupun validasi profesional kodifikasi.
-\n\n## 10. Catatan versi 0.4.0\n\n- DQ-09 membandingkan nomor RM antar-record dan mengabaikan perbedaan kapitalisasi.\n- DQ-10 hanya membandingkan beberapa pasangan diagnosis-kode demonstrasi yang ditentukan secara eksplisit; diagnosis lain tidak dinilai.\n- Unit test mesin audit dijalankan dengan `node --test tests/audit.test.cjs` melalui GitHub Actions.\n- Pengujian ini tidak membuktikan ketepatan klinis atau validitas kode ICD-10 secara menyeluruh.\n
+
+
+## 10. Catatan versi 0.4.0
+
+- DQ-09 membandingkan nomor RM antar-record dan mengabaikan perbedaan kapitalisasi.
+- DQ-10 hanya membandingkan beberapa pasangan diagnosis-kode demonstrasi yang ditentukan secara eksplisit; diagnosis lain tidak dinilai.
+- Unit test mesin audit dijalankan dengan `node --test tests/audit.test.cjs` melalui GitHub Actions.
+- Pengujian ini tidak membuktikan ketepatan klinis atau validitas kode ICD-10 secara menyeluruh.
