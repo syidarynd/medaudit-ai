@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#10243a">
 <title>MedAudit AI | Audit Rekam Medis</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root{--navy:#10243a;--blue:#2463eb;--bg:#f3f6fa;--ink:#172334;--muted:#64748b;--line:#e2e8f0;--green:#15803d;--red:#b91c1c;--amber:#b45309}
 *{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
@@ -52,6 +53,17 @@ margin-top:16px
 .chart-box{min-height:230px}
  }
 @media(max-width:650px){header{padding:17px}main{margin-top:13px}.panel{padding:14px}.toolbar{grid-template-columns:1fr}.actions button{flex:1}}
+
+.index-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.index-results{display:grid;gap:10px;margin-top:14px}
+.index-result{border:1px solid var(--line);border-radius:11px;padding:13px;background:#fff}
+.index-result h3{font-size:14px;margin:0 0 6px}
+.index-result p{margin:5px 0;font-size:13px}
+.index-code{display:inline-block;margin:4px 6px 0 0;padding:4px 7px;border-radius:7px;background:#eff6ff;color:#1e40af;font-weight:700;font-size:12px}
+.index-status{font-size:12px;color:var(--muted)}
+.index-status.ok{color:var(--green)}.index-status.warn{color:var(--amber)}.index-status.bad{color:var(--red)}
+#icdIndexProgress{width:100%;height:12px;margin-top:10px}
+@media(max-width:650px){.index-toolbar{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -60,8 +72,32 @@ margin-top:16px
 <div class="notice"><b>Mode demonstrasi:</b> gunakan data sintetis/fiktif saja. Data disimpan di browser melalui LocalStorage. Bukan sistem produksi, bukan database klinis, dan bukan pengganti verifikasi koder/DPJP.</div>
 <div id="appMessage" class="notice info hidden" role="status"></div>
 <nav>
-<button class="tab active" data-tab="dashboard">Dashboard</button><button class="tab" data-tab="input">Input Data</button><button class="tab" data-tab="audit">Hasil Audit</button><button class="tab" data-tab="backup">Backup Data</button><button class="tab" data-tab="about">Tentang</button>
+<button class="tab active" data-tab="dashboard">Dashboard</button><button class="tab" data-tab="input">Input Data</button><button class="tab" data-tab="audit">Hasil Audit</button><button class="tab" data-tab="backup">Backup Data</button><button class="tab" data-tab="about">Tentang</button><button class="tab" data-tab="icd10">Indeks ICD-10</button>
 </nav>
+
+<section id="icd10" class="view hidden">
+<div class="panel">
+<h2>Pencarian Alphabetical Index ICD-10</h2>
+<div class="notice info">Sumber indeks yang dipakai adalah ICD-10 2e Volume 3 (2013). Tabular yang dibandingkan adalah WHO ICD-10 2019. Karena edisinya berbeda, hasil cocok/tidak cocok hanya pembanding teknis, bukan validasi kode final atau standar klaim Indonesia.</div>
+<p class="muted">Pilih PDF Alphabetical Index dan file <code>icd102019syst_codes.txt</code>. Pemrosesan dilakukan di browser perangkat ini. File tidak diunggah ke server dan tidak disimpan ke LocalStorage.</p>
+<div class="index-toolbar">
+<div><label for="indexPdfFile">Alphabetical Index PDF (2013)</label><input id="indexPdfFile" type="file" accept="application/pdf,.pdf"></div>
+<div><label for="tabularFile">Tabular List WHO 2019 (TXT)</label><input id="tabularFile" type="file" accept=".txt,text/plain"></div>
+</div>
+<div class="actions"><button type="button" id="loadIcdReferences">Muat &amp; proses referensi</button></div>
+<progress id="icdIndexProgress" max="100" value="0" class="hidden"></progress>
+<p id="icdIndexStatus" class="muted" role="status">Belum ada referensi yang dimuat.</p>
+</div>
+<div class="panel">
+<h2>Telusuri istilah diagnosis</h2>
+<div class="index-toolbar">
+<div><label for="indexSearchInput">Istilah / diagnosis / kode</label><input id="indexSearchInput" type="search" placeholder="Contoh: abscess brain, diabetes, R10.4"></div>
+<div><label for="indexSectionFilter">Bagian indeks</label><select id="indexSectionFilter"><option value="all">Semua bagian</option><option value="diseases">Penyakit &amp; cedera</option><option value="external_causes">Penyebab luar cedera</option></select></div>
+</div>
+<div class="actions"><button type="button" id="searchIcdIndex">Cari indeks</button></div>
+<div id="indexResults" class="index-results"><div class="empty">Muat kedua referensi, lalu cari istilah.</div></div>
+</div>
+</section>
 <section id="dashboard" class="view">
 <div class="grid">
 <div class="metric"><strong id="total">0</strong><span>Total data kunjungan</span></div>
@@ -150,6 +186,7 @@ margin-top:16px
 <footer>MedAudit AI · Prototype v0.4.0 · Data sintetis saja</footer>
 </main>
 <script src="js/audit.js"></script>
+<script src="js/icd10-index.js"></script>
 <script>
 'use strict';
 const KEY='medaudit_ai_cases_v02';
@@ -266,6 +303,71 @@ function exportJson(){const payload={app:'MedAudit AI',version:'0.4.0',exportedA
 $('csvExport').addEventListener('click',exportCsv);$('csvExport2').addEventListener('click',exportCsv);$('jsonExport').addEventListener('click',exportJson);$('backupExport').addEventListener('click',exportJson);
 function validateImport(parsed){const records=Array.isArray(parsed)?parsed:parsed&&Array.isArray(parsed.records)?parsed.records:null;if(!records)throw new Error('Format JSON harus berupa array atau objek dengan properti records.');const seenIds=new Set();const out=records.map((r,i)=>{if(!r||typeof r!=='object'||Array.isArray(r))throw new Error('Record ke-'+(i+1)+' bukan objek yang valid.');for(const k of ['mrn','name','admit','discharge','mainDx','code','notes'])if(r[k]!==undefined&&typeof r[k]!=='string')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa teks.');for(const k of ['resumeComplete','dpjpSigned'])if(r[k]!==undefined&&typeof r[k]!=='boolean')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa boolean.');const c=normalizeRecord(r);if(!c.id)throw new Error('ID record kosong pada baris '+(i+1)+'.');if(seenIds.has(c.id))throw new Error('ID record ganda: '+c.id);seenIds.add(c.id);return c;});return out;}
 $('importJson').addEventListener('click',async()=>{const file=$('jsonFile').files[0];if(!file){showMessage('Pilih file backup JSON terlebih dahulu.','error');return;}try{const parsed=JSON.parse(await file.text());const imported=validateImport(parsed);if(!confirm('Impor '+imported.length+' record dan mengganti seluruh data lokal saat ini? Pastikan sudah memiliki backup.'))return;const old=cases;cases=imported;try{localStorage.setItem(KEY,JSON.stringify(cases));storageWarning='';}catch(err){cases=old;throw new Error('Penyimpanan gagal. Data lokal lama dipertahankan.');}resetForm();$('jsonFile').value='';render();showMessage('Impor berhasil. '+cases.length+' record telah dimuat.','info');}catch(err){showMessage('Impor dibatalkan: '+err.message,'error');}});
+
+const ICD_INDEX_PAGE_LIMIT=1718;
+let icdIndexEntries=[];
+let icdTabularCodes=new Map();
+const indexStatusLabels={matched:"Ditemukan sebagai kode terminal pada Tabular WHO 2019",non_terminal:"Kategori / kode non-terminal pada Tabular WHO 2019",not_found:"Tidak ditemukan pada Tabular WHO 2019 — perlu telaah perbedaan versi",no_code:"Tidak ada kode pada baris indeks"};
+function setIndexStatus(message,type="muted"){$("icdIndexStatus").textContent=message;$("icdIndexStatus").className=type;}
+function pdfPageLines(items){
+ let text="";
+ for(const item of items){if(!item.str)continue;text+=item.str+(item.hasEOL?"\\n":" ");}
+ return text.split(/\\r?\\n/).map(line=>line.trim()).filter(Boolean);
+}
+async function loadIcdReferences(){
+ const pdfFile=$("indexPdfFile").files[0],tabularFile=$("tabularFile").files[0],button=$("loadIcdReferences"),progress=$("icdIndexProgress");
+ if(!pdfFile||!tabularFile){setIndexStatus("Pilih kedua file: PDF Alphabetical Index dan Tabular TXT.","error");return;}
+ if(!window.pdfjsLib||!window.MedAuditIndex){setIndexStatus("Library PDF.js atau modul indeks gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.","error");return;}
+ button.disabled=true;progress.classList.remove("hidden");progress.value=0;icdIndexEntries=[];icdTabularCodes=new Map();
+ try{
+  setIndexStatus("Membaca file Tabular WHO 2019…");
+  const tabularText=await tabularFile.text();
+  const parsedTabular=MedAuditIndex.parseTabularText(tabularText);
+  icdTabularCodes=parsedTabular.codeMap;
+  setIndexStatus("Membuka PDF dan mengekstrak teks indeks…");
+  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const pdf=await pdfjsLib.getDocument({data:await pdfFile.arrayBuffer()}).promise;
+  const pageLimit=Math.min(pdf.numPages,ICD_INDEX_PAGE_LIMIT);
+  const parserState={section:"diseases",stack:{},letter:""};
+  for(let pageNumber=1;pageNumber<=pageLimit;pageNumber++){
+   const page=await pdf.getPage(pageNumber);
+   const content=await page.getTextContent();
+   const lines=pdfPageLines(content.items);
+   icdIndexEntries.push(...MedAuditIndex.parseIndexLines(lines,pageNumber,parserState));
+   if(pageNumber%10===0||pageNumber===pageLimit){
+    progress.value=Math.round(pageNumber/pageLimit*100);
+    setIndexStatus("Memproses halaman "+pageNumber+" dari "+pageLimit+" · "+icdIndexEntries.length.toLocaleString("id-ID")+" baris indeks terstruktur…");
+    await new Promise(resolve=>requestAnimationFrame(resolve));
+   }
+  }
+  setIndexStatus("Selesai. "+icdIndexEntries.length.toLocaleString("id-ID")+" entri indeks dan "+parsedTabular.rows.toLocaleString("id-ID")+" baris Tabular diproses. Pencarian siap digunakan.","ok");
+ }catch(error){
+  icdIndexEntries=[];icdTabularCodes=new Map();
+  setIndexStatus("Gagal memproses referensi: "+(error&&error.message?error.message:"kesalahan tidak diketahui"),"error");
+ }finally{button.disabled=false;}
+}
+function renderIcdSearch(){
+ const query=$("indexSearchInput").value.trim(),section=$("indexSectionFilter").value,container=$("indexResults");
+ if(!icdIndexEntries.length){container.innerHTML='<div class="empty">Muat PDF dan Tabular terlebih dahulu.</div>';return;}
+ if(!query){container.innerHTML='<div class="empty">Masukkan istilah diagnosis atau kode untuk mencari.</div>';return;}
+ const source=section==="all"?icdIndexEntries:icdIndexEntries.filter(entry=>entry.section===section);
+ const results=MedAuditIndex.searchEntries(source,query,60);
+ if(!results.length){container.innerHTML='<div class="empty">Tidak ditemukan istilah yang cocok. Coba kata kunci lain atau periksa ejaan.</div>';return;}
+ container.innerHTML=results.map(entry=>{
+  const codes=(entry.codes||[]).map(code=>{
+   const status=MedAuditIndex.getCodeStatus(code,icdTabularCodes);
+   const cls=status==="matched"?"ok":status==="not_found"?"warn":"muted";
+   const detail=icdTabularCodes.get(code);
+   return '<div><span class="index-code">'+esc(code)+'</span><span class="index-status '+cls+'">'+esc(indexStatusLabels[status]||status)+'</span>'+(detail&&detail.title?'<p class="muted">Deskripsi Tabular 2019: '+esc(detail.title)+'</p>':"")+'</div>';
+  }).join("");
+  return '<article class="index-result"><h3>'+esc(entry.term)+'</h3>'+(entry.parent?'<p class="muted">Konteks: '+esc(entry.parent)+'</p>':"")+(codes||'<p class="index-status">Tidak ada kode pada baris ini; periksa rujukan silang.</p>')+(entry.crossReference?'<p class="muted">Rujukan: '+esc(entry.crossReference)+' '+esc(entry.crossReferenceTarget)+'</p>':"")+'<p class="muted">Bagian: '+(entry.section==="diseases"?"Penyakit & cedera":"Penyebab luar cedera")+' · Halaman PDF: '+esc(entry.page)+'</p></article>';
+ }).join("");
+}
+$("loadIcdReferences").addEventListener("click",loadIcdReferences);
+$("searchIcdIndex").addEventListener("click",renderIcdSearch);
+$("indexSearchInput").addEventListener("keydown",event=>{if(event.key==="Enter")renderIcdSearch();});
+$("indexSectionFilter").addEventListener("change",renderIcdSearch);
+
 render();
 </script>
 </body>
