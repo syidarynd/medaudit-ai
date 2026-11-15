@@ -13,7 +13,7 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 |---|---|
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
-| Versi saat ini | Prototype v0.3.0 |
+| Versi saat ini | Prototype v0.4.0 |
 | Target pengembangan | v0.4.0 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
@@ -37,7 +37,7 @@ https://syidarynd.github.io/medaudit-ai/
 - Pengelolaan data kunjungan: tambah, lihat detail, edit, dan hapus.
 - Pencarian berdasarkan nomor rekam medis, nama/inisial fiktif, diagnosis, dan kode.
 - Filter berdasarkan status audit.
-- Pemeriksaan kualitas data berbasis aturan DQ-01 sampai DQ-08.
+- Pemeriksaan kualitas data berbasis aturan DQ-01 sampai DQ-10.
 - Ekspor laporan ke CSV.
 - Backup dan pemulihan data melalui JSON.
 - Penyimpanan lokal menggunakan LocalStorage.
@@ -133,7 +133,7 @@ Pengujian otomatis menyeluruh, pengujian keamanan, dan pengujian performa skala 
 ## 9. Batasan Sistem
 
 - Pemeriksaan ICD-10 saat ini hanya memeriksa pola format dasar, bukan memastikan ketepatan kode berdasarkan indeks dan tabular resmi.
-- Mesin pemeriksaan menggunakan aturan tetap (*rule-based*), belum menggunakan model AI atau LLM.
+- Mesin pemeriksaan menggunakan aturan tetap (*rule-based*), belum menggunakan model AI atau LLM. DQ-10 adalah pemeriksaan silang daftar contoh terbatas, bukan validasi ICD-10 resmi.
 - Aplikasi belum memiliki autentikasi pengguna, fitur multi-user, sinkronisasi cloud, atau audit trail server-side.
 - LocalStorage tidak dirancang untuk menyimpan rekam medis pasien nyata.
 - Hasil audit merupakan indikator untuk ditinjau petugas berwenang, bukan keputusan klinis, penetapan kode final, atau keputusan klaim otomatis.
@@ -142,9 +142,9 @@ Pengujian otomatis menyeluruh, pengujian keamanan, dan pengujian performa skala 
 ## 10. Roadmap Pengembangan
 
 1. Menyelesaikan blueprint dan dokumentasi desain dashboard v0.4.0.
-2. Menambahkan pengujian otomatis untuk setiap aturan audit.
-3. Mengembangkan pemeriksaan duplikasi nomor rekam medis (DQ-09).
-4. Mengembangkan pemeriksaan konsistensi diagnosis dan kode ICD-10 (DQ-10) dengan referensi yang dapat dipertanggungjawabkan.
+2. Memperluas cakupan unit test dan pengujian browser/regresi.
+3. Menyempurnakan pemeriksaan duplikasi nomor rekam medis (DQ-09).
+4. Memperluas daftar contoh DQ-10 hanya setelah ditinjau menggunakan referensi ICD-10 resmi.
 5. Meningkatkan responsivitas, aksesibilitas, dan pengalaman pengguna.
 6. Melengkapi dokumentasi teknis dan pengujian regresi.
 
