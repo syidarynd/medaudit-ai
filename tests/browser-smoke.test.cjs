@@ -95,7 +95,7 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     await page.locator("#indexSearchInput").fill("brain");
     await page.locator("#searchIcdIndex").click();
     const restoredResults = await page.locator("#indexResults").innerText();
-    assert.match(restoredResults, /brain G06\\.0/);
+    assert.match(restoredResults, /brain G06\.0/);
     assert.match(restoredResults, /Ditemukan sebagai kode terminal/);
 
     const gridColumns = await page.locator(".index-toolbar").first().evaluate(
