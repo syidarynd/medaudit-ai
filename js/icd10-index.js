@@ -4,9 +4,9 @@
  */
 (function (root) {
   "use strict";
-  const CODE_RE = /(^|[^A-Z0-9])([A-Z][0-9]{2}(?:\\.[0-9A-Z]{1,4})?(?:\\.-)?)(?![A-Z0-9])/g;
+  const CODE_RE = /(^|[^A-Z0-9])([A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?(?:\.-)?)(?![A-Z0-9])/g;
   function normalizeText(value) {
-    return String(value ?? "").normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+    return String(value ?? "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
       .toLocaleLowerCase("en").replace(/[^a-z0-9]+/g, " ").trim();
   }
   function extractCodes(value) {
@@ -19,12 +19,12 @@
   function parseIndexLines(lines, pageNumber, state) {
     const output = [], parserState = state || { section: "diseases", stack: {} };
     for (const rawLine of lines || []) {
-      const line = String(rawLine ?? "").replace(/\\u00ad/g, "-").replace(/\\u00a0/g, " ").replace(/\\s+/g, " ").trim();
-      if (!line || /^ICD-10\\s+2e\\s+Volume\\s+3/i.test(line)) continue;
-      if (/^SECTION\\s+I\\s*-/i.test(line)) { parserState.section = "diseases"; parserState.stack = {}; continue; }
-      if (/^SECTION\\s+II\\s*-/i.test(line)) { parserState.section = "external_causes"; parserState.stack = {}; continue; }
-      if (/^\\d{1,4}$/.test(line)) continue;
-      const prefix = line.match(/^((?:-\\s*)+)(.*)$/);
+      const line = String(rawLine ?? "").replace(/\u00ad/g, "-").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
+      if (!line || /^ICD-10\s+2e\s+Volume\s+3/i.test(line)) continue;
+      if (/^SECTION\s+I\s*-/i.test(line)) { parserState.section = "diseases"; parserState.stack = {}; continue; }
+      if (/^SECTION\s+II\s*-/i.test(line)) { parserState.section = "external_causes"; parserState.stack = {}; continue; }
+      if (/^\d{1,4}$/.test(line)) continue;
+      const prefix = line.match(/^((?:-\s*)+)(.*)$/);
       let depth = 0, term = line;
       if (prefix) { depth = (prefix[1].match(/-/g) || []).length; term = prefix[2].trim(); }
       else if (/^[A-Z]$/.test(line)) { parserState.letter = line; parserState.stack = {}; continue; }
@@ -32,9 +32,9 @@
       const parent = depth > 0 ? (parserState.stack[depth - 1] || null) : null;
       parserState.stack[depth] = term;
       for (const key of Object.keys(parserState.stack)) if (Number(key) > depth) delete parserState.stack[key];
-      const seeMatch = term.match(/\\bsee\\s+(also\\s+)?(.+)$/i);
+      const seeMatch = term.match(/\bsee\s+(also\s+)?(.+)$/i);
       const hierarchy = Object.keys(parserState.stack).sort((a,b)=>Number(a)-Number(b)).map(key=>parserState.stack[key]);
-      const searchText = normalizeText(hierarchy.join(" ").replace(/(^|[^A-Z0-9])[A-Z][0-9]{2}(?:\\.[0-9A-Z]{1,4})?(?:\\.-)?(?![A-Z0-9])/gi, " "));
+      const searchText = normalizeText(hierarchy.join(" ").replace(/(^|[^A-Z0-9])[A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?(?:\.-)?(?![A-Z0-9])/gi, " "));
       output.push({
         section: parserState.section || "diseases", letter: parserState.letter || "",
         page: Number(pageNumber) || null, depth, term, parent, codes: extractCodes(term),
@@ -46,7 +46,7 @@
   }
   function parseTabularText(text) {
     const codeMap = new Map(); let rows = 0;
-    for (const line of String(text ?? "").split(/\\r?\\n/)) {
+    for (const line of String(text ?? "").split(/\r?\n/)) {
       if (!line.trim()) continue;
       const fields = line.split(";");
       if (fields.length < 10 || !["T","N"].includes(fields[1])) continue;
