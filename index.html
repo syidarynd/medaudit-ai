@@ -55,7 +55,7 @@ margin-top:16px
 </style>
 </head>
 <body>
-<header><h1>MedAudit AI</h1><p>Healthcare Data Quality &amp; Medical Records Audit · Prototype v0.3.0</p></header>
+<header><h1>MedAudit AI</h1><p>Healthcare Data Quality &amp; Medical Records Audit · Prototype v0.4.0</p></header>
 <main>
 <div class="notice"><b>Mode demonstrasi:</b> gunakan data sintetis/fiktif saja. Data disimpan di browser melalui LocalStorage. Bukan sistem produksi, bukan database klinis, dan bukan pengganti verifikasi koder/DPJP.</div>
 <div id="appMessage" class="notice info hidden" role="status"></div>
@@ -147,12 +147,12 @@ margin-top:16px
 <section id="about" class="view hidden"><div class="panel"><h2>Ruang lingkup dan batasan</h2>
 <ul><li>Prototype portofolio untuk demonstrasi audit kelengkapan dan kualitas data rekam medis.</li><li>Mesin audit menggunakan aturan sederhana (rule-based), bukan model AI/LLM.</li><li>Validasi kode ICD-10 hanya memeriksa pola penulisan dasar, bukan memastikan kode resmi atau ketepatan klinis.</li><li>Data disimpan di LocalStorage browser perangkat ini; hapus data situs/browser dapat menghilangkannya.</li><li>Aturan kelengkapan merupakan indikator review, bukan keputusan klinis atau keputusan klaim otomatis.</li><li>Jangan masukkan data pasien nyata, NIK, alamat, nomor telepon, atau informasi yang dapat mengidentifikasi seseorang.</li></ul>
 <p class="muted">Dikembangkan sebagai proyek demonstrasi pembelajaran informatika kesehatan. Keputusan klinis dan kodifikasi akhir tetap memerlukan validasi profesional.</p></div></section>
-<footer>MedAudit AI · Prototype v0.3.0 · Data sintetis saja</footer>
+<footer>MedAudit AI · Prototype v0.4.0 · Data sintetis saja</footer>
 </main>
 <script src="js/audit.js"></script>
 <script>
 'use strict';
-const KEY='medaudit_ai_cases_v02';
+const KEY='medaudit_ai_cases_v04';
 const $=id=>document.getElementById(id);
 let cases=[];
 let selectedDetailId=null;
@@ -182,7 +182,7 @@ const isBasicIcd10Format =
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function render(){
- const results=cases.map(c=>({...c,issues:audit(c)}));
+ const results=cases.map(c=>({...c,issues:audit(c,cases)}));
  const clean=results.filter(x=>!x.issues.length).length;
  $('total').textContent=cases.length;$('passed').textContent=clean;$('issues').textContent=cases.length-clean;$('rate').textContent=(cases.length?Math.round(clean/cases.length*100):0)+'%';
  $('summary').textContent=cases.length?`${clean} kunjungan tanpa temuan dasar · ${cases.length-clean} kunjungan perlu ditinjau.`:'Belum ada data. Tambahkan data demonstrasi untuk memulai.';
@@ -249,7 +249,7 @@ function render(){
 }
 function switchTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('hidden',v.id!==name));}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
-function openDetail(id){const c=cases.find(x=>x.id===id);if(!c)return;selectedDetailId=id;const issues=audit(c);$('detailContent').innerHTML=`<div class="detail-meta"><b>No. RM:</b> ${esc(c.mrn)} &nbsp; <b>Diagnosis:</b> ${esc(c.mainDx)} &nbsp; <b>Kode:</b> ${esc(c.code)}</div>`+(issues.length?'<ol class="detail-list">'+issues.map(x=>`<li><b>${x.code}</b> — ${esc(x.text)}</li>`).join('')+'</ol>':'<p class="status ok">Tidak ditemukan masalah pada aturan dasar yang aktif.</p>');$('detailPanel').classList.remove('hidden');}
+function openDetail(id){const c=cases.find(x=>x.id===id);if(!c)return;selectedDetailId=id;const issues=audit(c,cases);$('detailContent').innerHTML=`<div class="detail-meta"><b>No. RM:</b> ${esc(c.mrn)} &nbsp; <b>Diagnosis:</b> ${esc(c.mainDx)} &nbsp; <b>Kode:</b> ${esc(c.code)}</div>`+(issues.length?'<ol class="detail-list">'+issues.map(x=>`<li><b>${x.code}</b> — ${esc(x.text)}</li>`).join('')+'</ol>':'<p class="status ok">Tidak ditemukan masalah pada aturan dasar yang aktif.</p>');$('detailPanel').classList.remove('hidden');}
 $('closeDetail').addEventListener('click',()=>$('detailPanel').classList.add('hidden'));
 function resetForm(){ $('caseForm').reset();$('recordId').value='';$('formTitle').textContent='Tambah kasus demonstrasi';$('saveBtn').textContent='Simpan & audit';}
 function editRecord(id){const c=cases.find(x=>x.id===id);if(!c)return;switchTab('input');$('recordId').value=c.id;$('mrn').value=c.mrn;$('name').value=c.name;$('admit').value=c.admit;$('discharge').value=c.discharge;$('mainDx').value=c.mainDx;$('code').value=c.code;$('kelas').value=c.kelas;$('resumeComplete').checked=c.resumeComplete;$('dpjpSigned').checked=c.dpjpSigned;$('notes').value=c.notes;$('formTitle').textContent='Edit kasus demonstrasi';$('saveBtn').textContent='Simpan perubahan';window.scrollTo({top:0,behavior:'smooth'});}
@@ -261,8 +261,8 @@ function demoRecords(){return [{mrn:'DEMO-001',name:'Pasien Contoh A',admit:'202
 $('seed').addEventListener('click',()=>{const demo=demoRecords();demo.forEach(d=>{if(!cases.some(x=>x.mrn===d.mrn))cases.push(d)});save();showMessage('Data demo ditambahkan tanpa menggandakan nomor RM yang sudah ada.','info');});
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"';}
-function exportCsv(){const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Kelas Rawat','Resume Lengkap','Autentikasi DPJP','Temuan Audit'];const rows=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,c.kelas,c.resumeComplete?'Ya':'Tidak',c.dpjpSigned?'Ya':'Tidak',audit(c).map(x=>x.code+': '+x.text).join('; ')])];const csv='\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'MedAudit-AI-audit-v0.3.0.csv');}
-function exportJson(){const payload={app:'MedAudit AI',version:'0.3.0',exportedAt:new Date().toISOString(),records:cases};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'MedAudit-AI-backup-v0.3.0.json');}
+function exportCsv(){const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Kelas Rawat','Resume Lengkap','Autentikasi DPJP','Temuan Audit'];const rows=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,c.kelas,c.resumeComplete?'Ya':'Tidak',c.dpjpSigned?'Ya':'Tidak',audit(c,cases).map(x=>x.code+': '+x.text).join('; ')])];const csv='\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'MedAudit-AI-audit-v0.4.0.csv');}
+function exportJson(){const payload={app:'MedAudit AI',version:'0.3.0',exportedAt:new Date().toISOString(),records:cases};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'MedAudit-AI-backup-v0.4.0.json');}
 $('csvExport').addEventListener('click',exportCsv);$('csvExport2').addEventListener('click',exportCsv);$('jsonExport').addEventListener('click',exportJson);$('backupExport').addEventListener('click',exportJson);
 function validateImport(parsed){const records=Array.isArray(parsed)?parsed:parsed&&Array.isArray(parsed.records)?parsed.records:null;if(!records)throw new Error('Format JSON harus berupa array atau objek dengan properti records.');const seenIds=new Set(),seenMrn=new Set();const out=records.map((r,i)=>{if(!r||typeof r!=='object'||Array.isArray(r))throw new Error('Record ke-'+(i+1)+' bukan objek yang valid.');for(const k of ['mrn','name','admit','discharge','mainDx','code','notes'])if(r[k]!==undefined&&typeof r[k]!=='string')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa teks.');for(const k of ['resumeComplete','dpjpSigned'])if(r[k]!==undefined&&typeof r[k]!=='boolean')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa boolean.');const c=normalizeRecord(r);if(!c.id)throw new Error('ID record kosong pada baris '+(i+1)+'.');if(seenIds.has(c.id))throw new Error('ID record ganda: '+c.id);if(c.mrn&&seenMrn.has(c.mrn.toLowerCase()))throw new Error('Nomor RM ganda: '+c.mrn);seenIds.add(c.id);if(c.mrn)seenMrn.add(c.mrn.toLowerCase());return c;});return out;}
 $('importJson').addEventListener('click',async()=>{const file=$('jsonFile').files[0];if(!file){showMessage('Pilih file backup JSON terlebih dahulu.','error');return;}try{const parsed=JSON.parse(await file.text());const imported=validateImport(parsed);if(!confirm('Impor '+imported.length+' record dan mengganti seluruh data lokal saat ini? Pastikan sudah memiliki backup.'))return;const old=cases;cases=imported;try{localStorage.setItem(KEY,JSON.stringify(cases));storageWarning='';}catch(err){cases=old;throw new Error('Penyimpanan gagal. Data lokal lama dipertahankan.');}resetForm();$('jsonFile').value='';render();showMessage('Impor berhasil. '+cases.length+' record telah dimuat.','info');}catch(err){showMessage('Impor dibatalkan: '+err.message,'error');}});
