@@ -46,3 +46,14 @@ test("auditAll returns findings for all visits and includes the synthetic MRN", 
   assert.ok(findings.some(x => x.code === "DQ-04" && x.mrn === "DEMO-002"));
   assert.ok(findings.some(x => x.code === "DQ-05" && x.mrn === "DEMO-002"));
 });
+
+test("DQ-10 accepts the configured example pair without mismatch finding", () => {
+  const findings = engine.audit(clean, [clean]);
+  assert.equal(findings.some(x => x.code === "DQ-10"), false);
+});
+
+test("DQ-09 ignores blank medical-record numbers", () => {
+  const blank = { ...clean, mrn: "" };
+  const findings = engine.audit(blank, [blank, { ...blank, id: "2" }]);
+  assert.equal(findings.some(x => x.code === "DQ-09"), false);
+});
