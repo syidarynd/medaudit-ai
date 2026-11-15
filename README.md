@@ -87,6 +87,10 @@ Proyek dirancang menggunakan teknologi gratis dan tidak memerlukan API key, back
 ```text
 medaudit-ai/
 │
+├── .github/
+│   └── workflows/
+│       └── quality.yml
+│
 ├── index.html
 ├── demo-data.js
 ├── README.md
@@ -104,7 +108,8 @@ medaudit-ai/
 └── tests/
     ├── audit-test-cases.md
     ├── audit.test.cjs
-    └── icd10-index.test.cjs
+    ├── icd10-index.test.cjs
+    └── browser-smoke.test.cjs
 ```
 
 Struktur di atas menggambarkan file dan folder utama yang tersedia pada repositori. Logika audit dan pencarian indeks dipisahkan ke modul JavaScript di folder `js/`.
