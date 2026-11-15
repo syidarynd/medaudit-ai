@@ -38,7 +38,7 @@ Kedua sumber **bukan edisi yang sama**. Hasil pembandingan tidak boleh ditafsirk
 
 File PDF yang diunggah pengguna merupakan salinan pihak ketiga; asal dan hak distribusinya belum diverifikasi. Karena itu dataset hasil ekstraksi tidak dimasukkan ke repositori publik.
 
-WHO menjelaskan bahwa ICD merupakan klasifikasi yang memiliki ketentuan lisensi tersendiri; materi ICD-10 yang diterbitkan WHO perlu digunakan sesuai ketentuan hak cipta dan lisensi pada publikasi terkait. WHO juga menyatakan klasifikasi digital ICD berada di bawah CC BY-ND 3.0 IGO, yang tidak mengizinkan distribusi adaptasi tanpa izin.
+FAQ resmi WHO menyatakan WHO adalah pemegang hak cipta ICD-10 dan dapat memberikan lisensi untuk penggunaannya secara komersial maupun non-komersial. Karena file yang diunggah merupakan salinan Volume 3 edisi 2013 dari sumber pihak ketiga, ketentuan lisensi spesifik untuk salinan tersebut belum dapat dipastikan. Periksa pemberitahuan hak cipta pada edisi/publikasi sumber sebelum mendistribusikan atau membuat dataset turunan.
 
 Rujukan:
 - https://www.who.int/about/policies/publishing/copyright
