@@ -3,7 +3,7 @@
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System
 
-**Versi target:** Prototype v0.4.0
+**Versi target:** Prototype v0.5.0
 
 **Jenis dokumen:** Daftar kasus pengujian fungsional dan regresi
 
@@ -22,7 +22,7 @@ Pengujian mencakup:
 - Dashboard.
 - Data kunjungan.
 - Hasil audit.
-- Pemeriksaan delapan aturan Data Quality (DQ-01 sampai DQ-08).
+- Pemeriksaan sepuluh aturan Data Quality (DQ-01 sampai DQ-10).
 - Pencarian dan filter data.
 - Ekspor data.
 - Pemulihan data.
@@ -142,6 +142,36 @@ Tanggal keluar yang kosong diperbolehkan untuk kunjungan yang masih berlangsung.
 
 ---
 
+### 4.9 Pengujian DQ-09 – Duplikasi Nomor Rekam Medis
+
+| ID | Skenario | Hasil yang Diharapkan |
+|---|---|---|
+| TC-DQ09-01 | Nomor RM unik pada seluruh kunjungan | Tidak ada temuan DQ-09 |
+| TC-DQ09-02 | Dua kunjungan berbeda memiliki nomor RM sama | Muncul temuan DQ-09 |
+| TC-DQ09-03 | Nomor RM sama dengan perbedaan kapitalisasi | Muncul temuan DQ-09 |
+
+### 4.10 Pengujian DQ-10 – Pemeriksaan Silang Diagnosis dan Kode
+
+| ID | Skenario | Hasil yang Diharapkan |
+|---|---|---|
+| TC-DQ10-01 | Diagnosis contoh Demam dengan kode R50.9 | Tidak ada temuan DQ-10 |
+| TC-DQ10-02 | Diagnosis contoh Demam dengan kode A09 | Muncul temuan DQ-10 |
+| TC-DQ10-03 | Diagnosis di luar daftar contoh | Tidak ada penilaian DQ-10 |
+
+**Catatan:** DQ-10 merupakan pemeriksaan silang daftar contoh terbatas untuk demonstrasi. Bukan encoder, validasi resmi ICD-10, atau penilaian klinis. Verifikasi tetap harus menggunakan indeks dan tabular resmi.
+
+
+### 4.11 Pengujian Pencarian Indeks ICD-10 (manual)
+
+| ID | Skenario | Hasil yang Diharapkan | Status |
+|---|---|---|---|
+| TC-IDX-01 | Memuat PDF Alphabetical Index dan Tabular TXT | Referensi diproses di browser dan jumlah entri ditampilkan | Belum diuji browser |
+| TC-IDX-02 | Cari istilah utama dan subistilah | Hasil mempertahankan konteks hierarki dan halaman sumber | Belum diuji browser |
+| TC-IDX-03 | Cari istilah dengan rujukan silang | Label see / see also dan target rujukan ditampilkan | Belum diuji browser |
+| TC-IDX-04 | Kode terminal ada pada Tabular 2019 | Status pembanding terminal ditampilkan | Belum diuji browser |
+| TC-IDX-05 | Kode tidak ditemukan pada Tabular 2019 | Status perlu telaah ditampilkan, bukan dinyatakan invalid | Belum diuji browser |
+| TC-IDX-06 | Muat ulang halaman | File referensi harus dipilih dan diproses ulang; tidak tersimpan di LocalStorage | Belum diuji browser |
+
 ## 5. PENGUJIAN FUNGSIONAL APLIKASI
 
 ### 5.1 Dashboard
@@ -241,16 +271,18 @@ Pengujian dinyatakan berhasil apabila:
 | DQ-06 | 2 |
 | DQ-07 | 2 |
 | DQ-08 | 2 |
+| DQ-09 | 3 |
+| DQ-10 | 3 |
 | Pengujian Fungsional | 20 |
 | Pengujian Regresi | 5 |
-| **TOTAL** | **47** |
+| **TOTAL** | **59** |
 
 | Status | Jumlah |
 |---|---:|
 | PASS | Diisi setelah pengujian |
 | FAIL | Diisi setelah pengujian |
 | BLOCKED | Diisi setelah pengujian |
-| Belum diuji | 47 |
+| Belum diuji | 59 |
 
 ---
 
@@ -258,4 +290,9 @@ Pengujian dinyatakan berhasil apabila:
 
 *AI-Assisted Medical Records Audit & Data Quality System*
 
-**Dokumentasi Pengujian Prototype v0.4.0**
+**Dokumentasi Pengujian Prototype v0.5.0**
+
+
+## 10. Unit Test Otomatis
+
+File `tests/audit.test.cjs` menguji mesin audit. File `tests/icd10-index.test.cjs` menguji ekstraksi kode, hierarki istilah, rujukan silang, pembacaan kode terminal/non-terminal, dan pencarian konteks. Jalankan keduanya dengan `node --test tests/audit.test.cjs tests/icd10-index.test.cjs`. Hasil CI harus diperiksa dari GitHub Actions.
