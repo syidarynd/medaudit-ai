@@ -334,12 +334,15 @@ async function loadIcdReferences(){
    const content=await page.getTextContent();
    const lines=pdfPageLines(content.items);
    icdIndexEntries.push(...MedAuditIndex.parseIndexLines(lines,pageNumber,parserState));
+   page.cleanup();
    if(pageNumber%10===0||pageNumber===pageLimit){
     progress.value=Math.round(pageNumber/pageLimit*100);
     setIndexStatus("Memproses halaman "+pageNumber+" dari "+pageLimit+" · "+icdIndexEntries.length.toLocaleString("id-ID")+" baris indeks terstruktur…");
     await new Promise(resolve=>requestAnimationFrame(resolve));
    }
   }
+  if(!icdIndexEntries.length)throw new Error("Tidak ada teks indeks yang berhasil diekstrak dari PDF. Pastikan file PDF memiliki teks yang dapat dipilih.");
+  if(!icdTabularCodes.size)throw new Error("Tidak ada kode yang terbaca dari Tabular TXT. Pastikan file yang dipilih adalah icd102019syst_codes.txt.");
   setIndexStatus("Selesai. "+icdIndexEntries.length.toLocaleString("id-ID")+" entri indeks dan "+parsedTabular.rows.toLocaleString("id-ID")+" baris Tabular diproses. Pencarian siap digunakan.","ok");
  }catch(error){
   icdIndexEntries=[];icdTabularCodes=new Map();
