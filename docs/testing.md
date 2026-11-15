@@ -1,7 +1,7 @@
 # DOKUMENTASI PENGUJIAN MEDAUDIT AI
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System  
-**Versi saat pengujian:** Prototype v0.3.0  
+**Versi saat pengujian:** Prototype v0.4.0  
 **Target pengembangan:** v0.4.0  
 **Jenis pengujian:** Pengujian fungsional manual  
 **Dataset:** 8 data kunjungan sintetis (DEMO-101–DEMO-108)
@@ -16,7 +16,7 @@ Ruang lingkup pengujian:
 
 - Pengelolaan data kunjungan.
 - Pemeriksaan kelengkapan data.
-- Pemeriksaan kualitas data berdasarkan DQ-01 sampai DQ-08.
+- Pemeriksaan kualitas data berdasarkan DQ-01 sampai DQ-10.
 - Pencarian dan penyaringan data.
 - Penampilan hasil audit.
 - Ekspor dan impor data.
@@ -51,7 +51,7 @@ Ruang lingkup pengujian:
 | 11 | Impor JSON | Data cadangan berhasil dipulihkan | Lulus |
 | 12 | Halaman Tentang | Informasi aplikasi ditampilkan | Lulus |
 
-**Catatan:** Status berdasarkan skenario pengujian manual yang telah dilakukan. Pengujian otomatis menyeluruh belum dilaksanakan.
+**Catatan:** Status berdasarkan skenario pengujian manual yang telah dilakukan. Unit test otomatis mesin audit ditambahkan melalui Node.js test runner. Pengujian UI browser dan pengujian keamanan menyeluruh belum diklaim selesai.
 
 ## 4. Pengujian Aturan Audit
 
@@ -64,7 +64,7 @@ Ruang lingkup pengujian:
 | DQ-05 | Format dasar kode ICD-10 | Kode kosong atau format tidak sesuai pola dasar |
 | DQ-06 | Kelengkapan kelas rawat | Kelas rawat kosong |
 | DQ-07 | Kelengkapan resume medis | Resume belum ditandai lengkap |
-| DQ-08 | Autentikasi DPJP | Autentikasi belum ditandai tersedia |
+| DQ-08 | Autentikasi DPJP | Autentikasi belum ditandai tersedia |\n| DQ-09 | Duplikasi nomor RM | Dua kunjungan berbeda menggunakan nomor RM sama (case-insensitive) |\n| DQ-10 | Konsistensi diagnosis-kode | Diagnosis yang termasuk daftar contoh memiliki kode berbeda dari pasangan contoh |
 
 ## 5. Hasil Pengujian Dataset Sintetis
 
@@ -138,3 +138,4 @@ Pengembangan berikutnya difokuskan pada peningkatan aturan audit, pengujian otom
 Prototype untuk demonstrasi dan portofolio informatika kesehatan.
 
 **Peringatan:** Aplikasi ini bukan sistem produksi. Jangan memasukkan data pasien nyata. Hasil pemeriksaan tidak menggantikan keputusan klinis maupun validasi profesional kodifikasi.
+\n\n## 10. Catatan versi 0.4.0\n\n- DQ-09 membandingkan nomor RM antar-record dan mengabaikan perbedaan kapitalisasi.\n- DQ-10 hanya membandingkan beberapa pasangan diagnosis-kode demonstrasi yang ditentukan secara eksplisit; diagnosis lain tidak dinilai.\n- Unit test mesin audit dijalankan dengan `node --test tests/audit.test.cjs` melalui GitHub Actions.\n- Pengujian ini tidak membuktikan ketepatan klinis atau validitas kode ICD-10 secara menyeluruh.\n
