@@ -97,14 +97,14 @@ medaudit-ai/
 │
 ├── css/
 │
-├── js/
-│
 ├── docs/
 │   ├── testing.md
 │   └── icd10-index.md
 │
 └── tests/
-    └── audit-test-cases.md
+    ├── audit-test-cases.md
+    ├── audit.test.cjs
+    └── icd10-index.test.cjs
 ```
 
 Struktur di atas menggambarkan file dan folder utama yang tersedia pada repositori. Logika audit dan pencarian indeks dipisahkan ke modul JavaScript di folder `js/`.
@@ -135,6 +135,7 @@ Dokumentasi proyek:
 
 - [Dokumentasi Pengujian](docs/testing.md)
 - [Skenario Uji Aturan Audit](tests/audit-test-cases.md)
+- [Panduan Indeks ICD-10](docs/icd10-index.md)
 
 Pengujian yang didokumentasikan merupakan pengujian fungsional manual pada skenario yang telah dicoba.
 
