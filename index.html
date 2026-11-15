@@ -320,6 +320,7 @@ async function loadIcdReferences(){
  const pdfjsLib=window.pdfjsLib||(window.pdfjsReady?await window.pdfjsReady:null);
  if(!pdfjsLib||!window.MedAuditIndex){setIndexStatus("Library PDF.js atau modul indeks gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.","error");return;}
  button.disabled=true;progress.classList.remove("hidden");progress.value=0;icdIndexEntries=[];icdTabularCodes=new Map();
+ let pdfDocument=null;
  try{
   setIndexStatus("Membaca file Tabular WHO 2019…");
   const tabularText=await tabularFile.text();
