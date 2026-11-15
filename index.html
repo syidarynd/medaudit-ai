@@ -373,11 +373,8 @@ async function restoreIcdCache(){
   setIndexStatus("Penyimpanan otomatis tidak dapat dibaca: "+error.message+". Siapkan referensi secara manual.","warn");
  }
 }
-function pdfPageLines(items){
- let text="";
- for(const item of items){if(!item.str)continue;text+=item.str+(item.hasEOL?"\n":" ");}
- return text.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
-}
+function pdfPageLines(items,pageWidth){return MedAuditIndex.groupPdfTextItems(items,pageWidth);}
+
 async function loadIcdReferences(){
  const pdfFile=$("indexPdfFile").files[0],tabularFile=$("tabularFile").files[0],button=$("loadIcdReferences"),progress=$("icdIndexProgress");
  if(!pdfFile||!tabularFile){setIndexStatus("Pilih kedua file: PDF Alphabetical Index dan Tabular TXT.","error");return;}
@@ -399,7 +396,7 @@ async function loadIcdReferences(){
   for(let pageNumber=1;pageNumber<=pageLimit;pageNumber++){
    const page=await pdfDocument.getPage(pageNumber);
    const content=await page.getTextContent();
-   const lines=pdfPageLines(content.items);
+   const lines=pdfPageLines(content.items,page.getViewport({scale:1}).width);
    icdIndexEntries.push(...MedAuditIndex.parseIndexLines(lines,pageNumber,parserState));
    page.cleanup();
    if(pageNumber%10===0||pageNumber===pageLimit){
