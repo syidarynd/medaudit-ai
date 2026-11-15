@@ -13,8 +13,8 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 |---|---|
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
-| Versi saat ini | Prototype v0.4.0 |
-| Target pengembangan | v0.4.0 |
+| Versi saat ini | Prototype v0.5.0 |
+| Target pengembangan | v0.5.0 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
 
@@ -38,6 +38,8 @@ https://syidarynd.github.io/medaudit-ai/
 - Pencarian berdasarkan nomor rekam medis, nama/inisial fiktif, diagnosis, dan kode.
 - Filter berdasarkan status audit.
 - Pemeriksaan kualitas data berbasis aturan DQ-01 sampai DQ-10.
+- Pencarian istilah melalui Alphabetical Index ICD-10 dari PDF lokal.
+- Pembandingan kode indeks dengan daftar kode terminal/non-terminal pada Tabular WHO 2019 yang dipilih pengguna.
 - Ekspor laporan ke CSV.
 - Backup dan pemulihan data melalui JSON.
 - Penyimpanan lokal menggunakan LocalStorage.
@@ -56,12 +58,14 @@ https://syidarynd.github.io/medaudit-ai/
 | DQ-07 | Kelengkapan resume medis |
 | DQ-08 | Ketersediaan autentikasi DPJP |
 
-**Rencana pengembangan:**
+DQ-09 mendeteksi nomor RM duplikat antar-kunjungan. DQ-10 membandingkan pasangan diagnosis-kode demonstrasi terbatas; keduanya bukan validasi klinis atau encoder ICD-10 resmi.
 
-- DQ-09: Pemeriksaan duplikasi nomor rekam medis.
-- DQ-10: Pemeriksaan konsistensi diagnosis dan kode ICD-10.
+### Referensi pencarian ICD-10
 
-DQ-09 dan DQ-10 belum menjadi fitur aktif.
+- Alphabetical Index: ICD-10 2e Volume 3 (2013), dipilih dan diproses secara lokal oleh pengguna.
+- Tabular pembanding: WHO ICD-10 2019, file TXT dipilih secara lokal.
+- Karena edisinya berbeda, status cocok/tidak cocok hanya pembanding teknis dan tidak menetapkan validitas kode Indonesia/BPJS.
+- Dataset sumber tidak disertakan dalam repositori; aplikasi tidak mengunggah atau menyimpan file referensi ke LocalStorage.
 
 ## 5. Teknologi
 
@@ -72,6 +76,7 @@ DQ-09 dan DQ-10 belum menjadi fitur aktif.
 | Vanilla JavaScript (ES6) | Logika aplikasi |
 | LocalStorage | Penyimpanan data lokal |
 | Chart.js | Visualisasi dashboard |
+| PDF.js 3.11.174 | Ekstraksi teks PDF di browser |
 | GitHub | Manajemen repositori |
 | GitHub Pages | Publikasi aplikasi |
 
@@ -86,18 +91,23 @@ medaudit-ai/
 ├── demo-data.js
 ├── README.md
 │
+├── js/
+│   ├── audit.js
+│   └── icd10-index.js
+│
 ├── css/
 │
 ├── js/
 │
 ├── docs/
-│   └── testing.md
+│   ├── testing.md
+│   └── icd10-index.md
 │
 └── tests/
     └── audit-test-cases.md
 ```
 
-Struktur di atas menggambarkan file dan folder utama yang tersedia pada repositori. Implementasi aplikasi saat ini masih berpusat pada `index.html`. Pemisahan modul kode akan dilakukan secara bertahap setelah pengujian dan pencadangan.
+Struktur di atas menggambarkan file dan folder utama yang tersedia pada repositori. Logika audit dan pencarian indeks dipisahkan ke modul JavaScript di folder `js/`.
 
 ## 7. Menjalankan Aplikasi
 
@@ -128,11 +138,11 @@ Dokumentasi proyek:
 
 Pengujian yang didokumentasikan merupakan pengujian fungsional manual pada skenario yang telah dicoba.
 
-Pengujian otomatis menyeluruh, pengujian keamanan, dan pengujian performa skala besar belum dilakukan.
+Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengujian UI browser lintas perangkat, keamanan menyeluruh, dan performa skala besar belum diklaim selesai.
 
 ## 9. Batasan Sistem
 
-- Pemeriksaan ICD-10 saat ini hanya memeriksa pola format dasar, bukan memastikan ketepatan kode berdasarkan indeks dan tabular resmi.
+- DQ-05 hanya memeriksa pola format dasar. Panel indeks adalah alat bantu pencarian; pembandingan indeks 2013 dengan Tabular 2019 tidak memastikan ketepatan kode atau kesesuaian standar Indonesia.
 - Mesin pemeriksaan menggunakan aturan tetap (*rule-based*), belum menggunakan model AI atau LLM. DQ-10 adalah pemeriksaan silang daftar contoh terbatas, bukan validasi ICD-10 resmi.
 - Aplikasi belum memiliki autentikasi pengguna, fitur multi-user, sinkronisasi cloud, atau audit trail server-side.
 - LocalStorage tidak dirancang untuk menyimpan rekam medis pasien nyata.
@@ -141,7 +151,7 @@ Pengujian otomatis menyeluruh, pengujian keamanan, dan pengujian performa skala 
 
 ## 10. Roadmap Pengembangan
 
-1. Menyusun rencana pengembangan v0.5.0 dan menyempurnakan dashboard.
+1. Menguji pengalaman pencarian indeks pada berbagai browser/perangkat dan memperbaiki ekstraksi PDF bila diperlukan.
 2. Memperluas cakupan unit test dan pengujian browser/regresi.
 3. Menyempurnakan pemeriksaan duplikasi nomor rekam medis (DQ-09).
 4. Memperluas daftar contoh DQ-10 hanya setelah ditinjau menggunakan referensi ICD-10 resmi.
