@@ -76,7 +76,7 @@ DQ-09 mendeteksi nomor RM duplikat antar-kunjungan. DQ-10 membandingkan pasangan
 | Vanilla JavaScript (ES6) | Logika aplikasi |
 | LocalStorage | Penyimpanan data lokal |
 | Chart.js | Visualisasi dashboard |
-| PDF.js 3.11.174 | Ekstraksi teks PDF di browser |
+| PDF.js 6.5.438 | Ekstraksi teks PDF di browser |
 | GitHub | Manajemen repositori |
 | GitHub Pages | Publikasi aplikasi |
 
