@@ -113,7 +113,7 @@ Langkah pengujian:
 
 Pengujian ini belum mencakup:
 
-- Unit testing otomatis.
+- Pengujian UI browser langsung pada perangkat pengguna.
 - Pengujian keamanan secara menyeluruh.
 - Pengujian multi-pengguna.
 - Integrasi dengan SIMRS atau database rumah sakit.
@@ -121,18 +121,16 @@ Pengujian ini belum mencakup:
 - Pengujian performa dengan jumlah data besar.
 - Pemeriksaan konsistensi diagnosis dan kode ICD-10 berdasarkan referensi resmi.
 
-Validasi kode ICD-10 saat ini hanya memeriksa pola format dasar, bukan ketepatan klinis maupun ketepatan pemilihan kode.
+DQ-05 hanya memeriksa pola format dasar. Panel indeks membantu penelusuran, tetapi pembandingan edisi 2013 dan 2019 bukan validasi klinis atau penetapan kode final.
 
 ## 9. Rencana Pengembangan Pengujian
 
-1. Menambahkan unit test untuk setiap aturan audit.
-2. Mengembangkan pemeriksaan duplikasi nomor RM (DQ-09).
-3. Mengembangkan pemeriksaan konsistensi diagnosis dan kode ICD-10 (DQ-10).
-4. Menguji validasi struktur file impor JSON.
-5. Menguji responsivitas berbagai ukuran layar.
-6. Menambahkan pengujian regresi setelah perubahan kode.
+1. Menjalankan pengujian manual panel indeks pada browser Android dan desktop.
+2. Menguji responsivitas dan penggunaan memori saat memproses PDF besar.
+3. Memperluas unit test dan pengujian regresi setelah perubahan kode.
+4. Menguji keamanan, aksesibilitas, dan validasi struktur file impor.
 
-## 9. Kesimpulan
+## 10. Kesimpulan
 
 Berdasarkan skenario pengujian manual yang telah dilakukan, fitur utama prototype MedAudit AI dapat dijalankan pada lingkungan browser.
 
@@ -149,9 +147,9 @@ Prototype untuk demonstrasi dan portofolio informatika kesehatan.
 **Peringatan:** Aplikasi ini bukan sistem produksi. Jangan memasukkan data pasien nyata. Hasil pemeriksaan tidak menggantikan keputusan klinis maupun validasi profesional kodifikasi.
 
 
-## 10. Catatan versi 0.4.0
+## 11. Catatan versi 0.5.0
 
 - DQ-09 membandingkan nomor RM antar-record dan mengabaikan perbedaan kapitalisasi.
 - DQ-10 hanya membandingkan beberapa pasangan diagnosis-kode demonstrasi yang ditentukan secara eksplisit; diagnosis lain tidak dinilai.
-- Unit test mesin audit dijalankan dengan `node --test tests/audit.test.cjs` melalui GitHub Actions.
+- Unit test mesin audit dijalankan dengan `node --test tests/audit.test.cjs tests/icd10-index.test.cjs` melalui GitHub Actions.
 - Pengujian ini tidak membuktikan ketepatan klinis atau validitas kode ICD-10 secara menyeluruh.
