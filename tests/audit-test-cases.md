@@ -22,7 +22,7 @@ Pengujian mencakup:
 - Dashboard.
 - Data kunjungan.
 - Hasil audit.
-- Pemeriksaan delapan aturan Data Quality (DQ-01 sampai DQ-08).
+- Pemeriksaan sepuluh aturan Data Quality (DQ-01 sampai DQ-10).
 - Pencarian dan filter data.
 - Ekspor data.
 - Pemulihan data.
@@ -142,7 +142,7 @@ Tanggal keluar yang kosong diperbolehkan untuk kunjungan yang masih berlangsung.
 
 ---
 
-## 5. PENGUJIAN FUNGSIONAL APLIKASI
+### 4.9 Pengujian DQ-09 – Duplikasi Nomor Rekam Medis\n\n| ID | Skenario | Hasil yang Diharapkan |\n|---|---|---|\n| TC-DQ09-01 | Nomor RM unik pada seluruh kunjungan | Tidak ada temuan DQ-09 |\n| TC-DQ09-02 | Dua kunjungan berbeda memiliki nomor RM sama | Muncul temuan DQ-09 |\n| TC-DQ09-03 | Nomor RM sama dengan perbedaan kapitalisasi | Muncul temuan DQ-09 |\n\n### 4.10 Pengujian DQ-10 – Pemeriksaan Silang Diagnosis dan Kode\n\n| ID | Skenario | Hasil yang Diharapkan |\n|---|---|---|\n| TC-DQ10-01 | Diagnosis contoh Demam dengan kode R50.9 | Tidak ada temuan DQ-10 |\n| TC-DQ10-02 | Diagnosis contoh Demam dengan kode A09 | Muncul temuan DQ-10 |\n| TC-DQ10-03 | Diagnosis di luar daftar contoh | Tidak ada penilaian DQ-10 |\n\n**Catatan:** DQ-10 merupakan pemeriksaan silang daftar contoh terbatas untuk demonstrasi. Bukan encoder, validasi resmi ICD-10, atau penilaian klinis. Verifikasi tetap harus menggunakan indeks dan tabular resmi.\n\n## 5. PENGUJIAN FUNGSIONAL APLIKASI
 
 ### 5.1 Dashboard
 
@@ -240,17 +240,17 @@ Pengujian dinyatakan berhasil apabila:
 | DQ-05 | 3 |
 | DQ-06 | 2 |
 | DQ-07 | 2 |
-| DQ-08 | 2 |
+| DQ-08 | 2 |\n| DQ-09 | 3 |\n| DQ-10 | 3 |
 | Pengujian Fungsional | 20 |
 | Pengujian Regresi | 5 |
-| **TOTAL** | **47** |
+| **TOTAL** | **53** |
 
 | Status | Jumlah |
 |---|---:|
 | PASS | Diisi setelah pengujian |
 | FAIL | Diisi setelah pengujian |
 | BLOCKED | Diisi setelah pengujian |
-| Belum diuji | 47 |
+| Belum diuji | 53 |
 
 ---
 
@@ -259,3 +259,4 @@ Pengujian dinyatakan berhasil apabila:
 *AI-Assisted Medical Records Audit & Data Quality System*
 
 **Dokumentasi Pengujian Prototype v0.4.0**
+\n\n## 10. Unit Test Otomatis\n\nFile `tests/audit.test.cjs` berisi pengujian untuk validasi tanggal, data bersih, DQ-09, DQ-10, dan agregasi temuan. Jalankan dengan `node --test tests/audit.test.cjs`. Hasil aktual harus dibaca dari GitHub Actions; jangan menganggap test lulus hanya karena workflow telah dibuat.\n
