@@ -72,10 +72,12 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
       name: "tabular-fixture.txt", mimeType: "text/plain", buffer: Buffer.from(tabular)
     });
     await page.locator("#loadIcdReferences").click();
-    await page.waitForFunction(
-      () => document.querySelector("#icdIndexStatus").textContent.includes("Selesai."),
-      { timeout: 30000 }
-    );
+    await page.waitForFunction(() => {
+      const status = document.querySelector("#icdIndexStatus").textContent;
+      return status.includes("Selesai.") || status.includes("Gagal memproses");
+    }, { timeout: 30000 });
+    const importStatus = await page.locator("#icdIndexStatus").innerText();
+    assert.match(importStatus, /Selesai\\./, "PDF import failed: " + importStatus + " | page errors: " + pageErrors.join("; "));
     await page.locator("#indexSearchInput").fill("brain");
     await page.locator("#searchIcdIndex").click();
     const results = await page.locator("#indexResults").innerText();
