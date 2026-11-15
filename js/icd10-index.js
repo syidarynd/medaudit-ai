@@ -28,6 +28,57 @@
     return codes;
   }
 
+
+  function groupPdfTextItems(items, pageWidth) {
+    const usable = (items || []).filter(item => item && String(item.str || "").trim());
+    if (!usable.length) return [];
+    // PDF.js exposes baseline coordinates in transform[5]. Group by baseline,
+    // not hasEOL: hasEOL alone can merge adjacent index columns/entries.
+    if (!usable.every(item => Array.isArray(item.transform) && Number.isFinite(item.transform[4]) && Number.isFinite(item.transform[5]))) {
+      let text = "";
+      for (const item of usable) text += item.str + (item.hasEOL ? "\\n" : " ");
+      return text.split(/\\r?\\n/).map(line => line.trim()).filter(Boolean);
+    }
+    const width = Number(pageWidth) || 0;
+    const columns = width > 100 ? [[], []] : [usable];
+    for (const item of usable) {
+      const x = item.transform[4];
+      (columns.length === 2 ? (x < width / 2 ? columns[0] : columns[1]) : columns[0]).push(item);
+    }
+    const output = [];
+    for (const column of columns) {
+      const sorted = column.slice().sort((a, b) => b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]);
+      let row = [], baseline = null;
+      const flush = () => {
+        if (!row.length) return;
+        row.sort((a, b) => a.transform[4] - b.transform[4]);
+        const parts = [];
+        let previousRight = null;
+        for (const item of row) {
+          const value = String(item.str || "").replace(/\\s+/g, " ").trim();
+          if (!value) continue;
+          const x = item.transform[4];
+          const gap = previousRight === null ? 0 : x - previousRight;
+          if (parts.length && gap > 1.5 && !/^[,.;:)]/.test(value) && !/[(/-]$/.test(parts[parts.length - 1])) parts.push(" ");
+          parts.push(value);
+          previousRight = x + (Number(item.width) || 0);
+        }
+        const line = parts.join("").replace(/\\s+/g, " ").trim();
+        if (line) output.push(line);
+        row = [];
+      };
+      for (const item of sorted) {
+        const y = item.transform[5];
+        if (baseline !== null && Math.abs(y - baseline) > 2.5) flush();
+        if (!row.length) baseline = y;
+        else baseline = (baseline * (row.length) + y) / (row.length + 1);
+        row.push(item);
+      }
+      flush();
+    }
+    return output;
+  }
+
   function parseIndexLines(lines, pageNumber, state) {
     const output = [], parserState = state || { section: "diseases", stack: {} };
     for (const rawLine of lines || []) {
@@ -151,7 +202,7 @@
   }
 
   const api = Object.freeze({
-    normalizeText, extractCodes, parseIndexLines, parseTabularText, getCodeStatus, searchEntries
+    normalizeText, extractCodes, groupPdfTextItems, parseIndexLines, parseTabularText, getCodeStatus, searchEntries
   });
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (root) root.MedAuditIndex = api;
