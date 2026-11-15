@@ -50,5 +50,5 @@ Jangan menerbitkan ulang PDF, teks hasil ekstraksi, atau dataset turunan sebelum
 
 - Parser memproses halaman 1–1718 dan berhenti saat menemukan judul Section III. Dengan demikian, bagian yang diproses adalah Section I (penyakit dan nature of injury) serta Section II (external causes); tabel obat/kimia pada Section III tidak dimasukkan sebagai entri indeks.
 - Struktur PDF lain dapat memiliki urutan halaman atau format teks berbeda.
-- Ekstraksi PDF menggunakan PDF.js 6.5.438 dari CDN resmi paket jsDelivr; koneksi internet diperlukan saat membuka panel indeks.
+- Ekstraksi PDF menggunakan PDF.js 6.5.438 dari CDN cdnjs dengan versi yang dipatok; koneksi internet diperlukan saat membuka panel indeks.
 - Pencarian adalah alat bantu navigasi, bukan pengganti penelaahan klinis/kodifikasi profesional.
