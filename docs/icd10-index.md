@@ -29,9 +29,11 @@ Kedua sumber **bukan edisi yang sama**. Hasil pembandingan tidak boleh ditafsirk
 
 ## Privasi dan penyimpanan
 
-- PDF dan TXT diproses di browser perangkat pengguna.
-- File sumber tidak dikirim ke server aplikasi dan tidak disimpan ke LocalStorage.
-- Setelah halaman dimuat ulang, pengguna perlu memilih ulang kedua file.
+- PDF dan TXT diproses di browser perangkat pengguna pada penyiapan pertama.
+- File sumber asli tidak dikirim ke server aplikasi dan tidak disimpan.
+- Hasil ekstraksi terstruktur (entri indeks dan peta kode) disimpan di IndexedDB.
+- Setelah halaman dimuat ulang, referensi dimuat otomatis pada browser/perangkat yang sama.
+- Menghapus data situs/browser atau memilih tombol **Hapus referensi tersimpan** akan menghapus cache; pengguna perlu menyiapkan ulang file sumber.
 - Repositori hanya menyimpan kode parser dan antarmuka, bukan salinan dataset indeks/tabular.
 
 ## Lisensi dan penggunaan
