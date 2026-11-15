@@ -4,17 +4,17 @@
  */
 (function (root) {
   "use strict";
-  const CODE_RE = /(^|[^A-Z0-9])([A-Z][0-9]{2}(?:\\.[0-9A-Z]{1,4})?(?:\\.-)?)(?![A-Z0-9])/g;
+  const CODE_RE = /(^|[^A-Z0-9])([A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?(?:\.-)?)(?![A-Z0-9])/g;
 
   function normalizeText(value) {
-    return String(value ?? "").normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+    return String(value ?? "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
       .toLocaleLowerCase("en").replace(/[^a-z0-9]+/g, " ").trim();
   }
 
   function stripCrossReference(value) {
     return String(value ?? "")
-      .replace(/\\(\\s*see\\s+(?:also\\s+)?[^)]*\\)/gi, " ")
-      .replace(/\\s+-\\s*see\\s+(?:also\\s+)?[^;]*$/i, "")
+      .replace(/\(\s*see\s+(?:also\s+)?[^)]*\)/gi, " ")
+      .replace(/\s+-\s*see\s+(?:also\s+)?[^;]*$/i, "")
       .trim();
   }
 
@@ -32,22 +32,22 @@
     const output = [], parserState = state || { section: "diseases", stack: {} };
     for (const rawLine of lines || []) {
       if (parserState.finished) break;
-      const line = String(rawLine ?? "").replace(/\\u00ad/g, "-").replace(/\\u00a0/g, " ")
-        .replace(/\\s+/g, " ").trim();
-      if (!line || /^ICD-10\\s+2e\\s+Volume\\s+3/i.test(line)) continue;
-      if (/^SECTION\\s+I\\s*-/i.test(line)) {
+      const line = String(rawLine ?? "").replace(/\u00ad/g, "-").replace(/\u00a0/g, " ")
+        .replace(/\s+/g, " ").trim();
+      if (!line || /^ICD-10\s+2e\s+Volume\s+3/i.test(line)) continue;
+      if (/^SECTION\s+I\s*-/i.test(line)) {
         parserState.section = "diseases"; parserState.stack = {}; continue;
       }
-      if (/^SECTION\\s+II\\s*-/i.test(line)) {
+      if (/^SECTION\s+II\s*-/i.test(line)) {
         parserState.section = "external_causes"; parserState.stack = {}; continue;
       }
       // The uploaded Volume 3 places the drug/chemical table after Section II.
       // Stop here: it is a separate table and must not be mislabeled as index entries.
-      if (/^SECTION\\s+III\\s*-/i.test(line)) {
+      if (/^SECTION\s+III\s*-/i.test(line)) {
         parserState.finished = true; break;
       }
-      if (/^\\d{1,4}$/.test(line)) continue;
-      const prefix = line.match(/^((?:-\\s*)+)(.*)$/);
+      if (/^\d{1,4}$/.test(line)) continue;
+      const prefix = line.match(/^((?:-\s*)+)(.*)$/);
       let depth = 0, term = line;
       if (prefix) {
         depth = (prefix[1].match(/-/g) || []).length;
@@ -61,11 +61,11 @@
       for (const key of Object.keys(parserState.stack)) {
         if (Number(key) > depth) delete parserState.stack[key];
       }
-      const seeMatch = term.match(/\\bsee\\s+(also\\s+)?(.+)$/i);
+      const seeMatch = term.match(/\bsee\s+(also\s+)?(.+)$/i);
       const hierarchy = Object.keys(parserState.stack).sort((a, b) => Number(a) - Number(b))
         .map(key => stripCrossReference(parserState.stack[key]));
       const searchText = normalizeText(hierarchy.join(" ").replace(
-        /(^|[^A-Z0-9])[A-Z][0-9]{2}(?:\\.[0-9A-Z]{1,4})?(?:\\.-)?(?![A-Z0-9])/gi, " "
+        /(^|[^A-Z0-9])[A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?(?:\.-)?(?![A-Z0-9])/gi, " "
       ));
       output.push({
         section: parserState.section || "diseases",
@@ -87,7 +87,7 @@
   function parseTabularText(text) {
     const codeMap = new Map();
     let rows = 0;
-    for (const line of String(text ?? "").split(/\\r?\\n/)) {
+    for (const line of String(text ?? "").split(/\r?\n/)) {
       if (!line.trim()) continue;
       const fields = line.split(";");
       if (fields.length < 10 || !["T", "N"].includes(fields[1])) continue;
@@ -124,7 +124,7 @@
 
     for (const entry of entries || []) {
       const termText = normalizeText(stripCrossReference(entry.term)
-        .replace(/(^|[^A-Z0-9])[A-Z][0-9]{2}(?:\\.[0-9A-Z]{1,4})?(?:\\.-)?(?![A-Z0-9])/gi, " "));
+        .replace(/(^|[^A-Z0-9])[A-Z][0-9]{2}(?:\.[0-9A-Z]{1,4})?(?:\.-)?(?![A-Z0-9])/gi, " "));
       const contextText = entry.searchText || normalizeText([entry.term, entry.parent].filter(Boolean).join(" "));
       const refText = normalizeText(entry.crossReferenceTarget || "");
       const termIndex = termText.indexOf(needle);
