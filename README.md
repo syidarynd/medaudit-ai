@@ -141,7 +141,7 @@ Pengujian otomatis menyeluruh, pengujian keamanan, dan pengujian performa skala 
 
 ## 10. Roadmap Pengembangan
 
-1. Menyelesaikan blueprint dan dokumentasi desain dashboard v0.4.0.
+1. Menyusun rencana pengembangan v0.5.0 dan menyempurnakan dashboard.
 2. Memperluas cakupan unit test dan pengujian browser/regresi.
 3. Menyempurnakan pemeriksaan duplikasi nomor rekam medis (DQ-09).
 4. Memperluas daftar contoh DQ-10 hanya setelah ditinjau menggunakan referensi ICD-10 resmi.
