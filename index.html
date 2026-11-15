@@ -327,11 +327,11 @@ async function loadIcdReferences(){
   icdTabularCodes=parsedTabular.codeMap;
   setIndexStatus("Membuka PDF dan mengekstrak teks indeks…");
   pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/pdf.worker.min.mjs";
-  const pdf=await pdfjsLib.getDocument({data:await pdfFile.arrayBuffer()}).promise;
-  const pageLimit=Math.min(pdf.numPages,ICD_INDEX_PAGE_LIMIT);
+  pdfDocument=await pdfjsLib.getDocument({data:await pdfFile.arrayBuffer()}).promise;
+  const pageLimit=Math.min(pdfDocument.numPages,ICD_INDEX_PAGE_LIMIT);
   const parserState={section:"diseases",stack:{},letter:""};
   for(let pageNumber=1;pageNumber<=pageLimit;pageNumber++){
-   const page=await pdf.getPage(pageNumber);
+   const page=await pdfDocument.getPage(pageNumber);
    const content=await page.getTextContent();
    const lines=pdfPageLines(content.items);
    icdIndexEntries.push(...MedAuditIndex.parseIndexLines(lines,pageNumber,parserState));
@@ -342,14 +342,14 @@ async function loadIcdReferences(){
     await new Promise(resolve=>requestAnimationFrame(resolve));
    }
   }
-  await pdf.destroy();
+  await pdfDocument.destroy();pdfDocument=null;
   if(!icdIndexEntries.length)throw new Error("Tidak ada teks indeks yang berhasil diekstrak dari PDF. Pastikan file PDF memiliki teks yang dapat dipilih.");
   if(!icdTabularCodes.size)throw new Error("Tidak ada kode yang terbaca dari Tabular TXT. Pastikan file yang dipilih adalah icd102019syst_codes.txt.");
   setIndexStatus("Selesai. "+icdIndexEntries.length.toLocaleString("id-ID")+" entri indeks dan "+parsedTabular.rows.toLocaleString("id-ID")+" baris Tabular diproses. Pencarian siap digunakan.","ok");
  }catch(error){
   icdIndexEntries=[];icdTabularCodes=new Map();
   setIndexStatus("Gagal memproses referensi: "+(error&&error.message?error.message:"kesalahan tidak diketahui"),"error");
- }finally{button.disabled=false;}
+ }finally{if(pdfDocument){try{await pdfDocument.destroy();}catch(error){}}button.disabled=false;}
 }
 function renderIcdSearch(){
  const query=$("indexSearchInput").value.trim(),section=$("indexSectionFilter").value,container=$("indexResults");
