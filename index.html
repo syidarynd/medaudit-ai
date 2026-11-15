@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#10243a">
 <title>MedAudit AI | Audit Rekam Medis</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-<script>window.pdfjsReady=import("https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/pdf.min.mjs").then(lib=>{window.pdfjsLib=lib;return lib;}).catch(error=>{window.pdfjsLoadError=error;return null;});</script>
+<script>window.pdfjsReady=import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.5.438/pdf.min.mjs").then(lib=>{window.pdfjsLib=lib;return lib;}).catch(error=>{window.pdfjsLoadError=error;return null;});</script>
 <style>
 :root{--navy:#10243a;--blue:#2463eb;--bg:#f3f6fa;--ink:#172334;--muted:#64748b;--line:#e2e8f0;--green:#15803d;--red:#b91c1c;--amber:#b45309}
 *{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
@@ -327,7 +327,7 @@ async function loadIcdReferences(){
   const parsedTabular=MedAuditIndex.parseTabularText(tabularText);
   icdTabularCodes=parsedTabular.codeMap;
   setIndexStatus("Membuka PDF dan mengekstrak teks indeks…");
-  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/pdf.worker.min.mjs";
+  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.5.438/pdf.worker.min.mjs";
   pdfDocument=await pdfjsLib.getDocument({data:await pdfFile.arrayBuffer()}).promise;
   const pageLimit=Math.min(pdfDocument.numPages,ICD_INDEX_PAGE_LIMIT);
   const parserState={section:"diseases",stack:{},letter:""};
