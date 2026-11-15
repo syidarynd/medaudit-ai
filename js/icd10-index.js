@@ -37,7 +37,7 @@
     if (!usable.every(item => Array.isArray(item.transform) && Number.isFinite(item.transform[4]) && Number.isFinite(item.transform[5]))) {
       let text = "";
       for (const item of usable) text += item.str + (item.hasEOL ? "\\n" : " ");
-      return text.split(/\\r?\\n/).map(line => line.trim()).filter(Boolean);
+      return text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
     }
     const width = Number(pageWidth) || 0;
     const columns = width > 100 ? [[], []] : [usable];
@@ -55,7 +55,7 @@
         const parts = [];
         let previousRight = null;
         for (const item of row) {
-          const value = String(item.str || "").replace(/\\s+/g, " ").trim();
+          const value = String(item.str || "").replace(/\s+/g, " ").trim();
           if (!value) continue;
           const x = item.transform[4];
           const gap = previousRight === null ? 0 : x - previousRight;
@@ -63,7 +63,7 @@
           parts.push(value);
           previousRight = x + (Number(item.width) || 0);
         }
-        const line = parts.join("").replace(/\\s+/g, " ").trim();
+        const line = parts.join("").replace(/\s+/g, " ").trim();
         if (line) output.push(line);
         row = [];
       };
