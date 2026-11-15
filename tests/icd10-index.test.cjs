@@ -56,3 +56,29 @@ test("direct index term results rank ahead of see-also references", () => {
   assert.equal(results[0].term, "brain G06.0");
   assert.equal(results[0].parent, "Abscess");
 });
+
+test("groups PDF text by baseline coordinates instead of hasEOL", () => {
+  const items = [
+    { str: "Abscess", transform: [1,0,0,1,40,700], width: 42, hasEOL: false },
+    { str: "-brain", transform: [1,0,0,1,40,685], width: 32, hasEOL: false },
+    { str: "G06.0", transform: [1,0,0,1,78,685], width: 25, hasEOL: true },
+    { str: "Diabetes", transform: [1,0,0,1,40,670], width: 45, hasEOL: true }
+  ];
+  assert.deepEqual(index.groupPdfTextItems(items, 500), [
+    "Abscess", "-brain G06.0", "Diabetes"
+  ]);
+});
+
+test("coordinate-grouped index rows retain their own codes", () => {
+  const lines = index.groupPdfTextItems([
+    { str: "Abscess", transform: [1,0,0,1,40,700], width: 42 },
+    { str: "-brain", transform: [1,0,0,1,40,685], width: 32 },
+    { str: "G06.0", transform: [1,0,0,1,78,685], width: 25 },
+    { str: "-spinal cord NEC", transform: [1,0,0,1,40,670], width: 88 },
+    { str: "G04.9", transform: [1,0,0,1,132,670], width: 25 }
+  ], 500);
+  const entries = index.parseIndexLines(lines, 858, { section: "diseases", stack: {} });
+  assert.equal(entries[1].term, "-brain G06.0".replace(/^-/, "brain G06.0"));
+  assert.deepEqual(entries[1].codes, ["G06.0"]);
+  assert.deepEqual(entries[2].codes, ["G04.9"]);
+});
