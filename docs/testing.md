@@ -1,8 +1,8 @@
 # DOKUMENTASI PENGUJIAN MEDAUDIT AI
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System  
-**Versi saat pengujian:** Prototype v0.4.0  
-**Target pengembangan:** v0.4.0  
+**Versi saat pengujian:** Prototype v0.5.0  
+**Target pengembangan:** v0.5.0  
 **Jenis pengujian:** Pengujian fungsional manual  
 **Dataset:** 8 data kunjungan sintetis (DEMO-101–DEMO-108)
 
@@ -21,6 +21,7 @@ Ruang lingkup pengujian:
 - Penampilan hasil audit.
 - Ekspor dan impor data.
 - Dashboard dan visualisasi hasil audit.
+- Parser lokal Alphabetical Index dan pembandingan kode terhadap Tabular WHO 2019.
 
 ## 2. Lingkungan Pengujian
 
@@ -68,7 +69,13 @@ Ruang lingkup pengujian:
 | DQ-09 | Duplikasi nomor RM | Dua kunjungan berbeda menggunakan nomor RM sama (case-insensitive) |
 | DQ-10 | Konsistensi diagnosis-kode | Diagnosis yang termasuk daftar contoh memiliki kode berbeda dari pasangan contoh |
 
-## 5. Hasil Pengujian Dataset Sintetis
+## 5. Pengujian Referensi Indeks ICD-10
+
+Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, hierarki istilah, rujukan silang, pemisahan kode terminal/non-terminal, dan pencarian konteks. Pengujian ekstraksi PDF langsung di browser serta kompatibilitas perangkat masih memerlukan uji manual.
+
+**Batasan:** Alphabetical Index yang dipakai berlabel Volume 3 edisi 2013, sedangkan Tabular pembanding adalah WHO 2019. Kode yang tidak ditemukan pada versi pembanding tidak otomatis invalid.
+
+## 6. Hasil Pengujian Dataset Sintetis
 
 | ID Kunjungan | Temuan yang diharapkan | Hasil |
 |---|---|---|
@@ -90,7 +97,7 @@ Ruang lingkup pengujian:
 | Perlu ditinjau | 7 |
 | Total temuan | 8 |
 
-## 6. Pengujian Backup dan Pemulihan Data
+## 7. Pengujian Backup dan Pemulihan Data
 
 Langkah pengujian:
 
@@ -102,7 +109,7 @@ Langkah pengujian:
 
 **Hasil:** Berhasil. Sebanyak 8 data kunjungan berhasil dimuat kembali.
 
-## 7. Batasan Pengujian
+## 8. Batasan Pengujian
 
 Pengujian ini belum mencakup:
 
@@ -116,7 +123,7 @@ Pengujian ini belum mencakup:
 
 Validasi kode ICD-10 saat ini hanya memeriksa pola format dasar, bukan ketepatan klinis maupun ketepatan pemilihan kode.
 
-## 8. Rencana Pengembangan Pengujian
+## 9. Rencana Pengembangan Pengujian
 
 1. Menambahkan unit test untuk setiap aturan audit.
 2. Mengembangkan pemeriksaan duplikasi nomor RM (DQ-09).
