@@ -295,4 +295,4 @@ Pengujian dinyatakan berhasil apabila:
 
 ## 10. Unit Test Otomatis
 
-File `tests/audit.test.cjs` berisi pengujian untuk validasi tanggal, data bersih, DQ-09, DQ-10, dan agregasi temuan. Jalankan dengan `node --test tests/audit.test.cjs`. Hasil aktual harus dibaca dari GitHub Actions; jangan menganggap test lulus hanya karena workflow telah dibuat.
+File `tests/audit.test.cjs` menguji mesin audit. File `tests/icd10-index.test.cjs` menguji ekstraksi kode, hierarki istilah, rujukan silang, pembacaan kode terminal/non-terminal, dan pencarian konteks. Jalankan keduanya dengan `node --test tests/audit.test.cjs tests/icd10-index.test.cjs`. Hasil CI harus diperiksa dari GitHub Actions.
