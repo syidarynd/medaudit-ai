@@ -14,7 +14,7 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
 | Versi saat ini | Prototype v0.5.0 |
-| Target pengembangan | v0.5.0 |
+| Target pengembangan | v0.6.0 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
 
@@ -142,7 +142,7 @@ Dokumentasi proyek:
 - [Skenario Uji Aturan Audit](tests/audit-test-cases.md)
 - [Panduan Indeks ICD-10](docs/icd10-index.md)
 
-Pengujian yang didokumentasikan merupakan pengujian fungsional manual pada skenario yang telah dicoba.
+Pengujian mencakup unit test otomatis dan browser smoke test Chromium pada viewport seluler. Uji langsung perangkat Android fisik tetap menjadi validasi lanjutan.
 
 Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengujian UI browser lintas perangkat, keamanan menyeluruh, dan performa skala besar belum diklaim selesai.
 
@@ -157,12 +157,10 @@ Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengu
 
 ## 10. Roadmap Pengembangan
 
-1. Menguji pengalaman pencarian indeks pada berbagai browser/perangkat dan memperbaiki ekstraksi PDF bila diperlukan.
-2. Memperluas cakupan unit test dan pengujian browser/regresi.
-3. Menjalankan uji browser manual untuk impor dan pencarian PDF pada Android serta desktop.
-4. Memperluas cakupan unit test, aksesibilitas, dan pengujian regresi.
-5. Menilai sumber ICD-10 yang lebih seragam versinya dan sesuai ketentuan lisensi sebelum integrasi lebih lanjut.
-6. Meningkatkan responsivitas dan dokumentasi teknis.
+1. Uji langsung pada perangkat Android pengguna untuk memastikan unggah PDF dan pencarian berjalan pada browser ponsel.
+2. Uji performa dan penggunaan memori saat memproses PDF besar.
+3. Perluas cakupan aksesibilitas, keamanan, dan pengujian regresi.
+4. Evaluasi sumber ICD-10 dengan edisi yang seragam dan ketentuan lisensi yang jelas sebelum integrasi lebih lanjut.
 
 ## 11. Lisensi dan Penggunaan
 
