@@ -165,6 +165,30 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
       "invalid JSON backup must not overwrite existing local data"
     );
 
+    // Repeated MRNs are valid across separate visits; missing IDs must be generated per record.
+    await page.locator("#jsonFile").setInputFiles({
+      name: "repeat-mrn-visits.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify({ records: [
+        { mrn: "DEMO-REPEAT", name: "Pasien Fiktif", admit: "2026-10-10", discharge: "2026-10-11", mainDx: "Demam", code: "R50.9", kelas: "Kelas 2", resumeComplete: true, dpjpSigned: true },
+        { mrn: "DEMO-REPEAT", name: "Pasien Fiktif", admit: "2026-10-20", discharge: "2026-10-21", mainDx: "Demam", code: "R50.9", kelas: "Kelas 2", resumeComplete: true, dpjpSigned: true }
+      ] }))
+    });
+    page.once("dialog", dialog => dialog.accept());
+    await page.locator("#importJson").click();
+    await page.waitForFunction(() => document.querySelector("#appMessage").textContent.includes("Impor berhasil"));
+    const repeatedMrnState = await page.evaluate(() => {
+      const records = JSON.parse(localStorage.getItem("medaudit_ai_cases_v02"));
+      return {
+        count: records.length,
+        ids: records.map(record => record.id),
+        dq09: records.map(record => window.MedAuditEngine.audit(record, records).some(issue => issue.code === "DQ-09"))
+      };
+    });
+    assert.equal(repeatedMrnState.count, 2);
+    assert.equal(new Set(repeatedMrnState.ids).size, 2, "each visit must receive a distinct internal ID");
+    assert.deepEqual(repeatedMrnState.dq09, [false, false], "same patient MRN on different dates must not be flagged");
+
     // Backup metadata must match the current application version.
     await page.locator('button[data-tab="dashboard"]').click();
     const backupDownloadPromise = page.waitForEvent("download");
