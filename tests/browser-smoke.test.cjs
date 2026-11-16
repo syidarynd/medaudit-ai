@@ -134,7 +134,7 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     assert.equal(await page.locator("#icdIndexStatus").getAttribute("class"), "warn");
     await page.locator("#indexSearchInput").fill("brain");
     await page.locator("#searchIcdIndex").click();
-    assert.match(await page.locator("#indexResults").innerText(), /brain G06\\.0/);
+    assert.match(await page.locator("#indexResults").innerText(), /brain G06\.0/);
 
     // Invalid backup input must be rejected without replacing the existing local records.
     await page.locator('button[data-tab="backup"]').click();
