@@ -36,8 +36,6 @@
       Number.isFinite(item.transform[4]) &&
       Number.isFinite(item.transform[5])
     );
-    if (!usable.length) return [];
-
     // Fallback for simplified/mocked PDF.js items without coordinates.
     if (!(items || []).filter(item => item && String(item.str || "").trim())
       .every(item => Array.isArray(item.transform) &&
@@ -49,6 +47,7 @@
       }
       return text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
     }
+    if (!usable.length) return [];
 
     const width = Number(pageWidth) || 0;
     const sorted = usable.slice().sort((a, b) =>
