@@ -146,7 +146,7 @@ Dokumentasi proyek:
 - [Skenario Uji Aturan Audit](tests/audit-test-cases.md)
 - [Panduan Indeks ICD-10](docs/icd10-index.md)
 
-Pengujian mencakup unit test otomatis, browser smoke test Chromium pada viewport seluler, serta uji manual pada perangkat Android fisik. Pada 16 November 2026, PDF WHO 2016 (848 halaman) dan Tabular TXT berhasil diproses di Android; lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`) berhasil menampilkan hasil, dan referensi dimuat kembali otomatis setelah halaman dimuat ulang. Uji manual ini memverifikasi alur aplikasi dan sampel hasil, bukan validasi menyeluruh seluruh entri indeks. CI pada commit v0.7.1 menjalankan 35 tes: 34 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena PDF tidak tersedia di runner (run #43803726998).
+Pengujian mencakup unit test otomatis, browser smoke test Chromium pada viewport seluler 390×844 dan desktop 1440×900, serta uji manual pada perangkat Android fisik. Pada 16 November 2026, PDF WHO 2016 (848 halaman) dan Tabular TXT berhasil diproses di Android; lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`) berhasil menampilkan hasil, dan referensi dimuat kembali otomatis setelah halaman dimuat ulang. Uji manual ini memverifikasi alur aplikasi dan sampel hasil, bukan validasi menyeluruh seluruh entri indeks. CI pada commit v0.7.1 menjalankan 35 tes: 34 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena PDF tidak tersedia di runner (run #43803726998).
 
 Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengujian UI browser lintas perangkat, keamanan menyeluruh, dan performa skala besar belum diklaim selesai.
 
