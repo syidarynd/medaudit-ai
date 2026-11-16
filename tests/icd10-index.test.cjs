@@ -200,3 +200,21 @@ test("detects columns from row starts, not fragmented inline text origins", () =
   assert.match(lines[23], /^Right term 11/);
   assert.ok(!lines.some(line => line.includes("Left term") && line.includes("Right term")));
 });
+
+
+test("keeps a fragmented left-column line together when a continuation crosses the gutter midpoint", () => {
+  const items = [];
+  for (let i = 0; i < 12; i++) {
+    const y = 700 - i * 12;
+    items.push(
+      { str: "Left entry " + i, transform: [1,0,0,1,70,y], width: 105 },
+      { str: "continued text", transform: [1,0,0,1,181,y], width: 55 },
+      { str: "Right entry " + i, transform: [1,0,0,1,250,y], width: 100 }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 595);
+  assert.equal(lines.length, 24);
+  assert.match(lines[0], /^Left entry 0 continued text$/);
+  assert.match(lines[12], /^Right entry 0$/);
+  assert.ok(!lines.some(line => line.includes("Left entry") && line.includes("Right entry")));
+});
