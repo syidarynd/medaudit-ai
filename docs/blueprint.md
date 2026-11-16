@@ -40,7 +40,7 @@ Target pengembangan v0.4.0:
 - Pengujian regresi untuk memastikan fitur v0.3.0 tetap berfungsi.
 - Penyempurnaan dokumentasi teknis.
 
-DQ-09 dan DQ-10 masih merupakan rencana pengembangan, bukan fitur aktif.
+DQ-09 dan DQ-10 telah tersedia pada mesin audit; DQ-09 menandai kandidat duplikasi kunjungan, sedangkan DQ-10 membandingkan pasangan diagnosis-kode contoh terbatas.
 
 ## 3. Arsitektur Aplikasi
 
@@ -161,7 +161,7 @@ Nama properti aktual harus mengikuti struktur kode aplikasi. Perubahan nama prop
 
 DQ-05 hanya memeriksa pola format dasar. Aturan ini tidak membuktikan ketepatan klinis atau ketepatan pemilihan kode ICD-10.
 
-DQ-09 (duplikasi nomor RM) dan DQ-10 (konsistensi diagnosis dan kode ICD-10) merupakan rencana pengembangan.
+DQ-09 menandai kandidat duplikasi kunjungan berdasarkan kombinasi nomor RM dan detail episode; pengulangan nomor RM antar-kunjungan berbeda diperbolehkan. DQ-10 membandingkan pasangan diagnosis-kode contoh terbatas dan bukan encoder ICD-10 resmi.
 
 ## 7. Alur Kerja Pengguna
 
