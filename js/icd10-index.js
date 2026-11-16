@@ -62,26 +62,34 @@
       row.baseline = row.items.reduce((sum, part) => sum + part.transform[5], 0) / row.items.length;
     }
 
-    // Detect the two column origins from each visual row's first x-coordinate.
-    // This avoids relying on a text-gap threshold: in the WHO PDF the gutter can
-    // be only ~20 pt, while a long line in one column may itself contain gaps.
-    const starts = usable.map(item => item.transform[4]);
+    // Infer columns from the first text item on each visual baseline, not
+    // from every PDF.js text item. A single logical line is often fragmented
+    // into many items at different x positions; clustering all item origins
+    // mistakes those fragments for additional columns.
+    const rowStarts = rows.map(row => {
+      const first = row.items.reduce((a, b) =>
+        a.transform[4] <= b.transform[4] ? a : b
+      );
+      return first.transform[4];
+    }).sort((a, b) => a - b);
     let boundary = null;
-    if (starts.length >= 20) {
-      let c1 = Math.min(...starts), c2 = Math.max(...starts);
-      for (let i = 0; i < 12; i++) {
-        const left = starts.filter(x => Math.abs(x - c1) <= Math.abs(x - c2));
-        const right = starts.filter(x => Math.abs(x - c1) > Math.abs(x - c2));
-        if (!left.length || !right.length) break;
-        const next1 = left.reduce((a, b) => a + b, 0) / left.length;
-        const next2 = right.reduce((a, b) => a + b, 0) / right.length;
-        if (Math.abs(next1 - c1) + Math.abs(next2 - c2) < 0.01) break;
-        c1 = next1; c2 = next2;
+    if (rowStarts.length >= 20) {
+      // The largest stable gap between recurring row starts separates the
+      // left and right text columns. Requiring >=10 baselines per side avoids
+      // interpreting a few indented continuation lines as a second column.
+      let splitAt = -1, largestGap = 0;
+      for (let i = 1; i < rowStarts.length; i++) {
+        const gap = rowStarts[i] - rowStarts[i - 1];
+        if (gap > largestGap) {
+          largestGap = gap;
+          splitAt = i;
+        }
       }
-      const low = Math.min(c1, c2), high = Math.max(c1, c2);
-      const leftCount = starts.filter(x => Math.abs(x - low) <= Math.abs(x - high)).length;
-      const rightCount = starts.length - leftCount;
-      if (high - low >= 70 && leftCount >= 10 && rightCount >= 10) boundary = (low + high) / 2;
+      if (splitAt >= 10 && rowStarts.length - splitAt >= 10 && largestGap >= 70) {
+        const leftOrigin = rowStarts.slice(0, splitAt).reduce((a, b) => a + b, 0) / splitAt;
+        const rightOrigin = rowStarts.slice(splitAt).reduce((a, b) => a + b, 0) / (rowStarts.length - splitAt);
+        if (rightOrigin - leftOrigin >= 70) boundary = (leftOrigin + rightOrigin) / 2;
+      }
     }
 
     function buildLine(lineItems) {
