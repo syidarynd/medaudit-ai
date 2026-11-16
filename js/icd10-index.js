@@ -114,16 +114,20 @@
     function buildLine(lineItems) {
       const parts = [];
       let previousRight = null;
+      let previousHadSpace = false;
       for (const item of lineItems) {
-        const value = String(item.str || "").replace(/\s+/g, " ").trim();
+        const raw = String(item.str || "").replace(/\s+/g, " ");
+        const value = raw.trim();
         if (!value) continue;
         const x = item.transform[4];
         const gap = previousRight === null ? 0 : x - previousRight;
-        if (parts.length && gap > 1.5 &&
-            !/^[,.;:)]/.test(value) && !/[(/-]$/.test(parts[parts.length - 1])) {
-          parts.push(" ");
-        }
+        const previousText = [...parts].reverse().find(part => part !== " ") || "";
+        const explicitSpace = /^\s/.test(raw) || previousHadSpace;
+        const needsSpace = parts.length && (explicitSpace || gap > 1.5) &&
+          !/^[,.;:)]/.test(value) && !/[(/-]$/.test(previousText);
+        if (needsSpace && parts[parts.length - 1] !== " ") parts.push(" ");
         parts.push(value);
+        previousHadSpace = /\s$/.test(raw);
         previousRight = x + (Number(item.width) || 0);
       }
       return parts.join("").replace(/\s+/g, " ").trim();
@@ -213,12 +217,14 @@
         .replace(/\s+/g, " ").trim();
       if (!line || /^ICD-10\s+2e\s+Volume\s+3/i.test(line)) continue;
       if (/^(?:INTERNATIONAL CLASSIFICATION OF DISEASES|ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY)$/i.test(line)) continue;
+      if (/^(?:ALPHABETICAL INDEX TO DISEASES AND|NATURE OF INJURY)$/i.test(line)) continue;
       if (parserState.started === false) {
         if (/^SECTION\s+I(?:\s*[-–—:].*)?$/i.test(line)) {
           parserState.started = true; parserState.section = "diseases"; parserState.stack = {};
         }
         continue;
-      }\n      if (/^SECTION\\s+I(?:\\s*[-–—:].*)?$/i.test(line)) {
+      }
+      if (/^SECTION\s+I(?:\s*[-–—:].*)?$/i.test(line)) {
         parserState.section = "diseases"; parserState.stack = {}; continue;
       }
       // WHO Volume 3 uses this running page heading for Section II; it is not
