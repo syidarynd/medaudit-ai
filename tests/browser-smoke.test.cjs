@@ -137,6 +137,7 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     assert.match(await page.locator("#indexResults").innerText(), /brain G06\\.0/);
 
     // Invalid backup input must be rejected without replacing the existing local records.
+    await page.locator('button[data-tab="backup"]').click();
     const recordsBeforeImport = await page.evaluate(() => localStorage.getItem("medaudit_ai_cases_v02"));
     await page.locator("#jsonFile").setInputFiles({
       name: "invalid-backup.json",
@@ -152,6 +153,7 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     );
 
     // Backup metadata must match the current application version.
+    await page.locator('button[data-tab="dashboard"]').click();
     const backupDownloadPromise = page.waitForEvent("download");
     await page.locator("#jsonExport").click();
     const backupDownload = await backupDownloadPromise;
