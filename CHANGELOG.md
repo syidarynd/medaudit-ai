@@ -10,6 +10,7 @@
 
 ### Testing
 - Added regression tests for repeated MRNs on different dates, likely duplicate encounters, and normalization of case/whitespace.
+- CI run #43815019242: 37 tests, 36 passed, 0 failed, 1 skipped (optional full WHO PDF test; source unavailable on runner).
 - Added a browser test that imports two visits for the same synthetic patient and confirms distinct internal IDs and no false DQ-09 finding.
 
 ### Scope
