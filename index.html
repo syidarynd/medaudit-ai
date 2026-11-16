@@ -423,10 +423,14 @@ async function loadIcdReferences(){
   const parserState={section:"diseases",stack:{},letter:"",started:false};
   for(let pageNumber=1;pageNumber<=pageLimit&&!parserState.finished;pageNumber++){
    const page=await pdfDocument.getPage(pageNumber);
-   const content=await page.getTextContent();
-   const lines=pdfPageLines(content.items,page.getViewport({scale:1}).width);
-   extractedEntries.push(...MedAuditIndex.parseIndexLines(lines,pageNumber,parserState));
-   page.cleanup();
+   try{
+    const pageContent=await page.getTextContent();
+    const lines=pdfPageLines(pageContent.items,page.getViewport({scale:1}).width);
+    extractedEntries.push(...MedAuditIndex.parseIndexLines(lines,pageNumber,parserState));
+   }finally{
+    // Always release page-level resources, including when text extraction or parsing fails.
+    if(page&&typeof page.cleanup==="function")page.cleanup();
+   }
    if(pageNumber%10===0||pageNumber===pageLimit||parserState.finished){
     progress.value=Math.round(pageNumber/pageLimit*100);
     setIndexStatus("Memproses halaman "+pageNumber+" dari "+pageLimit+" · "+extractedEntries.length.toLocaleString("id-ID")+" baris indeks terstruktur…");
