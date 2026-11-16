@@ -1,8 +1,8 @@
 # DOKUMENTASI PENGUJIAN MEDAUDIT AI
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System  
-**Versi saat pengujian:** Prototype v0.5.0  
-**Target pengembangan:** v0.5.0  
+**Versi saat pengujian:** Prototype v0.7.1  
+**Target pengembangan:** v0.7.1  
 **Jenis pengujian:** Pengujian fungsional manual  
 **Dataset:** 8 data kunjungan sintetis (DEMO-101–DEMO-108)
 
@@ -21,7 +21,7 @@ Ruang lingkup pengujian:
 - Penampilan hasil audit.
 - Ekspor dan impor data.
 - Dashboard dan visualisasi hasil audit.
-- Parser lokal Alphabetical Index dan pembandingan kode terhadap Tabular WHO 2019.
+- Parser lokal WHO ICD-10 Volume 3 edisi 2016 dan pembandingan kode terhadap Tabular WHO 2019.
 
 ## 2. Lingkungan Pengujian
 
@@ -71,9 +71,11 @@ Ruang lingkup pengujian:
 
 ## 5. Pengujian Referensi Indeks ICD-10
 
-Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, hierarki istilah, rujukan silang, pemisahan kode terminal/non-terminal, pencarian konteks, serta batas Section III. Browser smoke test otomatis menggunakan Chromium viewport seluler menguji unggah PDF lokal, pembacaan Tabular, pencarian kode, dan layout responsif. Pengujian pada perangkat Android fisik pengguna masih memerlukan uji langsung.
+Tes impor PDF WHO penuh tersedia secara opsional pada `tests/icd10-who-pdf.test.cjs` dan memerlukan file PDF lokal melalui variabel lingkungan `WHO_ICD10_INDEX_PDF`.
 
-**Batasan:** Alphabetical Index yang dipakai berlabel Volume 3 edisi 2013, sedangkan Tabular pembanding adalah WHO 2019. Kode yang tidak ditemukan pada versi pembanding tidak otomatis invalid.
+Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, pemisahan kolom berdasarkan asal teks berulang, preservasi spasi eksplisit PDF, hierarki dash Unicode, rujukan silang, running header, matriks transportasi, awal Section I, batas Section III, serta pembedaan jumlah baris Tabular dan jumlah kode unik. Browser smoke test otomatis menggunakan Chromium viewport seluler menguji unggah PDF fixture, pembacaan Tabular, pencarian kode, dan layout responsif. Tes PDF WHO penuh tersedia secara opsional melalui `WHO_ICD10_INDEX_PDF` dan dilewati pada CI ketika PDF tidak tersedia di runner. Pada 16 November 2026, uji manual Android berhasil memproses PDF WHO 2016 dan Tabular TXT, menjalankan lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`), serta memuat ulang referensi dari IndexedDB setelah reload. Validasi ini merupakan smoke/regression check berbasis sampel, bukan pemeriksaan seluruh entri secara manual.
+
+**Batasan:** Alphabetical Index yang dipakai adalah WHO Volume 3 edisi 2016, sedangkan Tabular pembanding adalah WHO 2019. Kode yang tidak ditemukan pada versi pembanding tidak otomatis invalid.
 
 ## 6. Hasil Pengujian Dataset Sintetis
 
@@ -121,7 +123,7 @@ Pengujian ini belum mencakup:
 - Pengujian performa dengan jumlah data besar.
 - Pemeriksaan konsistensi diagnosis dan kode ICD-10 berdasarkan referensi resmi.
 
-DQ-05 hanya memeriksa pola format dasar. Panel indeks membantu penelusuran, tetapi pembandingan edisi 2013 dan 2019 bukan validasi klinis atau penetapan kode final.
+DQ-05 hanya memeriksa pola format dasar. Panel indeks membantu penelusuran, tetapi pembandingan edisi 2016 dan 2019 bukan validasi klinis atau penetapan kode final.
 
 ## 9. Rencana Pengembangan Pengujian
 
@@ -152,7 +154,7 @@ Prototype untuk demonstrasi dan portofolio informatika kesehatan.
 - DQ-09 membandingkan nomor RM antar-record dan mengabaikan perbedaan kapitalisasi.
 - DQ-10 hanya membandingkan beberapa pasangan diagnosis-kode demonstrasi yang ditentukan secara eksplisit; diagnosis lain tidak dinilai.
 - Unit test mesin audit dan parser indeks serta browser smoke test Chromium dijalankan melalui GitHub Actions.
-- Perintah lokal: `npm install --no-save --no-package-lock playwright@1.58.2`, `npx playwright install chromium`, lalu `node --test tests/audit.test.cjs tests/icd10-index.test.cjs tests/browser-smoke.test.cjs`.
-- Pada commit rilis v0.5.0, seluruh 16 tes otomatis lulus (9 mesin audit, 6 parser indeks, 1 browser smoke test).
-- Browser smoke test menggunakan viewport seluler 390×844; uji pada perangkat Android fisik tetap disarankan.
+- Perintah lokal: `npm install --no-save --no-package-lock playwright@1.58.2`, `npx playwright install chromium`, lalu `node --test tests/*.test.cjs`. Untuk mengaktifkan tes PDF WHO penuh, set `WHO_ICD10_INDEX_PDF` ke path PDF WHO Volume 3 edisi 2016.
+- Pada pemeriksaan CI commit `24ababc`: 34 tes terdaftar, 33 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena file sumber tidak tersedia di runner. Angka ini adalah hasil tes otomatis, bukan hasil validasi penuh terhadap PDF WHO.
+- Browser smoke test menggunakan viewport seluler 390×844. Uji manual Android fisik sudah dilakukan untuk lima pencarian baseline dan persistensi IndexedDB; pengujian tambahan lintas perangkat tetap disarankan.
 - Pengujian ini tidak membuktikan ketepatan klinis atau validitas kode ICD-10 secara menyeluruh.

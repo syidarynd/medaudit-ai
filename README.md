@@ -13,8 +13,8 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 |---|---|
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
-| Versi saat ini | Prototype v0.6.0 |
-| Target pengembangan | v0.6.0 |
+| Versi saat ini | Prototype v0.7.1 |
+| Target pengembangan | v0.7.1 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
 
@@ -38,7 +38,7 @@ https://syidarynd.github.io/medaudit-ai/
 - Pencarian berdasarkan nomor rekam medis, nama/inisial fiktif, diagnosis, dan kode.
 - Filter berdasarkan status audit.
 - Pemeriksaan kualitas data berbasis aturan DQ-01 sampai DQ-10.
-- Pencarian istilah melalui Alphabetical Index ICD-10 yang disiapkan satu kali dari file sumber lokal.
+- Pencarian istilah melalui Alphabetical Index ICD-10 WHO Volume 3 edisi 2016 yang diekstrak di browser dengan pemisahan dua kolom, hierarki dash Unicode, dan rujukan silang.
 - Referensi hasil ekstraksi disimpan di IndexedDB dan dimuat otomatis pada kunjungan berikutnya di browser/perangkat yang sama.
 - Pembandingan kode indeks dengan daftar kode terminal/non-terminal pada Tabular WHO 2019.
 - Ekspor laporan ke CSV.
@@ -63,7 +63,9 @@ DQ-09 mendeteksi nomor RM duplikat antar-kunjungan. DQ-10 membandingkan pasangan
 
 ### Referensi pencarian ICD-10
 
-- Alphabetical Index: ICD-10 2e Volume 3 (2013), dipilih dan diproses secara lokal oleh pengguna.
+- Alphabetical Index: WHO ICD-10 Volume 3, Fifth edition 2016, dipilih dan diproses secara lokal oleh pengguna.
+- Parser memulai ekstraksi pada Section I, melanjutkan Section II, dan berhenti saat Section III (tabel obat/kimia) dimulai.
+- Matriks kecelakaan transportasi darat WHO dilewati secara eksplisit agar kode dari kolom tabel yang berbeda tidak digabung sebagai satu entri.
 - Tabular pembanding: WHO ICD-10 2019, file TXT dipilih secara lokal.
 - Karena edisinya berbeda, status cocok/tidak cocok hanya pembanding teknis dan tidak menetapkan validitas kode Indonesia/BPJS.
 - PDF/TXT sumber tidak disertakan dalam repositori atau diunggah ke server. Hasil ekstraksi terstruktur disimpan lokal di IndexedDB pada perangkat pengguna; tidak tersinkron antarperangkat.
@@ -110,7 +112,8 @@ medaudit-ai/
     ├── audit-test-cases.md
     ├── audit.test.cjs
     ├── icd10-index.test.cjs
-    └── browser-smoke.test.cjs
+    ├── browser-smoke.test.cjs
+    └── icd10-who-pdf.test.cjs (opsional; memerlukan file PDF lokal)
 ```
 
 Struktur di atas menggambarkan file dan folder utama yang tersedia pada repositori. Logika audit dan pencarian indeks dipisahkan ke modul JavaScript di folder `js/`.
@@ -143,13 +146,13 @@ Dokumentasi proyek:
 - [Skenario Uji Aturan Audit](tests/audit-test-cases.md)
 - [Panduan Indeks ICD-10](docs/icd10-index.md)
 
-Pengujian mencakup unit test otomatis dan browser smoke test Chromium pada viewport seluler. Uji langsung perangkat Android fisik tetap menjadi validasi lanjutan.
+Pengujian mencakup unit test otomatis, browser smoke test Chromium pada viewport seluler, serta uji manual pada perangkat Android fisik. Pada 16 November 2026, PDF WHO 2016 (848 halaman) dan Tabular TXT berhasil diproses di Android; lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`) berhasil menampilkan hasil, dan referensi dimuat kembali otomatis setelah halaman dimuat ulang. Uji manual ini memverifikasi alur aplikasi dan sampel hasil, bukan validasi menyeluruh seluruh entri indeks. CI pada commit v0.7.1 menjalankan 35 tes: 34 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena PDF tidak tersedia di runner (run #43803726998).
 
 Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengujian UI browser lintas perangkat, keamanan menyeluruh, dan performa skala besar belum diklaim selesai.
 
 ## 9. Batasan Sistem
 
-- DQ-05 hanya memeriksa pola format dasar. Panel indeks adalah alat bantu pencarian; pembandingan indeks 2013 dengan Tabular 2019 tidak memastikan ketepatan kode atau kesesuaian standar Indonesia.
+- DQ-05 hanya memeriksa pola format dasar. Panel indeks adalah alat bantu pencarian; pembandingan indeks 2016 dengan Tabular 2019 tidak memastikan ketepatan kode atau kesesuaian standar Indonesia.
 - Mesin pemeriksaan menggunakan aturan tetap (*rule-based*), belum menggunakan model AI atau LLM. DQ-10 adalah pemeriksaan silang daftar contoh terbatas, bukan validasi ICD-10 resmi.
 - Aplikasi belum memiliki autentikasi pengguna, fitur multi-user, sinkronisasi cloud, atau audit trail server-side.
 - LocalStorage tidak dirancang untuk menyimpan rekam medis pasien nyata.

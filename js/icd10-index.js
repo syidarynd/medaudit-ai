@@ -14,7 +14,7 @@
   function stripCrossReference(value) {
     return String(value ?? "")
       .replace(/\(\s*see\s+(?:also\s+)?[^)]*\)/gi, " ")
-      .replace(/\s+-\s*see\s+(?:also\s+)?[^;]*$/i, "")
+      .replace(/\s+[-–—]\s*see\s+(?:also\s+)?[^;]*$/i, "")
       .trim();
   }
 
@@ -28,29 +28,239 @@
     return codes;
   }
 
+
+  function groupPdfTextItems(items, pageWidth) {
+    const nonEmpty = (items || []).filter(item => item && String(item.str || "").trim());
+    const usable = nonEmpty.filter(item =>
+      Array.isArray(item.transform) &&
+      Number.isFinite(item.transform[4]) &&
+      Number.isFinite(item.transform[5])
+    );
+
+    // Compatibility fallback for test doubles or PDF.js adapters without geometry.
+    if (usable.length !== nonEmpty.length) {
+      let text = "";
+      for (const item of nonEmpty) text += item.str + (item.hasEOL ? "\n" : " ");
+      return text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    }
+    if (!usable.length) return [];
+
+    // Reconstruct visual baselines first. A PDF page may contain two columns
+    // whose text starts at x=70/250 on one page and x=181/361 on another.
+    const sorted = usable.slice().sort((a, b) =>
+      b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]
+    );
+    const rows = [];
+    for (const item of sorted) {
+      const y = item.transform[5];
+      let row = rows.find(candidate => Math.abs(candidate.baseline - y) <= 2.5);
+      if (!row) {
+        row = { baseline: y, items: [] };
+        rows.push(row);
+      }
+      row.items.push(item);
+      row.baseline = row.items.reduce((sum, part) => sum + part.transform[5], 0) / row.items.length;
+    }
+
+    // Infer column starts from recurring, baseline-level text runs. PDF.js can
+    // split a logical line into inline fragments, so an arbitrary fragment
+    // origin must not be mistaken for a new column. A genuine second-column
+    // run recurs across many baselines and is separated from the prior run
+    // by a visible horizontal gap.
+    const originClusters = [];
+    rows.forEach((row, rowIndex) => {
+      const lineItems = row.items.slice().sort((a, b) => a.transform[4] - b.transform[4]);
+      let previousRight = null;
+      for (const item of lineItems) {
+        const x = item.transform[4];
+        const gap = previousRight === null ? Infinity : x - previousRight;
+        if (previousRight === null || gap >= 8) {
+          let cluster = originClusters.find(candidate => Math.abs(candidate.origin - x) <= 4);
+          if (!cluster) {
+            cluster = { origin: x, total: 0, count: 0, rows: new Set() };
+            originClusters.push(cluster);
+          }
+          cluster.total += x;
+          cluster.count += 1;
+          cluster.rows.add(rowIndex);
+          cluster.origin = cluster.total / cluster.count;
+        }
+        previousRight = x + (Number(item.width) || 0);
+      }
+    });
+    const recurringThreshold = Math.max(4, Math.ceil(rows.length * 0.25));
+    const recurringOrigins = originClusters
+      .filter(cluster => cluster.rows.size >= recurringThreshold)
+      .map(cluster => cluster.origin)
+      .sort((a, b) => a - b);
+    let boundary = null;
+    let rightOrigin = null;
+    if (recurringOrigins.length >= 2) {
+      let splitAt = -1, largestGap = 0;
+      for (let i = 1; i < recurringOrigins.length; i++) {
+        const gap = recurringOrigins[i] - recurringOrigins[i - 1];
+        if (gap > largestGap) {
+          largestGap = gap;
+          splitAt = i;
+        }
+      }
+      if (splitAt > 0 && largestGap >= 70) {
+        const leftOrigin = recurringOrigins[splitAt - 1];
+        rightOrigin = recurringOrigins[splitAt];
+        boundary = (leftOrigin + rightOrigin) / 2;
+      }
+    }
+
+    function buildLine(lineItems) {
+      const parts = [];
+      let previousRight = null;
+      let previousHadSpace = false;
+      for (const item of lineItems) {
+        const raw = String(item.str || "").replace(/\s+/g, " ");
+        const value = raw.trim();
+        if (!value) continue;
+        const x = item.transform[4];
+        const gap = previousRight === null ? 0 : x - previousRight;
+        const previousText = [...parts].reverse().find(part => part !== " ") || "";
+        const explicitSpace = /^\s/.test(raw) || previousHadSpace;
+        const needsSpace = parts.length && (explicitSpace || gap > 1.5) &&
+          !/^[,.;:)]/.test(value) && !/[(/-]$/.test(previousText);
+        if (needsSpace && parts[parts.length - 1] !== " ") parts.push(" ");
+        parts.push(value);
+        previousHadSpace = /\s$/.test(raw);
+        previousRight = x + (Number(item.width) || 0);
+      }
+      return parts.join("").replace(/\s+/g, " ").trim();
+    }
+
+    const fragments = [];
+    for (const row of rows) {
+      const lineItems = row.items.slice().sort((a, b) => a.transform[4] - b.transform[4]);
+      if (boundary === null) {
+        const text = buildLine(lineItems);
+        if (text) fragments.push({ column: 0, y: row.baseline, x: lineItems[0].transform[4], text });
+        continue;
+      }
+      const columns = [[], []];
+      let leftStarted = false;
+      let leftRight = -Infinity;
+      for (const item of lineItems) {
+        const x = item.transform[4];
+        // A fragmented long line can continue past the geometric midpoint.
+        // Keep a nearby fragment with the left line when it follows an item
+        // already assigned to that column; otherwise it starts the right one.
+        const continuesLeft = leftStarted && x >= boundary && x < rightOrigin - 6 && x - leftRight <= 18;
+        const column = x < boundary || continuesLeft ? 0 : 1;
+        columns[column].push(item);
+        if (column === 0) {
+          leftStarted = true;
+          leftRight = Math.max(leftRight, x + (Number(item.width) || 0));
+        }
+      }
+      columns.forEach((columnItems, column) => {
+        if (!columnItems.length) return;
+        const text = buildLine(columnItems);
+        if (text) fragments.push({ column, y: row.baseline, x: columnItems[0].transform[4], text });
+      });
+    }
+
+    // Read the complete left column before the right column, preserving
+    // top-to-bottom order inside each. On single-column pages retain page order.
+    if (boundary !== null) {
+      fragments.sort((a, b) => a.column - b.column || b.y - a.y || a.x - b.x);
+    } else {
+      fragments.sort((a, b) => b.y - a.y || a.x - b.x);
+    }
+    // Join visual continuation lines before semantic parsing. In this WHO PDF,
+    // wrapped text/code lines are indented by about 9 pt and do not begin with
+    // the index dash used for a new subentry. Keeping them together prevents
+    // orphaned codes and truncated terms such as "hip or other / joint".
+    const isLayoutMarker = text =>
+      /^(?:\d{1,4}|[A-Z]|ICD-10\s+2e\s+Volume\s+3|INTERNATIONAL CLASSIFICATION OF DISEASES|ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY|EXTERNAL CAUSES OF INJUR(?:Y|IES)|SECTION\s+I{1,3}\b.*|TABLE OF DRUGS AND CHEMICALS)$/i.test(String(text || "").trim());
+    // Centered running headers, page numbers and single-letter dividers may
+    // sit left of a real column's first body line. They must not become the
+    // column's baseline origin, or right-column rows can be concatenated.
+    const bodyFragments = fragments.filter(fragment => !isLayoutMarker(fragment.text));
+    const merged = [];
+    const columnBases = new Map();
+    for (const fragment of fragments) {
+      const column = fragment.column || 0;
+      const baseCandidates = bodyFragments.filter(part => (part.column || 0) === column);
+      const base = columnBases.has(column)
+        ? columnBases.get(column)
+        : Math.min(...(baseCandidates.length ? baseCandidates : fragments.filter(part => (part.column || 0) === column)).map(part => part.x));
+      columnBases.set(column, base);
+      const text = fragment.text;
+      const previous = merged[merged.length - 1];
+      const sameColumn = previous && (previous.column || 0) === column;
+      const indentedContinuation = fragment.x > base + 4 &&
+        !/^(?:-|–|—)/.test(text) &&
+        !isLayoutMarker(text);
+      const closeBaseline = sameColumn && Math.abs(previous.y - fragment.y) <= 18;
+      if (sameColumn && closeBaseline && indentedContinuation) {
+        previous.text = (previous.text + " " + text).replace(/\s+/g, " ").trim();
+        previous.y = fragment.y;
+      } else {
+        merged.push({ ...fragment });
+      }
+    }
+    return merged.map(fragment => fragment.text);
+  }
+
   function parseIndexLines(lines, pageNumber, state) {
-    const output = [], parserState = state || { section: "diseases", stack: {} };
+    const output = [], parserState = state || { section: "diseases", stack: {}, started: true };
+    // WHO Volume 3 contains a multi-axis transport accident matrix page.
+    // It is not a normal alphabetical entry list; flattening it would attach
+    // codes from different table columns to the same term. Skip that page
+    // rather than emitting misleading index records.
+    if ((lines || []).some(rawLine => {
+      const line = String(rawLine ?? "").replace(/\s+/g, " ").trim();
+      return /^Table of\s+land transport accidents\b/i.test(line);
+    })) return [];
     for (const rawLine of lines || []) {
       if (parserState.finished) break;
       const line = String(rawLine ?? "").replace(/\u00ad/g, "-").replace(/\u00a0/g, " ")
         .replace(/\s+/g, " ").trim();
       if (!line || /^ICD-10\s+2e\s+Volume\s+3/i.test(line)) continue;
-      if (/^SECTION\s+I\s*-/i.test(line)) {
+      if (/^(?:INTERNATIONAL CLASSIFICATION OF DISEASES|ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY)$/i.test(line)) continue;
+      if (/^(?:ALPHABETICAL INDEX TO DISEASES AND|NATURE OF INJURY)$/i.test(line)) continue;
+      if (parserState.started === false) {
+        if (/^SECTION\s+I(?:\s*[-–—:].*)?$/i.test(line)) {
+          parserState.started = true; parserState.section = "diseases"; parserState.stack = {};
+        }
+        continue;
+      }
+      if (/^SECTION\s+I(?:\s*[-–—:].*)?$/i.test(line)) {
         parserState.section = "diseases"; parserState.stack = {}; continue;
       }
-      if (/^SECTION\s+II\s*-/i.test(line)) {
+      // WHO Volume 3 uses this running page heading for Section II; it is not
+      // printed as "SECTION II -" on each page in the PDF.
+      if (/^(?:SECTION\s+II\b(?:\s*[-–—:].*)?|EXTERNAL CAUSES OF INJUR(?:Y|IES))$/i.test(line)) {
         parserState.section = "external_causes"; parserState.stack = {}; continue;
       }
-      // The uploaded Volume 3 places the drug/chemical table after Section II.
-      // Stop here: it is a separate table and must not be mislabeled as index entries.
-      if (/^SECTION\s+III\s*-/i.test(line)) {
+      // Section III is a separate drug/chemical table, not an index hierarchy.
+      if (parserState.section === "external_causes" && /^(?:SECTION\s+III\b(?:\s*[-–—:].*)?|TABLE OF DRUGS AND CHEMICALS)$/i.test(line)) {
         parserState.finished = true; break;
       }
       if (/^\d{1,4}$/.test(line)) continue;
-      const prefix = line.match(/^((?:-\s*)+)(.*)$/);
+
+      // Column/page continuation headings (for example "Abscess—continued")
+      // are running headers, not diagnosis entries. Restore their parent path
+      // so following indented rows remain children of the original index term.
+      const continuedHeading = line.match(/^((?:[-–—]\s*)*)(.+?)\s*[–—-]{1,2}\s*continued$/i);
+      if (continuedHeading) {
+        const headingDepth = (continuedHeading[1].match(/[-–—]/g) || []).length;
+        parserState.stack[headingDepth] = continuedHeading[2].trim();
+        for (const key of Object.keys(parserState.stack)) {
+          if (Number(key) > headingDepth) delete parserState.stack[key];
+        }
+        continue;
+      }
+
+      const prefix = line.match(/^((?:[-–—]\s*)+)(.*)$/);
       let depth = 0, term = line;
       if (prefix) {
-        depth = (prefix[1].match(/-/g) || []).length;
+        depth = (prefix[1].match(/[-–—]/g) || []).length;
         term = prefix[2].trim();
       } else if (/^[A-Z]$/.test(line)) {
         parserState.letter = line; parserState.stack = {}; continue;
@@ -143,6 +353,9 @@
       else if (contextIndex >= 0 || tokenMatch) score = 40 + Math.max(0, contextIndex);
       else if (codeMatch) score = 60;
       else score = 100; // Cross-reference target matches rank below direct index terms.
+      // Prefer the lead-term entry when a broad query also occurs in many
+      // nested subentries (for example, "diabetes" under multiple conditions).
+      score += entry.parent ? 12 : -8;
       ranked.push({ entry, score });
     }
 
@@ -151,7 +364,7 @@
   }
 
   const api = Object.freeze({
-    normalizeText, extractCodes, parseIndexLines, parseTabularText, getCodeStatus, searchEntries
+    normalizeText, extractCodes, groupPdfTextItems, parseIndexLines, parseTabularText, getCodeStatus, searchEntries
   });
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (root) root.MedAuditIndex = api;

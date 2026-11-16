@@ -16,6 +16,21 @@ test("preserves hierarchy, cross references, and section changes", () => {
   assert.equal(entries[4].section,"external_causes");
 });
 
+test("counts source Tabular rows separately from distinct mapped codes", () => {
+  const text = [
+    "3;N;X;01;A00;A00.-;A00;A00;Cholera;Cholera",
+    "4;T;X;01;A00;A00.0;A00.0;A000;Cholera due to Vibrio cholerae 01, biovar cholerae;Cholera",
+    "4;T;X;01;A00;A00.1;A00.1;A001;Cholera due to Vibrio cholerae 01, biovar eltor;Cholera"
+  ].join("\n");
+  const parsed = index.parseTabularText(text);
+  assert.equal(parsed.rows, 3);
+  assert.equal(parsed.codeMap.size, 4);
+  assert.equal(parsed.codeMap.has("A00.-"), true);
+  assert.equal(parsed.codeMap.has("A00"), true);
+  assert.equal(parsed.codeMap.has("A00.0"), true);
+  assert.equal(parsed.codeMap.has("A00.1"), true);
+});
+
 test("reads terminal and non-terminal tabular codes", () => {
   const text=["3;N;X;10;J90;J94.-;J94;J94;Other pleural conditions;Other pleural conditions","4;T;X;10;J90;J94.0;J94.0;J940;Chylous effusion;Chylous effusion","4;T;X;10;J90;J94.1;J94.1;J941;Fibrothorax;Fibrothorax"].join("\n");
   const parsed=index.parseTabularText(text);
@@ -55,4 +70,266 @@ test("direct index term results rank ahead of see-also references", () => {
   const results = index.searchEntries(entries, "abscess brain", 10);
   assert.equal(results[0].term, "brain G06.0");
   assert.equal(results[0].parent, "Abscess");
+});
+
+test("groups PDF text by baseline coordinates instead of hasEOL", () => {
+  const items = [
+    { str: "Abscess", transform: [1,0,0,1,40,700], width: 42, hasEOL: false },
+    { str: "-brain", transform: [1,0,0,1,40,685], width: 32, hasEOL: false },
+    { str: "G06.0", transform: [1,0,0,1,78,685], width: 25, hasEOL: true },
+    { str: "Diabetes", transform: [1,0,0,1,40,670], width: 45, hasEOL: true }
+  ];
+  assert.deepEqual(index.groupPdfTextItems(items, 500), [
+    "Abscess", "-brain G06.0", "Diabetes"
+  ]);
+});
+
+test("coordinate-grouped index rows retain their own codes", () => {
+  const lines = index.groupPdfTextItems([
+    { str: "Abscess", transform: [1,0,0,1,40,700], width: 42 },
+    { str: "-brain", transform: [1,0,0,1,40,685], width: 32 },
+    { str: "G06.0", transform: [1,0,0,1,78,685], width: 25 },
+    { str: "-spinal cord NEC", transform: [1,0,0,1,40,670], width: 88 },
+    { str: "G04.9", transform: [1,0,0,1,132,670], width: 25 }
+  ], 500);
+  const entries = index.parseIndexLines(lines, 858, { section: "diseases", stack: {} });
+  assert.equal(entries[1].term, "brain G06.0");
+  assert.deepEqual(entries[1].codes, ["G06.0"]);
+  assert.deepEqual(entries[2].codes, ["G04.9"]);
+});
+
+
+test("keeps a long left-column entry intact when it crosses the page midpoint", () => {
+  const items = [];
+  for (let i = 0; i < 12; i++) {
+    const y = 700 - i * 12;
+    items.push(
+      { str: i === 0 ? "Long index term with qualifiers" : "Left column entry " + i, transform: [1,0,0,1,70,y], width: i === 0 ? 270 : 100 },
+      { str: "Right column term " + i, transform: [1,0,0,1,360,y], width: 110 }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 500);
+  assert.equal(lines.length, 24);
+  assert.match(lines[0], /^Long index term with qualifiers$/);
+  assert.match(lines[12], /^Right column term 0$/);
+  assert.ok(!lines.some(line => line.includes("Long index term") && line.includes("Right column term")));
+});
+
+test("fallback uses real line breaks when PDF.js coordinates are unavailable", () => {
+  const lines = index.groupPdfTextItems([
+    { str: "Abscess", hasEOL: true },
+    { str: "Diabetes", hasEOL: false },
+    { str: "Hypertension", hasEOL: true }
+  ], 0);
+  assert.deepEqual(lines, ["Abscess", "Diabetes Hypertension"]);
+});
+
+test("recognizes the WHO Volume 3 running heading for external causes", () => {
+  const state = { section: "diseases", stack: {} };
+  const entries = index.parseIndexLines([
+    "Final disease index term Z99.9",
+    "EXTERNAL CAUSES OF INJURY",
+    "Struck by object W20"
+  ], 717, state);
+  assert.equal(entries.length, 2);
+  assert.equal(entries[0].section, "diseases");
+  assert.equal(entries[1].section, "external_causes");
+});
+
+test("stops at the actual WHO Volume 3 drug and chemical table heading", () => {
+  const state = { section: "external_causes", stack: {} };
+  const entries = index.parseIndexLines([
+    "Suicide X84",
+    "TABLE OF DRUGS AND CHEMICALS",
+    "Aspirin T39.0 X40 X60 Y10 Y45.1"
+  ], 723, state);
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].section, "external_causes");
+  assert.equal(state.finished, true);
+});
+
+
+test("splits WHO two-column rows by recurring text origins even when gutter is narrow", () => {
+  const items = [];
+  for (let i = 0; i < 12; i++) {
+    const y = 700 - i * 12;
+    items.push(
+      { str: "Left entry " + i + " A" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,70,y], width: 170, hasEOL: false },
+      { str: "Right entry " + i + " B" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,250,y], width: 140, hasEOL: false }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 595);
+  assert.equal(lines.length, 24);
+  assert.match(lines[0], /^Left entry 0/);
+  assert.match(lines[11], /^Left entry 11/);
+  assert.match(lines[12], /^Right entry 0/);
+  assert.match(lines[23], /^Right entry 11/);
+  assert.ok(!lines.some(line => line.includes("Right entry") && line.includes("Left entry")));
+});
+
+
+test("joins indented visual continuation lines without absorbing new subentries", () => {
+  const lines = index.groupPdfTextItems([
+    { str: "Abduction contracture, hip or other", transform: [1,0,0,1,70,700], width: 160 },
+    { str: "joint - see Contraction, joint", transform: [1,0,0,1,79,690], width: 145 },
+    { str: "- knee", transform: [1,0,0,1,70,680], width: 35 },
+    { str: "M24.5", transform: [1,0,0,1,110,680], width: 25 }
+  ], 0);
+  assert.deepEqual(lines, [
+    "Abduction contracture, hip or other joint - see Contraction, joint",
+    "- knee M24.5"
+  ]);
+});
+
+
+test("treats continued column headings as hierarchy markers, not diagnosis entries", () => {
+  const state = { section: "diseases", stack: {} };
+  const entries = index.parseIndexLines([
+    "Abscess",
+    "-brain G06.0",
+    "Abscess—continued",
+    "-spinal cord G06.1"
+  ], 18, state);
+  assert.equal(entries.length, 3);
+  assert.equal(entries[2].term, "spinal cord G06.1");
+  assert.equal(entries[2].parent, "Abscess");
+  assert.equal(entries[2].searchText.includes("continued"), false);
+});
+
+
+test("detects columns from recurring text runs, not fragmented inline origins", () => {
+  const items = [];
+  for (let i = 0; i < 12; i++) {
+    const y = 700 - i * 12;
+    // Each column line is split into multiple PDF.js items. The inline
+    // fragments have different x origins but must remain in their own row.
+    items.push(
+      { str: "Left term " + i, transform: [1,0,0,1,70,y], width: 48 },
+      { str: "L" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,122,y], width: 24 },
+      { str: "Right term " + i, transform: [1,0,0,1,250,y], width: 55 },
+      { str: "R" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,310,y], width: 24 }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 595);
+  assert.equal(lines.length, 24);
+  assert.match(lines[0], /^Left term 0/);
+  assert.match(lines[11], /^Left term 11/);
+  assert.match(lines[12], /^Right term 0/);
+  assert.match(lines[23], /^Right term 11/);
+  assert.ok(!lines.some(line => line.includes("Left term") && line.includes("Right term")));
+});
+
+
+test("keeps a fragmented left-column line together when a continuation crosses the gutter midpoint", () => {
+  const items = [];
+  for (let i = 0; i < 12; i++) {
+    const y = 700 - i * 12;
+    items.push(
+      { str: "Left entry " + i, transform: [1,0,0,1,70,y], width: 105 },
+      { str: "continued text", transform: [1,0,0,1,181,y], width: 55 },
+      { str: "Right entry " + i, transform: [1,0,0,1,250,y], width: 100 }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 595);
+  assert.equal(lines.length, 24);
+  assert.match(lines[0], /^Left entry 0 continued text$/);
+  assert.match(lines[12], /^Right entry 0$/);
+  assert.ok(!lines.some(line => line.includes("Left entry") && line.includes("Right entry")));
+});
+
+
+test("skips the WHO land transport accident matrix instead of flattening its columns", () => {
+  const state = { section: "external_causes", stack: {} };
+  const entries = index.parseIndexLines([
+    "Table of  land transport accidents",
+    "Victim and mode of transport",
+    "Pedestrian or animal V01 V02 V03 V04 V05 V06 V09",
+    "Pedal cyclist V10 V11 V12 V13 V14 V15 V16 V17 V18 V19"
+  ], 677, state);
+  assert.deepEqual(entries, []);
+  assert.equal(state.section, "external_causes");
+
+});
+
+test("ignores WHO running page headers instead of indexing them as diagnoses", () => {
+  const entries = index.parseIndexLines([
+    "INTERNATIONAL CLASSIFICATION OF DISEASES",
+    "ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY",
+    "Abscess",
+    "- brain G06.0"
+  ], 21, { section: "diseases", stack: {} });
+  assert.deepEqual(entries.map(entry => entry.term), ["Abscess", "brain G06.0"]);
+});
+
+
+test("starts only at the Section I heading and stops at Section III only after Section II", () => {
+  const state = { section: "diseases", stack: {}, started: false };
+  const entries = index.parseIndexLines([
+    "Table of drugs and chemicals",
+    "Section I is the index of diseases and injuries",
+    "SECTION I",
+    "Alphabetical index to diseases and",
+    "nature of injury",
+    "Abscess",
+    "– brain (any part) G06.0"
+  ], 17, state);
+  assert.deepEqual(entries.map(entry => entry.term), ["Abscess", "brain (any part) G06.0"]);
+  assert.equal(entries[1].parent, "Abscess");
+  assert.equal(state.started, true);
+  assert.equal(state.finished, undefined);
+
+  index.parseIndexLines(["SECTION II", "External causes of injury", "Assault"], 669, state);
+  assert.equal(state.section, "external_causes");
+  index.parseIndexLines(["SECTION III"], 723, state);
+  assert.equal(state.finished, true);
+});
+
+test("parses Unicode en-dash subentries as hierarchy levels", () => {
+  const state = { section: "diseases", stack: {} };
+  const entries = index.parseIndexLines([
+    "Abscess",
+    "– brain G06.0",
+    "– – cystic G06.0"
+  ], 24, state);
+  assert.equal(entries[1].parent, "Abscess");
+  assert.equal(entries[2].parent, "brain G06.0");
+  assert.match(entries[2].searchText, /abscess brain cystic/);
+});
+
+
+test("running headers and letter dividers do not collapse a right-column page", () => {
+  const items = [
+    { str: "ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY", transform: [1,0,0,1,169,760], width: 245 },
+    { str: "A", transform: [1,0,0,1,233,700], width: 12 }
+  ];
+  for (let i = 0; i < 12; i++) {
+    const y = 688 - i * 12;
+    items.push(
+      { str: "Left term " + i, transform: [1,0,0,1,70,y], width: 75 },
+      { str: "Right term " + i, transform: [1,0,0,1,250,y], width: 85 }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 595);
+  const rightRows = lines.filter(line => /^Right term \d+$/.test(line));
+  assert.equal(rightRows.length, 12);
+  assert.ok(!lines.some(line => /Right term 0.*Right term 1/.test(line)));
+  assert.ok(lines.includes("ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY"));
+  assert.ok(lines.includes("A"));
+});
+
+test("broad searches rank the lead term ahead of matching nested subentries", () => {
+  const entries = index.parseIndexLines([
+    "Abscess (embolic) (infective) L02.9",
+    "-brain G06.0",
+    "Artery",
+    "-abscess I77.8",
+    "Diabetes, diabetic (mellitus) E14.-",
+    "-complicating pregnancy O24.9"
+  ], 24, { section: "diseases", stack: {} });
+  const abscess = index.searchEntries(entries, "abscess", 10);
+  assert.equal(abscess[0].parent, null);
+  assert.match(abscess[0].term, /^Abscess/i);
+  const diabetes = index.searchEntries(entries, "diabetes", 10);
+  assert.equal(diabetes[0].parent, null);
+  assert.match(diabetes[0].term, /^Diabetes/i);
 });

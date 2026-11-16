@@ -13,6 +13,8 @@ function createPdfFixture() {
     "BT", "/F1 12 Tf",
     "72 720 Td (SECTION I - Alphabetical index to diseases and nature of injury) Tj",
     "0 -20 Td (A) Tj", "0 -20 Td (Abscess) Tj", "0 -20 Td (-brain G06.0) Tj",
+    "0 -20 Td (SECTION II - External causes of injury) Tj",
+    "0 -20 Td (Assault W50) Tj",
     "0 -20 Td (SECTION III - Table of drugs and chemicals) Tj",
     "0 -20 Td (Drug sample T42.0) Tj", "ET"
   ].join("\n");

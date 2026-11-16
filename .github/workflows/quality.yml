@@ -2,9 +2,7 @@ name: MedAudit AI Quality Checks
 
 on:
   push:
-    branches: [main, "feature/**"]
   pull_request:
-    branches: [main]
 
 permissions:
   contents: read
@@ -24,5 +22,36 @@ jobs:
         run: npm install --no-save --no-package-lock playwright@1.58.2
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+      - name: Try to obtain WHO 2016 PDF for optional full-source regression
+        id: who_pdf
+        run: |
+          set -euo pipefail
+          urls=(
+            "https://iris.who.int/bitstream/handle/10665/246208/9789241549165-V3-eng.pdf?sequence=3"
+            "https://apps.who.int/iris/bitstream/handle/10665/246208/9789241549165-V3-eng.pdf?sequence=3"
+          )
+          downloaded=false
+          for url in "${urls[@]}"; do
+            rm -f /tmp/9789241549165-V3-eng.pdf
+            curl --silent --show-error --location --retry 1 --retry-all-errors \
+              --user-agent "Mozilla/5.0" --header "Accept: application/pdf" \
+              --output /tmp/9789241549165-V3-eng.pdf "$url" || true
+            if [ -s /tmp/9789241549165-V3-eng.pdf ] && \
+               [ "$(stat -c%s /tmp/9789241549165-V3-eng.pdf)" -gt 1000000 ] && \
+               head -c 5 /tmp/9789241549165-V3-eng.pdf | grep -q "%PDF-"; then
+              downloaded=true
+              break
+            fi
+          done
+          if [ "$downloaded" = true ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "WHO PDF available; full-source regression will run."
+          else
+            rm -f /tmp/9789241549165-V3-eng.pdf
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::WHO IRIS blocked automated direct download; full-source test will be skipped. Supply WHO_ICD10_INDEX_PDF locally to run it."
+          fi
       - name: Run unit and browser tests
-        run: node --test tests/audit.test.cjs tests/icd10-index.test.cjs tests/browser-smoke.test.cjs
+        env:
+          WHO_ICD10_INDEX_PDF: ${{ steps.who_pdf.outputs.available == 'true' && '/tmp/9789241549165-V3-eng.pdf' || '' }}
+        run: node --test tests/*.test.cjs
