@@ -199,6 +199,13 @@
 
   function parseIndexLines(lines, pageNumber, state) {
     const output = [], parserState = state || { section: "diseases", stack: {} };
+    // WHO Volume 3 contains a multi-axis transport accident matrix page.
+    // It is not a normal alphabetical entry list; flattening it would attach
+    // codes from different table columns to the same term. Skip that page
+    // rather than emitting misleading index records.
+    if ((lines || []).some(rawLine =>
+      /^Table of\s+land transport accidents$/i.test(String(rawLine ?? "").replace(/\s+/g, " ").trim())
+    )) return [];
     for (const rawLine of lines || []) {
       if (parserState.finished) break;
       const line = String(rawLine ?? "").replace(/\u00ad/g, "-").replace(/\u00a0/g, " ")
