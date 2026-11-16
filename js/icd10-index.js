@@ -175,21 +175,27 @@
     // wrapped text/code lines are indented by about 9 pt and do not begin with
     // the index dash used for a new subentry. Keeping them together prevents
     // orphaned codes and truncated terms such as "hip or other / joint".
+    const isLayoutMarker = text =>
+      /^(?:\d{1,4}|[A-Z]|ICD-10\s+2e\s+Volume\s+3|INTERNATIONAL CLASSIFICATION OF DISEASES|ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY|EXTERNAL CAUSES OF INJUR(?:Y|IES)|SECTION\s+I{1,3}\b.*|TABLE OF DRUGS AND CHEMICALS)$/i.test(String(text || "").trim());
+    // Centered running headers, page numbers and single-letter dividers may
+    // sit left of a real column's first body line. They must not become the
+    // column's baseline origin, or right-column rows can be concatenated.
+    const bodyFragments = fragments.filter(fragment => !isLayoutMarker(fragment.text));
     const merged = [];
     const columnBases = new Map();
     for (const fragment of fragments) {
       const column = fragment.column || 0;
+      const baseCandidates = bodyFragments.filter(part => (part.column || 0) === column);
       const base = columnBases.has(column)
         ? columnBases.get(column)
-        : Math.min(...fragments.filter(part => (part.column || 0) === column).map(part => part.x));
+        : Math.min(...(baseCandidates.length ? baseCandidates : fragments.filter(part => (part.column || 0) === column)).map(part => part.x));
       columnBases.set(column, base);
       const text = fragment.text;
       const previous = merged[merged.length - 1];
       const sameColumn = previous && (previous.column || 0) === column;
       const indentedContinuation = fragment.x > base + 4 &&
         !/^(?:-|–|—)/.test(text) &&
-        !/^(?:SECTION\s|EXTERNAL CAUSES OF INJURY$|TABLE OF DRUGS)/i.test(text) &&
-        !/^[A-Z]$/.test(text);
+        !isLayoutMarker(text);
       const closeBaseline = sameColumn && Math.abs(previous.y - fragment.y) <= 18;
       if (sameColumn && closeBaseline && indentedContinuation) {
         previous.text = (previous.text + " " + text).replace(/\s+/g, " ").trim();
