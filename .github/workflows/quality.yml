@@ -54,7 +54,4 @@ jobs:
       - name: Run unit and browser tests
         env:
           WHO_ICD10_INDEX_PDF: ${{ steps.who_pdf.outputs.available == 'true' && '/tmp/9789241549165-V3-eng.pdf' || '' }}
-        run: node --test tests/*.test.cjs      - name: Run unit and browser tests including the full WHO PDF
-        env:
-          WHO_ICD10_INDEX_PDF: /tmp/9789241549165-V3-eng.pdf
         run: node --test tests/*.test.cjs
