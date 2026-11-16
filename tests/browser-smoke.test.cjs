@@ -100,6 +100,42 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     assert.match(restoredResults, /brain G06\.0/);
     assert.match(restoredResults, /Ditemukan sebagai kode terminal/);
 
+    // A cache quota failure must not discard the freshly parsed in-memory reference.
+    await page.evaluate(() => {
+      Object.defineProperty(indexedDB, "open", {
+        configurable: true,
+        value: () => {
+          const request = {};
+          queueMicrotask(() => {
+            request.result = {
+              transaction: () => ({
+                objectStore: () => ({
+                  put: () => { throw new DOMException("Quota exceeded", "QuotaExceededError"); }
+                })
+              }),
+              close: () => {}
+            };
+            if (request.onsuccess) request.onsuccess();
+          });
+          return request;
+        }
+      });
+    });
+    await page.locator("#indexPdfFile").setInputFiles({
+      name: "index-fixture.pdf", mimeType: "application/pdf", buffer: createPdfFixture()
+    });
+    await page.locator("#tabularFile").setInputFiles({
+      name: "tabular-fixture.txt", mimeType: "text/plain", buffer: Buffer.from(tabular)
+    });
+    await page.locator("#loadIcdReferences").click();
+    await page.waitForFunction(() =>
+      document.querySelector("#icdIndexStatus").textContent.includes("Pencarian siap digunakan pada sesi ini")
+    );
+    assert.equal(await page.locator("#icdIndexStatus").getAttribute("class"), "warn");
+    await page.locator("#indexSearchInput").fill("brain");
+    await page.locator("#searchIcdIndex").click();
+    assert.match(await page.locator("#indexResults").innerText(), /brain G06\\.0/);
+
     // Invalid backup input must be rejected without replacing the existing local records.
     const recordsBeforeImport = await page.evaluate(() => localStorage.getItem("medaudit_ai_cases_v02"));
     await page.locator("#jsonFile").setInputFiles({
