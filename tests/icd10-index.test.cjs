@@ -105,3 +105,27 @@ test("fallback uses real line breaks when PDF.js coordinates are unavailable", (
   ], 0);
   assert.deepEqual(lines, ["Abscess", "Diabetes Hypertension"]);
 });
+
+test("recognizes the WHO Volume 3 running heading for external causes", () => {
+  const state = { section: "diseases", stack: {} };
+  const entries = index.parseIndexLines([
+    "Final disease index term Z99.9",
+    "EXTERNAL CAUSES OF INJURY",
+    "Struck by object W20"
+  ], 717, state);
+  assert.equal(entries.length, 2);
+  assert.equal(entries[0].section, "diseases");
+  assert.equal(entries[1].section, "external_causes");
+});
+
+test("stops at the actual WHO Volume 3 drug and chemical table heading", () => {
+  const state = { section: "external_causes", stack: {} };
+  const entries = index.parseIndexLines([
+    "Suicide X84",
+    "TABLE OF DRUGS AND CHEMICALS",
+    "Aspirin T39.0 X40 X60 Y10 Y45.1"
+  ], 723, state);
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].section, "external_causes");
+  assert.equal(state.finished, true);
+});
