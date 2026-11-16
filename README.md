@@ -39,6 +39,8 @@ https://syidarynd.github.io/medaudit-ai/
 - Filter berdasarkan status audit.
 - Pemeriksaan kualitas data berbasis aturan DQ-01 sampai DQ-10.
 - Pencarian istilah melalui Alphabetical Index ICD-10 WHO Volume 3 edisi 2016 yang diekstrak di browser dengan pemisahan dua kolom, hierarki dash Unicode, dan rujukan silang.
+- Validasi sumber ICD-10 sebelum ekstraksi: PDF maksimal 50 MB dan diperiksa signature `%PDF-`; Tabular TXT maksimal 20 MB dan harus menghasilkan struktur kode yang dikenali.
+- Kegagalan pemrosesan file pengganti tidak menghapus referensi ICD-10 valid yang sudah tersedia di memori/cache.
 - Referensi hasil ekstraksi disimpan di IndexedDB dan dimuat otomatis pada kunjungan berikutnya di browser/perangkat yang sama.
 - Pembandingan kode indeks dengan daftar kode terminal/non-terminal pada Tabular WHO 2019.
 - Ekspor laporan ke CSV.
