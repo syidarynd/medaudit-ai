@@ -33,6 +33,7 @@ Kedua sumber **bukan edisi yang sama**. Hasil pembandingan tidak boleh ditafsirk
 - PDF diperiksa signature awal `%PDF-` sebelum diteruskan ke PDF.js; file lebih dari 50 MB ditolak.
 - Tabular TXT lebih dari 20 MB ditolak dan harus menghasilkan struktur kode yang dikenali sebelum ekstraksi PDF dimulai.
 - Proses penyiapan menggunakan hasil sementara. Referensi lama tetap dipertahankan jika file pengganti tidak valid atau proses ekstraksi gagal.
+- Setiap halaman PDF dibersihkan setelah diproses melalui blok `finally`; resource dokumen/loading task juga dihancurkan setelah proses selesai atau gagal.
 - File sumber asli tidak dikirim ke server aplikasi dan tidak disimpan.
 - Hasil ekstraksi terstruktur (entri indeks dan peta kode) disimpan di IndexedDB dengan cache schema v3. Perubahan parser akan mengabaikan cache lama sehingga file sumber perlu diproses ulang satu kali.
 - Setelah halaman dimuat ulang, referensi dimuat otomatis pada browser/perangkat yang sama.
