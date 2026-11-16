@@ -40,7 +40,7 @@ Kedua sumber **bukan edisi yang sama**. Hasil pembandingan tidak boleh ditafsirk
 
 File PDF yang diunggah pengguna merupakan salinan pihak ketiga; asal dan hak distribusinya belum diverifikasi. Karena itu dataset hasil ekstraksi tidak dimasukkan ke repositori publik.
 
-FAQ resmi WHO menyatakan WHO adalah pemegang hak cipta ICD-10 dan dapat memberikan lisensi untuk penggunaannya secara komersial maupun non-komersial. Karena file yang diunggah merupakan salinan Volume 3 edisi 2013 dari sumber pihak ketiga, ketentuan lisensi spesifik untuk salinan tersebut belum dapat dipastikan. Periksa pemberitahuan hak cipta pada edisi/publikasi sumber sebelum mendistribusikan atau membuat dataset turunan.
+FAQ resmi WHO menyatakan WHO adalah pemegang hak cipta ICD-10 dan dapat memberikan lisensi untuk penggunaannya secara komersial maupun non-komersial. Karena file yang diunggah merupakan salinan Volume 3 edisi 2016 dari sumber pihak ketiga, ketentuan lisensi spesifik untuk salinan tersebut belum dapat dipastikan. Periksa pemberitahuan hak cipta pada edisi/publikasi sumber sebelum mendistribusikan atau membuat dataset turunan.
 
 Rujukan:
 - https://www.who.int/about/policies/publishing/copyright
