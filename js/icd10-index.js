@@ -65,9 +65,9 @@
     // Detect the two column origins from each visual row's first x-coordinate.
     // This avoids relying on a text-gap threshold: in the WHO PDF the gutter can
     // be only ~20 pt, while a long line in one column may itself contain gaps.
-    const starts = rows.map(row => Math.min(...row.items.map(item => item.transform[4])));
+    const starts = usable.map(item => item.transform[4]);
     let boundary = null;
-    if (starts.length >= 12) {
+    if (starts.length >= 20) {
       let c1 = Math.min(...starts), c2 = Math.max(...starts);
       for (let i = 0; i < 12; i++) {
         const left = starts.filter(x => Math.abs(x - c1) <= Math.abs(x - c2));
@@ -81,7 +81,7 @@
       const low = Math.min(c1, c2), high = Math.max(c1, c2);
       const leftCount = starts.filter(x => Math.abs(x - low) <= Math.abs(x - high)).length;
       const rightCount = starts.length - leftCount;
-      if (high - low >= 70 && leftCount >= 5 && rightCount >= 5) boundary = (low + high) / 2;
+      if (high - low >= 70 && leftCount >= 10 && rightCount >= 10) boundary = (low + high) / 2;
     }
 
     function buildLine(lineItems) {
