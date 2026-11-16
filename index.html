@@ -396,18 +396,25 @@ async function restoreIcdCache(){
 }
 function pdfPageLines(items,pageWidth){return MedAuditIndex.groupPdfTextItems(items,pageWidth);}
 
+const MAX_INDEX_PDF_BYTES=50*1024*1024;
+const MAX_TABULAR_TEXT_BYTES=20*1024*1024;
 async function loadIcdReferences(){
  const pdfFile=$("indexPdfFile").files[0],tabularFile=$("tabularFile").files[0],button=$("loadIcdReferences"),progress=$("icdIndexProgress");
  if(!pdfFile||!tabularFile){setIndexStatus("Pilih kedua file: PDF Alphabetical Index dan Tabular TXT.","error");return;}
+ if(pdfFile.size>MAX_INDEX_PDF_BYTES){setIndexStatus("Ukuran PDF melebihi batas 50 MB. Gunakan file sumber yang lebih kecil.","error");return;}
+ if(tabularFile.size>MAX_TABULAR_TEXT_BYTES){setIndexStatus("Ukuran Tabular TXT melebihi batas 20 MB. Periksa file sumber yang dipilih.","error");return;}
+ const signature=new TextDecoder().decode(await pdfFile.slice(0,5).arrayBuffer());
+ if(signature!=="%PDF-"){setIndexStatus("File pertama bukan PDF yang valid. Pilih Alphabetical Index PDF WHO.","error");return;}
  const pdfjsLib=window.pdfjsLib||(window.pdfjsReady?await window.pdfjsReady:null);
  if(!pdfjsLib||!window.MedAuditIndex){setIndexStatus("Library PDF.js atau modul indeks gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.","error");return;}
- button.disabled=true;progress.classList.remove("hidden");progress.value=0;icdIndexEntries=[];icdTabularCodes=new Map();
+ button.disabled=true;progress.classList.remove("hidden");progress.value=0;
  let pdfLoadingTask=null,pdfDocument=null;
  try{
   setIndexStatus("Membaca file Tabular WHO 2019…");
   const tabularText=await tabularFile.text();
   const parsedTabular=MedAuditIndex.parseTabularText(tabularText);
-  icdTabularCodes=parsedTabular.codeMap;
+  if(!parsedTabular.codeMap.size)throw new Error("Tabular TXT tidak berisi struktur kode WHO yang dikenali. Pastikan file yang dipilih adalah icd102019syst_codes.txt.");
+  const extractedEntries=[];
   setIndexStatus("Membuka PDF dan mengekstrak teks indeks…");
   pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.5.438/pdf.worker.min.mjs";
   pdfLoadingTask=pdfjsLib.getDocument({data:await pdfFile.arrayBuffer()});
@@ -418,17 +425,18 @@ async function loadIcdReferences(){
    const page=await pdfDocument.getPage(pageNumber);
    const content=await page.getTextContent();
    const lines=pdfPageLines(content.items,page.getViewport({scale:1}).width);
-   icdIndexEntries.push(...MedAuditIndex.parseIndexLines(lines,pageNumber,parserState));
+   extractedEntries.push(...MedAuditIndex.parseIndexLines(lines,pageNumber,parserState));
    page.cleanup();
    if(pageNumber%10===0||pageNumber===pageLimit||parserState.finished){
     progress.value=Math.round(pageNumber/pageLimit*100);
-    setIndexStatus("Memproses halaman "+pageNumber+" dari "+pageLimit+" · "+icdIndexEntries.length.toLocaleString("id-ID")+" baris indeks terstruktur…");
+    setIndexStatus("Memproses halaman "+pageNumber+" dari "+pageLimit+" · "+extractedEntries.length.toLocaleString("id-ID")+" baris indeks terstruktur…");
     await new Promise(resolve=>requestAnimationFrame(resolve));
    }
   }
   await pdfLoadingTask.destroy();pdfLoadingTask=null;pdfDocument=null;
-  if(!icdIndexEntries.length)throw new Error("Tidak ada teks indeks yang berhasil diekstrak dari PDF. Pastikan file PDF memiliki teks yang dapat dipilih.");
-  if(!icdTabularCodes.size)throw new Error("Tidak ada kode yang terbaca dari Tabular TXT. Pastikan file yang dipilih adalah icd102019syst_codes.txt.");
+  if(!extractedEntries.length)throw new Error("Tidak ada teks indeks yang berhasil diekstrak dari PDF. Pastikan file PDF memiliki teks yang dapat dipilih.");
+  icdIndexEntries=extractedEntries;
+  icdTabularCodes=parsedTabular.codeMap;
   let cacheSaved=false,cacheWarning="";
   try{await saveIcdCache();cacheSaved=true;}
   catch(cacheError){cacheWarning=cacheError&&cacheError.message?cacheError.message:"penyimpanan lokal gagal";console.warn("MedAudit AI: referensi siap digunakan, tetapi cache IndexedDB gagal disimpan.",cacheError);}
@@ -436,8 +444,8 @@ async function loadIcdReferences(){
   setIndexStatus(completionMessage,cacheSaved?"ok":"warn");
   $("indexResults").innerHTML='<div class="empty">Referensi siap. Cari istilah diagnosis tanpa mengunggah ulang file.</div>';
  }catch(error){
-  icdIndexEntries=[];icdTabularCodes=new Map();
-  setIndexStatus("Gagal memproses referensi: "+(error&&error.message?error.message:"kesalahan tidak diketahui"),"error");
+  const retained=icdIndexEntries.length>0;
+  setIndexStatus("Gagal memproses referensi: "+(error&&error.message?error.message:"kesalahan tidak diketahui")+(retained?" Referensi sebelumnya tetap tersedia.":""),"error");
  }finally{if(pdfLoadingTask){try{await pdfLoadingTask.destroy();}catch(error){}}button.disabled=false;}
 }
 function renderIcdSearch(){

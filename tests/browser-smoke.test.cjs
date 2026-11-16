@@ -88,6 +88,19 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     assert.match(results, /Ditemukan sebagai kode terminal/);
     assert.doesNotMatch(results, /Drug sample/);
 
+    // A malformed replacement PDF must not erase a previously valid in-memory index.
+    await page.locator("#indexPdfFile").setInputFiles({
+      name: "not-a-pdf.pdf", mimeType: "application/pdf", buffer: Buffer.from("not a PDF")
+    });
+    await page.locator("#tabularFile").setInputFiles({
+      name: "tabular-fixture.txt", mimeType: "text/plain", buffer: Buffer.from(tabular)
+    });
+    await page.locator("#loadIcdReferences").click();
+    await page.waitForFunction(() => document.querySelector("#icdIndexStatus").textContent.includes("bukan PDF yang valid"));
+    await page.locator("#indexSearchInput").fill("brain");
+    await page.locator("#searchIcdIndex").click();
+    assert.match(await page.locator("#indexResults").innerText(), /brain G06\.0/);
+
     // Cached parsed references must survive a reload and restore without file selection.
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForFunction(() => window.MedAuditIndex && document.querySelector("#icdIndexStatus").textContent.includes("Referensi dimuat otomatis"), { timeout: 10000 });

@@ -14,8 +14,8 @@ Kedua sumber **bukan edisi yang sama**. Hasil pembandingan tidak boleh ditafsirk
 ## Cara menggunakan
 
 1. Buka tab **Indeks ICD-10**.
-2. Pilih file PDF Alphabetical Index WHO Volume 3 edisi 2016.
-3. Pilih file `icd102019syst_codes.txt` dari paket Tabular WHO 2019.
+2. Pilih file PDF Alphabetical Index WHO Volume 3 edisi 2016 (maksimal 50 MB).
+3. Pilih file `icd102019syst_codes.txt` dari paket Tabular WHO 2019 (maksimal 20 MB).
 4. Tekan **Muat & proses referensi** dan tunggu ekstraksi selesai.
 5. Masukkan istilah, subistilah, atau kode, lalu tekan **Cari indeks**.
 6. Baca konteks, rujukan silang, kode, dan nomor halaman PDF.
@@ -30,6 +30,9 @@ Kedua sumber **bukan edisi yang sama**. Hasil pembandingan tidak boleh ditafsirk
 ## Privasi dan penyimpanan
 
 - PDF dan TXT diproses di browser perangkat pengguna pada penyiapan pertama.
+- PDF diperiksa signature awal `%PDF-` sebelum diteruskan ke PDF.js; file lebih dari 50 MB ditolak.
+- Tabular TXT lebih dari 20 MB ditolak dan harus menghasilkan struktur kode yang dikenali sebelum ekstraksi PDF dimulai.
+- Proses penyiapan menggunakan hasil sementara. Referensi lama tetap dipertahankan jika file pengganti tidak valid atau proses ekstraksi gagal.
 - File sumber asli tidak dikirim ke server aplikasi dan tidak disimpan.
 - Hasil ekstraksi terstruktur (entri indeks dan peta kode) disimpan di IndexedDB dengan cache schema v3. Perubahan parser akan mengabaikan cache lama sehingga file sumber perlu diproses ulang satu kali.
 - Setelah halaman dimuat ulang, referensi dimuat otomatis pada browser/perangkat yang sama.
