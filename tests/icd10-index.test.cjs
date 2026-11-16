@@ -16,6 +16,21 @@ test("preserves hierarchy, cross references, and section changes", () => {
   assert.equal(entries[4].section,"external_causes");
 });
 
+test("counts source Tabular rows separately from distinct mapped codes", () => {
+  const text = [
+    "3;N;X;01;A00;A00.-;A00;A00;Cholera;Cholera",
+    "4;T;X;01;A00;A00.0;A00.0;A000;Cholera due to Vibrio cholerae 01, biovar cholerae;Cholera",
+    "4;T;X;01;A00;A00.1;A00.1;A001;Cholera due to Vibrio cholerae 01, biovar eltor;Cholera"
+  ].join("\\n");
+  const parsed = index.parseTabularText(text);
+  assert.equal(parsed.rows, 3);
+  assert.equal(parsed.codeMap.size, 4);
+  assert.equal(parsed.codeMap.has("A00.-"), true);
+  assert.equal(parsed.codeMap.has("A00"), true);
+  assert.equal(parsed.codeMap.has("A00.0"), true);
+  assert.equal(parsed.codeMap.has("A00.1"), true);
+});
+
 test("reads terminal and non-terminal tabular codes", () => {
   const text=["3;N;X;10;J90;J94.-;J94;J94;Other pleural conditions;Other pleural conditions","4;T;X;10;J90;J94.0;J94.0;J940;Chylous effusion;Chylous effusion","4;T;X;10;J90;J94.1;J94.1;J941;Fibrothorax;Fibrothorax"].join("\n");
   const parsed=index.parseTabularText(text);
