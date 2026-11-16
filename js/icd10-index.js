@@ -353,6 +353,9 @@
       else if (contextIndex >= 0 || tokenMatch) score = 40 + Math.max(0, contextIndex);
       else if (codeMatch) score = 60;
       else score = 100; // Cross-reference target matches rank below direct index terms.
+      // Prefer the lead-term entry when a broad query also occurs in many
+      // nested subentries (for example, "diabetes" under multiple conditions).
+      score += entry.parent ? 12 : -8;
       ranked.push({ entry, score });
     }
 
