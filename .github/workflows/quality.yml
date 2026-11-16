@@ -46,6 +46,29 @@ jobs:
             echo "Not a PDF or file too small; response preview:"
             head -c 500 /tmp/9789241549165-V3-eng.pdf || true
           done
+          if [ "$downloaded" != true ]; then
+            echo "Trying WHO IRIS DSpace REST API"
+            item_json="$(curl --silent --show-error --location --retry 2 --retry-all-errors \
+              --header "Accept: application/json" \
+              "https://iris.who.int/server/api/core/items?handle=10665%2F246208" || true)"
+            echo "$item_json" | head -c 2000
+            item_url="$(printf '%s' "$item_json" | jq -r '._embedded.items[0]._links.bundles.href // empty' 2>/dev/null || true)"
+            if [ -n "$item_url" ]; then
+              bundles="$(curl --silent --show-error --location "$item_url" || true)"
+              while IFS= read -r bitstreams_url; do
+                [ -n "$bitstreams_url" ] || continue
+                bitstreams="$(curl --silent --show-error --location "$bitstreams_url" || true)"
+                content_url="$(printf '%s' "$bitstreams" | jq -r '._embedded.bitstreams[]? | select(.name=="9789241549165-V3-eng.pdf") | ._links.content.href' | head -n 1)"
+                if [ -n "$content_url" ]; then
+                  curl --fail --location --retry 2 --retry-all-errors --output /tmp/9789241549165-V3-eng.pdf "$content_url"
+                  if [ "$(stat -c%s /tmp/9789241549165-V3-eng.pdf)" -gt 1000000 ] && head -c 5 /tmp/9789241549165-V3-eng.pdf | grep -q "%PDF-"; then
+                    downloaded=true
+                    break
+                  fi
+                fi
+              done < <(printf '%s' "$bundles" | jq -r '._embedded.bundles[]? | ._links.bitstreams.href' 2>/dev/null || true)
+            fi
+          fi
           test "$downloaded" = true
       - name: Run unit and browser tests including the full WHO PDF
         env:
