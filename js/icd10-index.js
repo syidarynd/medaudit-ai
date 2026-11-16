@@ -176,6 +176,20 @@
         parserState.finished = true; break;
       }
       if (/^\d{1,4}$/.test(line)) continue;
+
+      // Column/page continuation headings (for example "Abscess—continued")
+      // are running headers, not diagnosis entries. Restore their parent path
+      // so following indented rows remain children of the original index term.
+      const continuedHeading = line.match(/^((?:-\s*)*)(.+?)\s*[–—-]{1,2}\s*continued$/i);
+      if (continuedHeading) {
+        const headingDepth = (continuedHeading[1].match(/-/g) || []).length;
+        parserState.stack[headingDepth] = continuedHeading[2].trim();
+        for (const key of Object.keys(parserState.stack)) {
+          if (Number(key) > headingDepth) delete parserState.stack[key];
+        }
+        continue;
+      }
+
       const prefix = line.match(/^((?:-\s*)+)(.*)$/);
       let depth = 0, term = line;
       if (prefix) {
