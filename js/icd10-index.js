@@ -73,6 +73,7 @@
       return first.transform[4];
     }).sort((a, b) => a - b);
     let boundary = null;
+    let rightOrigin = null;
     if (rowStarts.length >= 20) {
       // The largest stable gap between recurring row starts separates the
       // left and right text columns. Requiring >=10 baselines per side avoids
@@ -87,7 +88,7 @@
       }
       if (splitAt >= 10 && rowStarts.length - splitAt >= 10 && largestGap >= 70) {
         const leftOrigin = rowStarts.slice(0, splitAt).reduce((a, b) => a + b, 0) / splitAt;
-        const rightOrigin = rowStarts.slice(splitAt).reduce((a, b) => a + b, 0) / (rowStarts.length - splitAt);
+        rightOrigin = rowStarts.slice(splitAt).reduce((a, b) => a + b, 0) / (rowStarts.length - splitAt);
         if (rightOrigin - leftOrigin >= 70) boundary = (leftOrigin + rightOrigin) / 2;
       }
     }
@@ -126,7 +127,7 @@
         // A fragmented long line can continue past the geometric midpoint.
         // Keep a nearby fragment with the left line when it follows an item
         // already assigned to that column; otherwise it starts the right one.
-        const continuesLeft = leftStarted && x >= boundary && x - leftRight <= 18;
+        const continuesLeft = leftStarted && x >= boundary && x < rightOrigin - 6 && x - leftRight <= 18;
         const column = x < boundary || continuesLeft ? 0 : 1;
         columns[column].push(item);
         if (column === 0) {
