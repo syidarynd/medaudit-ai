@@ -13,8 +13,8 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 |---|---|
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
-| Versi saat ini | Prototype v0.8.1 |
-| Target pengembangan | v0.8.1 |
+| Versi saat ini | Prototype v0.8.2 |
+| Target pengembangan | v0.8.2 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
 
