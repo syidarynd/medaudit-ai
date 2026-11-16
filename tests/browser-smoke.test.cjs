@@ -189,6 +189,26 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     assert.equal(new Set(repeatedMrnState.ids).size, 2, "each visit must receive a distinct internal ID");
     assert.deepEqual(repeatedMrnState.dq09, [false, false], "same patient MRN on different dates must not be flagged");
 
+    // Spreadsheet formula-like values must be exported as literal text.
+    await page.locator("#jsonFile").setInputFiles({
+      name: "csv-formula-values.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify({ records: [
+        { mrn: "=1+1", name: "+SUM(1,1)", admit: "2026-10-10", discharge: "2026-10-11", mainDx: "@SUM(1,1)", code: "-1+1", kelas: "Kelas 2", resumeComplete: true, dpjpSigned: true }
+      ] }))
+    });
+    page.once("dialog", dialog => dialog.accept());
+    await page.locator("#importJson").click();
+    await page.waitForFunction(() => document.querySelector("#appMessage").textContent.includes("Impor berhasil"));
+    const csvDownloadPromise = page.waitForEvent("download");
+    await page.locator("#csvExport2").click();
+    const csvDownload = await csvDownloadPromise;
+    const csvText = await fs.promises.readFile(await csvDownload.path(), "utf8");
+    assert.match(csvText, /"'=1\+1"/, "formula-like MRN must be prefixed as text");
+    assert.match(csvText, /"'+SUM\(1,1\)"/, "formula-like name must be prefixed as text");
+    assert.match(csvText, /"'@SUM\(1,1\)"/, "formula-like diagnosis must be prefixed as text");
+    assert.match(csvText, /"'-1\+1"/, "formula-like code must be prefixed as text");
+
     // Backup metadata must match the current application version.
     await page.locator('button[data-tab="dashboard"]').click();
     const backupDownloadPromise = page.waitForEvent("download");
@@ -196,7 +216,7 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     const backupDownload = await backupDownloadPromise;
     const backupPath = await backupDownload.path();
     const backup = JSON.parse(await fs.promises.readFile(backupPath, "utf8"));
-    assert.equal(backup.version, "0.8.1");
+    assert.equal(backup.version, "0.8.2");
 
     const gridColumns = await page.locator(".index-toolbar").first().evaluate(
       element => getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).length
