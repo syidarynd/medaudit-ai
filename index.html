@@ -308,7 +308,7 @@ $('importJson').addEventListener('click',async()=>{const file=$('jsonFile').file
 
 const ICD_CACHE_DB="medaudit-icd10-reference";
 const ICD_CACHE_STORE="reference";
-const ICD_CACHE_KEY="who-index-2016-tabular-2019";
+const ICD_CACHE_KEY="who-index-2016-tabular-2019-v3";
 let icdIndexEntries=[];
 let icdTabularCodes=new Map();
 const indexStatusLabels={matched:"Ditemukan sebagai kode terminal pada Tabular WHO 2019",non_terminal:"Kategori / kode non-terminal pada Tabular WHO 2019",not_found:"Tidak ditemukan pada Tabular WHO 2019 — perlu telaah perbedaan versi",no_code:"Tidak ada kode pada baris indeks"};
@@ -327,7 +327,7 @@ async function saveIcdCache(){
  try{await new Promise((resolve,reject)=>{
   const tx=db.transaction(ICD_CACHE_STORE,"readwrite");
   tx.objectStore(ICD_CACHE_STORE).put({
-   schemaVersion:2,createdAt:new Date().toISOString(),
+   schemaVersion:3,createdAt:new Date().toISOString(),
    indexEdition:"ICD-10 Volume 3 (Alphabetical Index), Fifth edition 2016",
    tabularEdition:"WHO ICD-10 2019",
    entries:icdIndexEntries,
@@ -360,7 +360,7 @@ async function restoreIcdCache(){
  try{
   setIndexStatus("Memeriksa referensi ICD-10 yang tersimpan di perangkat…");
   const cached=await readIcdCache();
-  if(!cached||cached.schemaVersion!==2||!Array.isArray(cached.entries)||!Array.isArray(cached.codes)||!cached.entries.length||!cached.codes.length){
+  if(!cached||cached.schemaVersion!==3||!Array.isArray(cached.entries)||!Array.isArray(cached.codes)||!cached.entries.length||!cached.codes.length){
    setIndexStatus("Penyiapan pertama: pilih PDF dan TXT satu kali. Setelah diproses, referensi akan dimuat otomatis pada kunjungan berikutnya.","muted");
    $("indexResults").innerHTML='<div class="empty">Referensi belum disiapkan pada browser ini. Pilih kedua file satu kali.</div>';
    return;
