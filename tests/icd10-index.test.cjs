@@ -85,16 +85,19 @@ test("coordinate-grouped index rows retain their own codes", () => {
 
 
 test("keeps a long left-column entry intact when it crosses the page midpoint", () => {
-  const lines = index.groupPdfTextItems([
-    { str: "Long index term with qualifiers", transform: [1,0,0,1,40,700], width: 270 },
-    { str: "Right column term", transform: [1,0,0,1,360,700], width: 110 },
-    { str: "G06.1", transform: [1,0,0,1,40,685], width: 28 }
-  ], 500);
-  assert.deepEqual(lines, [
-    "Long index term with qualifiers",
-    "G06.1",
-    "Right column term"
-  ]);
+  const items = [];
+  for (let i = 0; i < 12; i++) {
+    const y = 700 - i * 12;
+    items.push(
+      { str: i === 0 ? "Long index term with qualifiers" : "Left column entry " + i, transform: [1,0,0,1,70,y], width: i === 0 ? 270 : 100 },
+      { str: "Right column term " + i, transform: [1,0,0,1,360,y], width: 110 }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 500);
+  assert.equal(lines.length, 24);
+  assert.match(lines[0], /^Long index term with qualifiers$/);
+  assert.match(lines[12], /^Right column term 0$/);
+  assert.ok(!lines.some(line => line.includes("Long index term") && line.includes("Right column term")));
 });
 
 test("fallback uses real line breaks when PDF.js coordinates are unavailable", () => {
