@@ -7,7 +7,7 @@
 
 **Jenis dokumen:** Daftar kasus pengujian fungsional dan regresi
 
-**Status dokumen:** Draft Pengujian
+**Status dokumen:** Katalog skenario uji dan referensi pencatatan hasil
 
 ---
 
@@ -165,12 +165,12 @@ Tanggal keluar yang kosong diperbolehkan untuk kunjungan yang masih berlangsung.
 
 | ID | Skenario | Hasil yang Diharapkan | Status |
 |---|---|---|---|
-| TC-IDX-01 | Memuat PDF Alphabetical Index dan Tabular TXT | Referensi diproses di browser dan jumlah entri ditampilkan | Belum diuji browser |
-| TC-IDX-02 | Cari istilah utama dan subistilah | Hasil mempertahankan konteks hierarki dan halaman sumber | Belum diuji browser |
-| TC-IDX-03 | Cari istilah dengan rujukan silang | Label see / see also dan target rujukan ditampilkan | Belum diuji browser |
-| TC-IDX-04 | Kode terminal ada pada Tabular 2019 | Status pembanding terminal ditampilkan | Belum diuji browser |
-| TC-IDX-05 | Kode tidak ditemukan pada Tabular 2019 | Status perlu telaah ditampilkan, bukan dinyatakan invalid | Belum diuji browser |
-| TC-IDX-06 | Muat ulang halaman | File referensi harus dipilih dan diproses ulang; tidak tersimpan di LocalStorage | Belum diuji browser |
+| TC-IDX-01 | Memuat PDF Alphabetical Index dan Tabular TXT | Referensi diproses di browser dan jumlah entri ditampilkan | Lulus: browser fixture otomatis dan impor PDF WHO 848 halaman secara manual di Android |
+| TC-IDX-02 | Cari istilah utama dan subistilah | Hasil mempertahankan konteks hierarki dan halaman sumber | Lulus: browser fixture otomatis dan lima pencarian baseline manual di Android |
+| TC-IDX-03 | Cari istilah dengan rujukan silang | Label see / see also dan target rujukan ditampilkan | Unit test parser tersedia; uji manual khusus belum direkap |
+| TC-IDX-04 | Kode terminal ada pada Tabular 2019 | Status pembanding terminal ditampilkan | Lulus: browser fixture otomatis dan unit test status kode |
+| TC-IDX-05 | Kode tidak ditemukan pada Tabular 2019 | Status perlu telaah ditampilkan, bukan dinyatakan invalid | Lulus: unit test status not_found |
+| TC-IDX-06 | Muat ulang halaman | Referensi dipulihkan otomatis dari IndexedDB tanpa memilih ulang file pada browser/perangkat yang sama | Lulus: browser smoke test otomatis dan uji reload manual Android |
 
 ## 5. PENGUJIAN FUNGSIONAL APLIKASI
 
@@ -282,7 +282,10 @@ Pengujian dinyatakan berhasil apabila:
 | PASS | Diisi setelah pengujian |
 | FAIL | Diisi setelah pengujian |
 | BLOCKED | Diisi setelah pengujian |
-| Belum diuji | 59 |
+| Belum direkap per kasus | 59 |
+
+
+**Interpretasi rekap:** angka 59 adalah jumlah skenario dalam katalog, bukan klaim bahwa seluruh 59 skenario telah dijalankan atau gagal. Status setiap skenario manual perlu diisi berdasarkan bukti pengujian. Pengujian otomatis yang sudah berjalan mencakup unit test audit/parser, browser smoke test, pemulihan cache IndexedDB, validasi backup JSON, dan simulasi kegagalan penulisan cache.
 
 ---
 
