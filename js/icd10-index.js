@@ -119,7 +119,21 @@
         continue;
       }
       const columns = [[], []];
-      for (const item of lineItems) columns[item.transform[4] < boundary ? 0 : 1].push(item);
+      let leftStarted = false;
+      let leftRight = -Infinity;
+      for (const item of lineItems) {
+        const x = item.transform[4];
+        // A fragmented long line can continue past the geometric midpoint.
+        // Keep a nearby fragment with the left line when it follows an item
+        // already assigned to that column; otherwise it starts the right one.
+        const continuesLeft = leftStarted && x >= boundary && x - leftRight <= 18;
+        const column = x < boundary || continuesLeft ? 0 : 1;
+        columns[column].push(item);
+        if (column === 0) {
+          leftStarted = true;
+          leftRight = Math.max(leftRight, x + (Number(item.width) || 0));
+        }
+      }
       columns.forEach((columnItems, column) => {
         if (!columnItems.length) return;
         const text = buildLine(columnItems);
