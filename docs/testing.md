@@ -1,8 +1,8 @@
 # DOKUMENTASI PENGUJIAN MEDAUDIT AI
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System  
-**Versi saat pengujian:** Prototype v0.7.0  
-**Target pengembangan:** v0.7.0  
+**Versi saat pengujian:** Prototype v0.7.1  
+**Target pengembangan:** v0.7.1  
 **Jenis pengujian:** Pengujian fungsional manual  
 **Dataset:** 8 data kunjungan sintetis (DEMO-101–DEMO-108)
 
