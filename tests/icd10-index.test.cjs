@@ -136,10 +136,8 @@ test("splits WHO two-column rows by recurring text origins even when gutter is n
   for (let i = 0; i < 12; i++) {
     const y = 700 - i * 12;
     items.push(
-      { str: "Left entry " + i, transform: [1,0,0,1,70,y], width: 150, hasEOL: false },
-      { str: "A" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,222,y], width: 24, hasEOL: false },
-      { str: "Right entry " + i, transform: [1,0,0,1,250,y], width: 110, hasEOL: false },
-      { str: "B" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,363,y], width: 24, hasEOL: false }
+      { str: "Left entry " + i + " A" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,70,y], width: 170, hasEOL: false },
+      { str: "Right entry " + i + " B" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,250,y], width: 140, hasEOL: false }
     );
   }
   const lines = index.groupPdfTextItems(items, 595);
