@@ -1,8 +1,8 @@
 # DOKUMENTASI PENGUJIAN MEDAUDIT AI
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System  
-**Versi saat pengujian:** Prototype v0.7.1  
-**Target pengembangan:** v0.7.1  
+**Versi saat pengujian:** Prototype v0.8.0  
+**Target pengembangan:** v0.8.0  
 **Jenis pengujian:** Pengujian fungsional manual  
 **Dataset:** 8 data kunjungan sintetis (DEMO-101–DEMO-108)
 
@@ -74,7 +74,7 @@ Ruang lingkup pengujian:
 
 Tes impor PDF WHO penuh tersedia secara opsional pada `tests/icd10-who-pdf.test.cjs` dan memerlukan file PDF lokal melalui variabel lingkungan `WHO_ICD10_INDEX_PDF`.
 
-Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, pemisahan kolom berdasarkan asal teks berulang, preservasi spasi eksplisit PDF, hierarki dash Unicode, rujukan silang, running header, matriks transportasi, awal Section I, batas Section III, serta pembedaan jumlah baris Tabular dan jumlah kode unik. Browser smoke test otomatis menggunakan Chromium menguji viewport seluler 390×844 dan desktop 1440×900, unggah PDF fixture, pembacaan Tabular, pencarian kode, pemulihan cache, penolakan file yang bukan PDF tanpa menghapus referensi valid yang sudah dimuat, dan layout responsif. Tes PDF WHO penuh tersedia secara opsional melalui `WHO_ICD10_INDEX_PDF` dan dilewati pada CI ketika PDF tidak tersedia di runner. Pada 16 November 2026, uji manual Android berhasil memproses PDF WHO 2016 dan Tabular TXT, menjalankan lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`), serta memuat ulang referensi dari IndexedDB setelah reload. Validasi ini merupakan smoke/regression check berbasis sampel, bukan pemeriksaan seluruh entri secara manual. CI terbaru setelah perbaikan cache dan backup (run #43806310880) menjalankan 35 tes: 34 lulus, 0 gagal, dan 1 dilewati. Browser smoke test juga mensimulasikan kegagalan tulis IndexedDB akibat kuota, memastikan hasil pencarian tetap tersedia selama sesi aktif; menguji bahwa backup JSON yang field-nya tidak valid tidak menimpa data lokal; dan memverifikasi metadata versi backup `0.7.1`. PR #8 menambahkan validasi impor untuk file maksimal 5 MB, 5.000 record, batas panjang setiap field, serta tipe data; tes browser tambahan memastikan field terlalu panjang dan jumlah record berlebihan ditolak tanpa mengubah data lokal. Pengujian tambahan ini masih menunggu hasil CI setelah perbaikan navigasi panel backup.
+Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, pemisahan kolom berdasarkan asal teks berulang, preservasi spasi eksplisit PDF, hierarki dash Unicode, rujukan silang, running header, matriks transportasi, awal Section I, batas Section III, serta pembedaan jumlah baris Tabular dan jumlah kode unik. Browser smoke test otomatis menggunakan Chromium menguji viewport seluler 390×844 dan desktop 1440×900, unggah PDF fixture, pembacaan Tabular, pencarian kode, pemulihan cache, penolakan file yang bukan PDF tanpa menghapus referensi valid yang sudah dimuat, validasi backup JSON, serta layout responsif. Siklus ekstraksi juga membersihkan resource halaman PDF melalui `finally`, termasuk saat pembacaan teks atau parsing halaman gagal. Tes PDF WHO penuh tersedia secara opsional melalui `WHO_ICD10_INDEX_PDF` dan dilewati pada CI ketika PDF tidak tersedia di runner. Pada 16 November 2026, uji manual Android berhasil memproses PDF WHO 2016 dan Tabular TXT, menjalankan lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`), serta memuat ulang referensi dari IndexedDB setelah reload. Validasi ini merupakan smoke/regression check berbasis sampel, bukan pemeriksaan seluruh entri secara manual. CI terbaru setelah hardening impor, validasi sumber, dan cleanup halaman PDF (run #43813702718) menjalankan 35 tes: 34 lulus, 0 gagal, dan 1 dilewati. Browser smoke test juga mensimulasikan kegagalan tulis IndexedDB akibat kuota, memastikan hasil pencarian tetap tersedia selama sesi aktif; menguji bahwa backup JSON yang field-nya tidak valid tidak menimpa data lokal; dan memverifikasi metadata versi backup `0.8.0`. PR #8 menambahkan validasi impor untuk file maksimal 5 MB, 5.000 record, batas panjang setiap field, serta tipe data; tes browser memastikan field terlalu panjang dan jumlah record berlebihan ditolak tanpa mengubah data lokal. PR #9 menambahkan batas ukuran/signature sumber ICD-10 dan memastikan referensi lama tetap tersedia ketika file pengganti invalid. PR #10 memastikan resource halaman PDF dibersihkan pada jalur gagal maupun berhasil. Seluruh pemeriksaan CI tersebut telah lulus.
 
 **Batasan:** Alphabetical Index yang dipakai adalah WHO Volume 3 edisi 2016, sedangkan Tabular pembanding adalah WHO 2019. Kode yang tidak ditemukan pada versi pembanding tidak otomatis invalid.
 
@@ -131,8 +131,8 @@ DQ-05 hanya memeriksa pola format dasar. Panel indeks membantu penelusuran, teta
 1. Menjalankan pengujian manual panel indeks pada browser Android dan desktop.
 2. Menguji responsivitas dan penggunaan memori saat memproses PDF besar.
 3. Memperluas unit test dan pengujian regresi setelah perubahan kode.
-4. Menuntaskan pengujian regresi untuk batas ukuran file sumber ICD-10 (PDF 50 MB, TXT 20 MB), signature PDF, dan preservasi referensi saat impor sumber gagal.
-5. Menguji keamanan, aksesibilitas, dan validasi struktur file impor/backup.
+4. Mengukur performa dan penggunaan memori pada beberapa perangkat, termasuk PDF besar.
+5. Memperluas audit keamanan dan aksesibilitas serta menjalankan tes PDF WHO penuh secara lokal bila sumber dan izin tersedia.
 
 ## 10. Kesimpulan
 

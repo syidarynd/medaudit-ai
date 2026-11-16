@@ -13,8 +13,8 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 |---|---|
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
-| Versi saat ini | Prototype v0.7.1 |
-| Target pengembangan | v0.7.1 |
+| Versi saat ini | Prototype v0.8.0 |
+| Target pengembangan | v0.8.0 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
 
@@ -148,10 +148,11 @@ Dokumentasi proyek:
 - [Dokumentasi Pengujian](docs/testing.md)
 - [Skenario Uji Aturan Audit](tests/audit-test-cases.md)
 - [Panduan Indeks ICD-10](docs/icd10-index.md)
+- [Catatan Rilis](CHANGELOG.md)
 
-Pengujian mencakup unit test otomatis, browser smoke test Chromium pada viewport seluler 390×844 dan desktop 1440×900, serta uji manual pada perangkat Android fisik. Pada 16 November 2026, PDF WHO 2016 (848 halaman) dan Tabular TXT berhasil diproses di Android; lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`) berhasil menampilkan hasil, dan referensi dimuat kembali otomatis setelah halaman dimuat ulang. Uji manual ini memverifikasi alur aplikasi dan sampel hasil, bukan validasi menyeluruh seluruh entri indeks. CI pada commit v0.7.1 menjalankan 35 tes: 34 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena PDF tidak tersedia di runner (run #43803726998).
+Pengujian mencakup unit test otomatis, browser smoke test Chromium pada viewport seluler 390×844 dan desktop 1440×900, serta uji manual pada perangkat Android fisik. Pada 16 November 2026, PDF WHO 2016 (848 halaman) dan Tabular TXT berhasil diproses di Android; lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`) berhasil menampilkan hasil, dan referensi dimuat kembali otomatis setelah halaman dimuat ulang. Uji manual ini memverifikasi alur aplikasi dan sampel hasil, bukan validasi menyeluruh seluruh entri indeks. CI terbaru setelah penguatan validasi sumber dan cleanup halaman PDF menjalankan 35 tes: 34 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena file sumber tidak tersedia di runner (run #43813702718).
 
-Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengujian UI browser lintas perangkat, keamanan menyeluruh, dan performa skala besar belum diklaim selesai.
+Unit test mesin audit/parser dan browser smoke test Chromium pada viewport 390×844 serta 1440×900 dijalankan melalui GitHub Actions. Uji manual Android pada 16 November 2026 berhasil memproses PDF WHO 848 halaman dan lima pencarian baseline. Pengukuran performa/memori kuantitatif, audit keamanan independen, dan validasi seluruh entri indeks belum diklaim selesai.
 
 ## 9. Batasan Sistem
 
@@ -164,11 +165,10 @@ Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengu
 
 ## 10. Roadmap Pengembangan
 
-1. Uji langsung pada perangkat Android pengguna untuk memastikan penyiapan satu kali, penyimpanan IndexedDB, dan pemuatan otomatis referensi berjalan.
-2. Uji performa dan penggunaan memori saat memproses PDF besar.
-3. Perluas cakupan aksesibilitas, keamanan, dan pengujian regresi.
-4. Uji batas impor backup JSON (5 MB, 5.000 record, tipe dan panjang field) pada browser setelah PR validasi impor lulus CI.
-5. Evaluasi sumber ICD-10 dengan edisi yang seragam dan ketentuan lisensi yang jelas sebelum integrasi lebih lanjut.
+1. Ukur performa dan penggunaan memori saat memproses PDF besar pada beberapa kelas perangkat.
+2. Perluas pengujian aksesibilitas, keamanan, dan regresi; termasuk pengujian langsung file backup berukuran mendekati batas.
+3. Jalankan pengujian penuh terhadap PDF WHO secara lokal bila sumber dan izin penggunaannya tersedia; CI saat ini melewati tes PDF penuh jika sumber tidak tersedia.
+4. Evaluasi penggunaan sumber ICD-10 dengan edisi yang seragam dan ketentuan lisensi yang jelas sebelum integrasi lebih lanjut.
 
 ## 11. Lisensi dan Penggunaan
 
