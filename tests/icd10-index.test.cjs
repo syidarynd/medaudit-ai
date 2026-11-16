@@ -226,9 +226,10 @@ test("keeps a fragmented left-column line together when a continuation crosses t
 test("skips the WHO land transport accident matrix instead of flattening its columns", () => {
   const state = { section: "external_causes", stack: {} };
   const entries = index.parseIndexLines([
-    "Table of land transport accidents V05 V15 V25 V35 V45 V55 V65 V75",
-    "Pedestrian V01 V11 V21 V31 V41 V51 V61 V71",
-    "Pedal cyclist V10 V20 V30 V40 V50 V60 V70"
+    "Table of  land transport accidents",
+    "Victim and mode of transport",
+    "Pedestrian or animal V01 V02 V03 V04 V05 V06 V09",
+    "Pedal cyclist V10 V11 V12 V13 V14 V15 V16 V17 V18 V19"
   ], 677, state);
   assert.deepEqual(entries, []);
   assert.equal(state.section, "external_causes");
