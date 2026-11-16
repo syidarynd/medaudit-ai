@@ -247,7 +247,7 @@ test("ignores WHO running page headers instead of indexing them as diagnoses", (
     "Abscess",
     "- brain G06.0"
   ], 21, { section: "diseases", stack: {} });
-  assert.deepEqual(entries.map(entry => entry.term), ["Abscess", "- brain G06.0"]);
+  assert.deepEqual(entries.map(entry => entry.term), ["Abscess", "brain G06.0"]);
 });
 
 
@@ -260,7 +260,7 @@ test("starts only at the Section I heading and stops at Section III only after S
     "Alphabetical index to diseases and",
     "nature of injury",
     "Abscess",
-    "– brain (any part) G06.0"
+    "brain (any part) G06.0"
   ], 17, state);
   assert.deepEqual(entries.map(entry => entry.term), ["Abscess", "– brain (any part) G06.0"]);
   assert.equal(entries[1].parent, "Abscess");
@@ -281,6 +281,6 @@ test("parses Unicode en-dash subentries as hierarchy levels", () => {
     "– – cystic G06.0"
   ], 24, state);
   assert.equal(entries[1].parent, "Abscess");
-  assert.equal(entries[2].parent, "– brain G06.0");
+  assert.equal(entries[2].parent, "brain G06.0");
   assert.match(entries[2].searchText, /abscess brain cystic/);
 });
