@@ -13,8 +13,8 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 |---|---|
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
-| Versi saat ini | Prototype v0.7.0 |
-| Target pengembangan | v0.7.0 |
+| Versi saat ini | Prototype v0.7.1 |
+| Target pengembangan | v0.7.1 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
 
@@ -146,7 +146,7 @@ Dokumentasi proyek:
 - [Skenario Uji Aturan Audit](tests/audit-test-cases.md)
 - [Panduan Indeks ICD-10](docs/icd10-index.md)
 
-Pengujian mencakup unit test otomatis dan browser smoke test Chromium pada viewport seluler. CI pada commit `958fe456` menjalankan 34 tes: 33 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena file PDF sumber tidak tersedia di runner. Tes browser otomatis memakai Chromium pada viewport seluler; ini bukan pengganti pengujian pada perangkat Android fisik. Pengujian impor PDF WHO 848 halaman dan lima pencarian baseline pada Android fisik masih menjadi validasi lanjutan.
+Pengujian mencakup unit test otomatis, browser smoke test Chromium pada viewport seluler, serta uji manual pada perangkat Android fisik. Pada 16 November 2026, PDF WHO 2016 (848 halaman) dan Tabular TXT berhasil diproses di Android; lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`) berhasil menampilkan hasil, dan referensi dimuat kembali otomatis setelah halaman dimuat ulang. Uji manual ini memverifikasi alur aplikasi dan sampel hasil, bukan validasi menyeluruh seluruh entri indeks. CI pada commit sebelumnya menjalankan 34 tes: 33 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena PDF tidak tersedia di runner. Hasil CI untuk commit terbaru tetap harus diperiksa setelah setiap perubahan.
 
 Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengujian UI browser lintas perangkat, keamanan menyeluruh, dan performa skala besar belum diklaim selesai.
 
