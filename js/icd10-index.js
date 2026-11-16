@@ -191,11 +191,11 @@
       }
       // WHO Volume 3 uses this running page heading for Section II; it is not
       // printed as "SECTION II -" on each page in the PDF.
-      if (/^(?:SECTION\s+II\b|EXTERNAL CAUSES OF INJURY)$/i.test(line)) {
+      if (/^(?:SECTION\s+II\b(?:\s*[-–—:].*)?|EXTERNAL CAUSES OF INJURY)$/i.test(line)) {
         parserState.section = "external_causes"; parserState.stack = {}; continue;
       }
       // Section III is a separate drug/chemical table, not an index hierarchy.
-      if (/^(?:SECTION\s+III\b|TABLE OF DRUGS AND CHEMICALS)$/i.test(line)) {
+      if (/^(?:SECTION\s+III\b(?:\s*[-–—:].*)?|TABLE OF DRUGS AND CHEMICALS)$/i.test(line)) {
         parserState.finished = true; break;
       }
       if (/^\d{1,4}$/.test(line)) continue;
