@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2] – 2026-11-16
+
+### Security
+- CSV export prefixes formula-like values beginning with `=`, `+`, `-`, or `@` (including leading control/space characters) with an apostrophe so spreadsheet software treats them as text.
+- Added a browser regression scenario covering formula-like MRN, name, diagnosis, and ICD-10 values.
+
+
 ## [0.8.1] – 2026-11-16
 
 ### Fixed
