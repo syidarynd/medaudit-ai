@@ -43,6 +43,7 @@ https://syidarynd.github.io/medaudit-ai/
 - Pembandingan kode indeks dengan daftar kode terminal/non-terminal pada Tabular WHO 2019.
 - Ekspor laporan ke CSV.
 - Backup dan pemulihan data melalui JSON.
+- Validasi impor backup: batas ukuran 5 MB, maksimal 5.000 record, tipe/panjang field diperiksa sebelum penyimpanan, dan data lama dipertahankan jika validasi gagal.
 - Penyimpanan lokal menggunakan LocalStorage.
 - Dataset demonstrasi sintetis.
 
@@ -164,7 +165,8 @@ Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengu
 1. Uji langsung pada perangkat Android pengguna untuk memastikan penyiapan satu kali, penyimpanan IndexedDB, dan pemuatan otomatis referensi berjalan.
 2. Uji performa dan penggunaan memori saat memproses PDF besar.
 3. Perluas cakupan aksesibilitas, keamanan, dan pengujian regresi.
-4. Evaluasi sumber ICD-10 dengan edisi yang seragam dan ketentuan lisensi yang jelas sebelum integrasi lebih lanjut.
+4. Uji batas impor backup JSON (5 MB, 5.000 record, tipe dan panjang field) pada browser setelah PR validasi impor lulus CI.
+5. Evaluasi sumber ICD-10 dengan edisi yang seragam dan ketentuan lisensi yang jelas sebelum integrasi lebih lanjut.
 
 ## 11. Lisensi dan Penggunaan
 

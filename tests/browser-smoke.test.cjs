@@ -173,6 +173,31 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     );
     assert.ok(desktopOverflow <= 1, "desktop layout must not overflow horizontally; overflow=" + desktopOverflow + "px");
 
+    // Reopen the backup panel after exporting from the dashboard.
+    await page.locator('button[data-tab="backup"]').click();
+
+    // Oversized field values must be rejected without replacing existing local records.
+    const recordsBeforeLimitChecks = await page.evaluate(() => localStorage.getItem("medaudit_ai_cases_v02"));
+    await page.locator("#jsonFile").setInputFiles({
+      name: "oversized-field.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify({ records: [{ id: "oversized-1", mrn: "X".repeat(41) }] }))
+    });
+    await page.locator("#importJson").click();
+    await page.waitForFunction(() => document.querySelector("#appMessage").textContent.includes("melebihi batas 40 karakter"));
+    assert.equal(await page.evaluate(() => localStorage.getItem("medaudit_ai_cases_v02")), recordsBeforeLimitChecks);
+
+    // Excessive record counts must be rejected before normalization/storage.
+    const excessiveRecords = Array.from({ length: 5001 }, (_, i) => ({ id: "bulk-" + i, mrn: "DEMO-" + i }));
+    await page.locator("#jsonFile").setInputFiles({
+      name: "too-many-records.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify({ records: excessiveRecords }))
+    });
+    await page.locator("#importJson").click();
+    await page.waitForFunction(() => document.querySelector("#appMessage").textContent.includes("melebihi batas 5.000 record"));
+    assert.equal(await page.evaluate(() => localStorage.getItem("medaudit_ai_cases_v02")), recordsBeforeLimitChecks);
+
     assert.deepEqual(pageErrors, []);
     await context.close();
   } finally {
