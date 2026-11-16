@@ -33,7 +33,7 @@ jobs:
           downloaded=false
           for url in "${urls[@]}"; do
             rm -f /tmp/9789241549165-V3-eng.pdf
-            curl --silent --show-error --location --retry 1 --retry-all-errors \
+            curl --silent --show-error --location --connect-timeout 10 --max-time 30 --retry 0 \
               --user-agent "Mozilla/5.0" --header "Accept: application/pdf" \
               --output /tmp/9789241549165-V3-eng.pdf "$url" || true
             if [ -s /tmp/9789241549165-V3-eng.pdf ] && \
