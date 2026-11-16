@@ -82,3 +82,26 @@ test("coordinate-grouped index rows retain their own codes", () => {
   assert.deepEqual(entries[1].codes, ["G06.0"]);
   assert.deepEqual(entries[2].codes, ["G04.9"]);
 });
+
+
+test("keeps a long left-column entry intact when it crosses the page midpoint", () => {
+  const lines = index.groupPdfTextItems([
+    { str: "Long index term with qualifiers", transform: [1,0,0,1,40,700], width: 270 },
+    { str: "Right column term", transform: [1,0,0,1,360,700], width: 110 },
+    { str: "G06.1", transform: [1,0,0,1,40,685], width: 28 }
+  ], 500);
+  assert.deepEqual(lines, [
+    "Long index term with qualifiers",
+    "G06.1",
+    "Right column term"
+  ]);
+});
+
+test("fallback uses real line breaks when PDF.js coordinates are unavailable", () => {
+  const lines = index.groupPdfTextItems([
+    { str: "Abscess", hasEOL: true },
+    { str: "Diabetes", hasEOL: false },
+    { str: "Hypertension", hasEOL: true }
+  ], 0);
+  assert.deepEqual(lines, ["Abscess", "Diabetes Hypertension"]);
+});
