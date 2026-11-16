@@ -1,8 +1,8 @@
 # DOKUMENTASI PENGUJIAN MEDAUDIT AI
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System  
-**Versi saat pengujian:** Prototype v0.8.0  
-**Target pengembangan:** v0.8.0  
+**Versi saat pengujian:** Prototype v0.8.1  
+**Target pengembangan:** v0.8.1  
 **Jenis pengujian:** Pengujian fungsional manual  
 **Dataset:** 8 data kunjungan sintetis (DEMO-101–DEMO-108)
 
@@ -67,14 +67,14 @@ Ruang lingkup pengujian:
 | DQ-06 | Kelengkapan kelas rawat | Kelas rawat kosong |
 | DQ-07 | Kelengkapan resume medis | Resume belum ditandai lengkap |
 | DQ-08 | Autentikasi DPJP | Autentikasi belum ditandai tersedia |
-| DQ-09 | Duplikasi nomor RM | Dua kunjungan berbeda menggunakan nomor RM sama (case-insensitive) |
+| DQ-09 | Kandidat duplikasi kunjungan | Kombinasi nomor RM, tanggal masuk/keluar, dan diagnosis utama sama; nomor RM sama pada tanggal berbeda tidak ditandai |
 | DQ-10 | Konsistensi diagnosis-kode | Diagnosis yang termasuk daftar contoh memiliki kode berbeda dari pasangan contoh |
 
 ## 5. Pengujian Referensi Indeks ICD-10
 
 Tes impor PDF WHO penuh tersedia secara opsional pada `tests/icd10-who-pdf.test.cjs` dan memerlukan file PDF lokal melalui variabel lingkungan `WHO_ICD10_INDEX_PDF`.
 
-Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, pemisahan kolom berdasarkan asal teks berulang, preservasi spasi eksplisit PDF, hierarki dash Unicode, rujukan silang, running header, matriks transportasi, awal Section I, batas Section III, serta pembedaan jumlah baris Tabular dan jumlah kode unik. Browser smoke test otomatis menggunakan Chromium menguji viewport seluler 390×844 dan desktop 1440×900, unggah PDF fixture, pembacaan Tabular, pencarian kode, pemulihan cache, penolakan file yang bukan PDF tanpa menghapus referensi valid yang sudah dimuat, validasi backup JSON, serta layout responsif. Siklus ekstraksi juga membersihkan resource halaman PDF melalui `finally`, termasuk saat pembacaan teks atau parsing halaman gagal. Tes PDF WHO penuh tersedia secara opsional melalui `WHO_ICD10_INDEX_PDF` dan dilewati pada CI ketika PDF tidak tersedia di runner. Pada 16 November 2026, uji manual Android berhasil memproses PDF WHO 2016 dan Tabular TXT, menjalankan lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`), serta memuat ulang referensi dari IndexedDB setelah reload. Validasi ini merupakan smoke/regression check berbasis sampel, bukan pemeriksaan seluruh entri secara manual. CI terbaru setelah hardening impor, validasi sumber, dan cleanup halaman PDF (run #43813702718) menjalankan 35 tes: 34 lulus, 0 gagal, dan 1 dilewati. Browser smoke test juga mensimulasikan kegagalan tulis IndexedDB akibat kuota, memastikan hasil pencarian tetap tersedia selama sesi aktif; menguji bahwa backup JSON yang field-nya tidak valid tidak menimpa data lokal; dan memverifikasi metadata versi backup `0.8.0`. PR #8 menambahkan validasi impor untuk file maksimal 5 MB, 5.000 record, batas panjang setiap field, serta tipe data; tes browser memastikan field terlalu panjang dan jumlah record berlebihan ditolak tanpa mengubah data lokal. PR #9 menambahkan batas ukuran/signature sumber ICD-10 dan memastikan referensi lama tetap tersedia ketika file pengganti invalid. PR #10 memastikan resource halaman PDF dibersihkan pada jalur gagal maupun berhasil. Seluruh pemeriksaan CI tersebut telah lulus.
+Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, pemisahan kolom berdasarkan asal teks berulang, preservasi spasi eksplisit PDF, hierarki dash Unicode, rujukan silang, running header, matriks transportasi, awal Section I, batas Section III, serta pembedaan jumlah baris Tabular dan jumlah kode unik. Browser smoke test otomatis menggunakan Chromium menguji viewport seluler 390×844 dan desktop 1440×900, unggah PDF fixture, pembacaan Tabular, pencarian kode, pemulihan cache, penolakan file yang bukan PDF tanpa menghapus referensi valid yang sudah dimuat, validasi backup JSON, serta layout responsif. Siklus ekstraksi juga membersihkan resource halaman PDF melalui `finally`, termasuk saat pembacaan teks atau parsing halaman gagal. Tes PDF WHO penuh tersedia secara opsional melalui `WHO_ICD10_INDEX_PDF` dan dilewati pada CI ketika PDF tidak tersedia di runner. Pada 16 November 2026, uji manual Android berhasil memproses PDF WHO 2016 dan Tabular TXT, menjalankan lima pencarian baseline (`abscess`, `diabetes`, `hypertension`, `brain`, `G06.0`), serta memuat ulang referensi dari IndexedDB setelah reload. Validasi ini merupakan smoke/regression check berbasis sampel, bukan pemeriksaan seluruh entri secara manual. CI terbaru setelah hardening impor, validasi sumber, dan cleanup halaman PDF (run #43813702718) menjalankan 39 tes: 38 lulus, 0 gagal, dan 1 dilewati (setelah perbaikan DQ-09, hasil run terbaru dicatat setelah CI selesai). Browser smoke test juga mensimulasikan kegagalan tulis IndexedDB akibat kuota, memastikan hasil pencarian tetap tersedia selama sesi aktif; menguji bahwa backup JSON yang field-nya tidak valid tidak menimpa data lokal; dan memverifikasi metadata versi backup `0.8.1`. PR #8 menambahkan validasi impor untuk file maksimal 5 MB, 5.000 record, batas panjang setiap field, serta tipe data; tes browser memastikan field terlalu panjang dan jumlah record berlebihan ditolak tanpa mengubah data lokal. PR #9 menambahkan batas ukuran/signature sumber ICD-10 dan memastikan referensi lama tetap tersedia ketika file pengganti invalid. PR #10 memastikan resource halaman PDF dibersihkan pada jalur gagal maupun berhasil. Seluruh pemeriksaan CI tersebut telah lulus.
 
 **Batasan:** Alphabetical Index yang dipakai adalah WHO Volume 3 edisi 2016, sedangkan Tabular pembanding adalah WHO 2019. Kode yang tidak ditemukan pada versi pembanding tidak otomatis invalid.
 
@@ -153,7 +153,7 @@ Prototype untuk demonstrasi dan portofolio informatika kesehatan.
 
 ## 11. Catatan versi 0.5.0
 
-- DQ-09 membandingkan nomor RM antar-record dan mengabaikan perbedaan kapitalisasi.
+- DQ-09 menandai kandidat duplikasi jika nomor RM, tanggal masuk/keluar, dan diagnosis utama sama setelah normalisasi. Nomor RM yang sama pada kunjungan dengan tanggal berbeda tidak ditandai.
 - DQ-10 hanya membandingkan beberapa pasangan diagnosis-kode demonstrasi yang ditentukan secara eksplisit; diagnosis lain tidak dinilai.
 - Unit test mesin audit dan parser indeks serta browser smoke test Chromium dijalankan melalui GitHub Actions.
 - Perintah lokal: `npm install --no-save --no-package-lock playwright@1.58.2`, `npx playwright install chromium`, lalu `node --test tests/*.test.cjs`. Untuk mengaktifkan tes PDF WHO penuh, set `WHO_ICD10_INDEX_PDF` ke path PDF WHO Volume 3 edisi 2016.
