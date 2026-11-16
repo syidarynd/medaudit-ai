@@ -14,7 +14,7 @@
   function stripCrossReference(value) {
     return String(value ?? "")
       .replace(/\(\s*see\s+(?:also\s+)?[^)]*\)/gi, " ")
-      .replace(/\s+-\s*see\s+(?:also\s+)?[^;]*$/i, "")
+      .replace(/\s+[-–—]\s*see\s+(?:also\s+)?[^;]*$/i, "")
       .trim();
   }
 
@@ -213,7 +213,7 @@
         .replace(/\s+/g, " ").trim();
       if (!line || /^ICD-10\s+2e\s+Volume\s+3/i.test(line)) continue;
       if (/^(?:INTERNATIONAL CLASSIFICATION OF DISEASES|ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY)$/i.test(line)) continue;
-      if (/^SECTION\s+I\b/i.test(line)) {
+      if (parserState.started === false) {\n        if (/^SECTION\\s+I(?:\\s*[-–—:].*)?$/i.test(line)) {\n          parserState.started = true; parserState.section = "diseases"; parserState.stack = {};\n        }\n        continue;\n      }\n      if (/^SECTION\\s+I(?:\\s*[-–—:].*)?$/i.test(line)) {
         parserState.section = "diseases"; parserState.stack = {}; continue;
       }
       // WHO Volume 3 uses this running page heading for Section II; it is not
@@ -222,7 +222,7 @@
         parserState.section = "external_causes"; parserState.stack = {}; continue;
       }
       // Section III is a separate drug/chemical table, not an index hierarchy.
-      if (/^(?:SECTION\s+III\b(?:\s*[-–—:].*)?|TABLE OF DRUGS AND CHEMICALS)$/i.test(line)) {
+      if (parserState.section === "external_causes" && /^(?:SECTION\s+III\b(?:\s*[-–—:].*)?|TABLE OF DRUGS AND CHEMICALS)$/i.test(line)) {
         parserState.finished = true; break;
       }
       if (/^\d{1,4}$/.test(line)) continue;
@@ -230,9 +230,9 @@
       // Column/page continuation headings (for example "Abscess—continued")
       // are running headers, not diagnosis entries. Restore their parent path
       // so following indented rows remain children of the original index term.
-      const continuedHeading = line.match(/^((?:-\s*)*)(.+?)\s*[–—-]{1,2}\s*continued$/i);
+      const continuedHeading = line.match(/^((?:[-–—]\s*)*)(.+?)\s*[–—-]{1,2}\s*continued$/i);
       if (continuedHeading) {
-        const headingDepth = (continuedHeading[1].match(/-/g) || []).length;
+        const headingDepth = (continuedHeading[1].match(/[-–—]/g) || []).length;
         parserState.stack[headingDepth] = continuedHeading[2].trim();
         for (const key of Object.keys(parserState.stack)) {
           if (Number(key) > headingDepth) delete parserState.stack[key];
@@ -240,10 +240,10 @@
         continue;
       }
 
-      const prefix = line.match(/^((?:-\s*)+)(.*)$/);
+      const prefix = line.match(/^((?:[-–—]\s*)+)(.*)$/);
       let depth = 0, term = line;
       if (prefix) {
-        depth = (prefix[1].match(/-/g) || []).length;
+        depth = (prefix[1].match(/[-–—]/g) || []).length;
         term = prefix[2].trim();
       } else if (/^[A-Z]$/.test(line)) {
         parserState.letter = line; parserState.stack = {}; continue;
