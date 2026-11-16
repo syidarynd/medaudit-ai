@@ -126,7 +126,34 @@
     } else {
       fragments.sort((a, b) => b.y - a.y || a.x - b.x);
     }
-    return fragments.map(fragment => fragment.text);
+    // Join visual continuation lines before semantic parsing. In this WHO PDF,
+    // wrapped text/code lines are indented by about 9 pt and do not begin with
+    // the index dash used for a new subentry. Keeping them together prevents
+    // orphaned codes and truncated terms such as "hip or other / joint".
+    const merged = [];
+    const columnBases = new Map();
+    for (const fragment of fragments) {
+      const column = fragment.column || 0;
+      const base = columnBases.has(column)
+        ? columnBases.get(column)
+        : Math.min(...fragments.filter(part => (part.column || 0) === column).map(part => part.x));
+      columnBases.set(column, base);
+      const text = fragment.text;
+      const previous = merged[merged.length - 1];
+      const sameColumn = previous && (previous.column || 0) === column;
+      const indentedContinuation = fragment.x > base + 4 &&
+        !/^(?:-|–|—)/.test(text) &&
+        !/^(?:SECTION\\s|EXTERNAL CAUSES OF INJURY$|TABLE OF DRUGS)/i.test(text) &&
+        !/^[A-Z]$/.test(text);
+      const closeBaseline = sameColumn && Math.abs(previous.y - fragment.y) <= 18;
+      if (sameColumn && closeBaseline && indentedContinuation) {
+        previous.text = (previous.text + " " + text).replace(/\\s+/g, " ").trim();
+        previous.y = fragment.y;
+      } else {
+        merged.push({ ...fragment });
+      }
+    }
+    return merged.map(fragment => fragment.text);
   }
 
   function parseIndexLines(lines, pageNumber, state) {
