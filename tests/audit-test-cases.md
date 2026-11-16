@@ -3,7 +3,7 @@
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System
 
-**Versi target:** Prototype v0.7.0
+**Versi target:** Prototype v0.7.1
 
 **Jenis dokumen:** Daftar kasus pengujian fungsional dan regresi
 
@@ -290,7 +290,7 @@ Pengujian dinyatakan berhasil apabila:
 
 *AI-Assisted Medical Records Audit & Data Quality System*
 
-**Dokumentasi Pengujian Prototype v0.7.0**
+**Dokumentasi Pengujian Prototype v0.7.1**
 
 
 ## 10. Unit Test Otomatis
