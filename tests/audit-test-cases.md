@@ -290,7 +290,7 @@ Pengujian dinyatakan berhasil apabila:
 
 *AI-Assisted Medical Records Audit & Data Quality System*
 
-**Dokumentasi Pengujian Prototype v0.5.0**
+**Dokumentasi Pengujian Prototype v0.7.0**
 
 
 ## 10. Unit Test Otomatis
