@@ -129,3 +129,24 @@ test("stops at the actual WHO Volume 3 drug and chemical table heading", () => {
   assert.equal(entries[0].section, "external_causes");
   assert.equal(state.finished, true);
 });
+
+
+test("splits WHO two-column rows by recurring text origins even when gutter is narrow", () => {
+  const items = [];
+  for (let i = 0; i < 12; i++) {
+    const y = 700 - i * 12;
+    items.push(
+      { str: "Left entry " + i, transform: [1,0,0,1,70,y], width: 150, hasEOL: false },
+      { str: "A" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,222,y], width: 24, hasEOL: false },
+      { str: "Right entry " + i, transform: [1,0,0,1,250,y], width: 110, hasEOL: false },
+      { str: "B" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,363,y], width: 24, hasEOL: false }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 595);
+  assert.equal(lines.length, 24);
+  assert.match(lines[0], /^Left entry 0/);
+  assert.match(lines[11], /^Left entry 11/);
+  assert.match(lines[12], /^Right entry 0/);
+  assert.match(lines[23], /^Right entry 11/);
+  assert.ok(!lines.some(line => line.includes("Right entry") && line.includes("Left entry")));
+});
