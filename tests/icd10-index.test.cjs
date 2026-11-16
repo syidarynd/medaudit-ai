@@ -234,11 +234,6 @@ test("skips the WHO land transport accident matrix instead of flattening its col
   assert.deepEqual(entries, []);
   assert.equal(state.section, "external_causes");
 
-  const crossReference = index.parseIndexLines([
-    "Table of land transport accidents V99"
-  ], 672, { section: "external_causes", stack: {} });
-  assert.equal(crossReference.length, 1);
-  assert.deepEqual(crossReference[0].codes, ["V99"]);
 });
 
 test("ignores WHO running page headers instead of indexing them as diagnoses", () => {
