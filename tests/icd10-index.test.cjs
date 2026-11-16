@@ -249,3 +249,38 @@ test("ignores WHO running page headers instead of indexing them as diagnoses", (
   ], 21, { section: "diseases", stack: {} });
   assert.deepEqual(entries.map(entry => entry.term), ["Abscess", "- brain G06.0"]);
 });
+
+
+test("starts only at the Section I heading and stops at Section III only after Section II", () => {
+  const state = { section: "diseases", stack: {}, started: false };
+  const entries = index.parseIndexLines([
+    "Table of drugs and chemicals",
+    "Section I is the index of diseases and injuries",
+    "SECTION I",
+    "Alphabetical index to diseases and",
+    "nature of injury",
+    "Abscess",
+    "– brain (any part) G06.0"
+  ], 17, state);
+  assert.deepEqual(entries.map(entry => entry.term), ["Abscess", "– brain (any part) G06.0"]);
+  assert.equal(entries[1].parent, "Abscess");
+  assert.equal(state.started, true);
+  assert.equal(state.finished, undefined);
+
+  index.parseIndexLines(["SECTION II", "External causes of injury", "Assault"], 669, state);
+  assert.equal(state.section, "external_causes");
+  index.parseIndexLines(["SECTION III"], 723, state);
+  assert.equal(state.finished, true);
+});
+
+test("parses Unicode en-dash subentries as hierarchy levels", () => {
+  const state = { section: "diseases", stack: {} };
+  const entries = index.parseIndexLines([
+    "Abscess",
+    "– brain G06.0",
+    "– – cystic G06.0"
+  ], 24, state);
+  assert.equal(entries[1].parent, "Abscess");
+  assert.equal(entries[2].parent, "– brain G06.0");
+  assert.match(entries[2].searchText, /abscess brain cystic/);
+});
