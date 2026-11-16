@@ -285,3 +285,41 @@ test("parses Unicode en-dash subentries as hierarchy levels", () => {
   assert.equal(entries[2].parent, "brain G06.0");
   assert.match(entries[2].searchText, /abscess brain cystic/);
 });
+
+
+test("running headers and letter dividers do not collapse a right-column page", () => {
+  const items = [
+    { str: "ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY", transform: [1,0,0,1,169,760], width: 245 },
+    { str: "A", transform: [1,0,0,1,233,700], width: 12 }
+  ];
+  for (let i = 0; i < 12; i++) {
+    const y = 688 - i * 12;
+    items.push(
+      { str: "Left term " + i, transform: [1,0,0,1,70,y], width: 75 },
+      { str: "Right term " + i, transform: [1,0,0,1,250,y], width: 85 }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 595);
+  const rightRows = lines.filter(line => /^Right term \d+$/.test(line));
+  assert.equal(rightRows.length, 12);
+  assert.ok(!lines.some(line => /Right term 0.*Right term 1/.test(line)));
+  assert.ok(lines.includes("ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY"));
+  assert.ok(lines.includes("A"));
+});
+
+test("broad searches rank the lead term ahead of matching nested subentries", () => {
+  const entries = index.parseIndexLines([
+    "Abscess (embolic) (infective) L02.9",
+    "-brain G06.0",
+    "Artery",
+    "-abscess I77.8",
+    "Diabetes, diabetic (mellitus) E14.-",
+    "-complicating pregnancy O24.9"
+  ], 24, { section: "diseases", stack: {} });
+  const abscess = index.searchEntries(entries, "abscess", 10);
+  assert.equal(abscess[0].parent, null);
+  assert.match(abscess[0].term, /^Abscess/i);
+  const diabetes = index.searchEntries(entries, "diabetes", 10);
+  assert.equal(diabetes[0].parent, null);
+  assert.match(diabetes[0].term, /^Diabetes/i);
+});
