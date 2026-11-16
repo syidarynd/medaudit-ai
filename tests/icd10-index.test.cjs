@@ -150,3 +150,17 @@ test("splits WHO two-column rows by recurring text origins even when gutter is n
   assert.match(lines[23], /^Right entry 11/);
   assert.ok(!lines.some(line => line.includes("Right entry") && line.includes("Left entry")));
 });
+
+
+test("joins indented visual continuation lines without absorbing new subentries", () => {
+  const lines = index.groupPdfTextItems([
+    { str: "Abduction contracture, hip or other", transform: [1,0,0,1,70,700], width: 160 },
+    { str: "joint - see Contraction, joint", transform: [1,0,0,1,79,690], width: 145 },
+    { str: "- knee", transform: [1,0,0,1,70,680], width: 35 },
+    { str: "M24.5", transform: [1,0,0,1,110,680], width: 25 }
+  ], 0);
+  assert.deepEqual(lines, [
+    "Abduction contracture, hip or other joint - see Contraction, joint",
+    "- knee M24.5"
+  ]);
+});
