@@ -3,7 +3,7 @@
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System
 
-**Versi target:** Prototype v0.5.0
+**Versi target:** Prototype v0.7.0
 
 **Jenis dokumen:** Daftar kasus pengujian fungsional dan regresi
 
