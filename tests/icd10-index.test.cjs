@@ -182,7 +182,7 @@ test("treats continued column headings as hierarchy markers, not diagnosis entri
 });
 
 
-test("detects columns from row starts, not fragmented inline text origins", () => {
+test("detects columns from recurring text runs, not fragmented inline origins", () => {
   const items = [];
   for (let i = 0; i < 12; i++) {
     const y = 700 - i * 12;
