@@ -3,7 +3,7 @@
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System
 
-**Versi target:** Prototype v0.4.0
+**Versi dokumen:** Blueprint awal v0.4.0 (dipertahankan sebagai catatan historis)
 
 **Jenis dokumen:** Blueprint teknis dan rancangan pengembangan
 
