@@ -13,8 +13,8 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 |---|---|
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
-| Versi saat ini | Prototype v0.8.0 |
-| Target pengembangan | v0.8.0 |
+| Versi saat ini | Prototype v0.8.1 |
+| Target pengembangan | v0.8.1 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
 
@@ -62,7 +62,7 @@ https://syidarynd.github.io/medaudit-ai/
 | DQ-07 | Kelengkapan resume medis |
 | DQ-08 | Ketersediaan autentikasi DPJP |
 
-DQ-09 mendeteksi nomor RM duplikat antar-kunjungan. DQ-10 membandingkan pasangan diagnosis-kode demonstrasi terbatas; keduanya bukan validasi klinis atau encoder ICD-10 resmi.
+DQ-09 menandai kandidat duplikasi kunjungan berdasarkan kesamaan nomor RM, tanggal masuk/keluar, dan diagnosis utama. Nomor RM yang sama pada tanggal kunjungan berbeda diperbolehkan. DQ-10 membandingkan pasangan diagnosis-kode demonstrasi terbatas; keduanya bukan validasi klinis atau encoder ICD-10 resmi.
 
 ### Referensi pencarian ICD-10
 
