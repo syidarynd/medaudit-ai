@@ -275,11 +275,11 @@ Pengujian dinyatakan berhasil apabila:
 | DQ-06 | 2 |
 | DQ-07 | 2 |
 | DQ-08 | 2 |
-| DQ-09 | 3 |
+| DQ-09 | 5 |
 | DQ-10 | 3 |
 | Pengujian Fungsional | 20 |
 | Pengujian Regresi | 5 |
-| **TOTAL** | **59** |
+| **TOTAL** | **61** |
 
 | Status | Jumlah |
 |---|---:|
