@@ -71,6 +71,8 @@ Ruang lingkup pengujian:
 
 ## 5. Pengujian Referensi Indeks ICD-10
 
+Tes impor PDF WHO penuh tersedia secara opsional pada `tests/icd10-who-pdf.test.cjs` dan memerlukan file PDF lokal melalui variabel lingkungan `WHO_ICD10_INDEX_PDF`.
+
 Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, pemisahan kolom berdasarkan asal teks berulang, preservasi spasi eksplisit PDF, hierarki dash Unicode, rujukan silang, running header, matriks transportasi, awal Section I, dan batas Section III. Browser smoke test otomatis menggunakan Chromium viewport seluler menguji unggah PDF fixture, pembacaan Tabular, pencarian kode, dan layout responsif. Tes PDF WHO penuh tersedia secara opsional melalui `WHO_ICD10_INDEX_PDF` dan dilewati pada CI karena PDF berhak cipta tidak disimpan di repositori. Pengujian pada perangkat Android fisik pengguna masih memerlukan uji langsung.
 
 **Batasan:** Alphabetical Index yang dipakai adalah WHO Volume 3 edisi 2016, sedangkan Tabular pembanding adalah WHO 2019. Kode yang tidak ditemukan pada versi pembanding tidak otomatis invalid.
@@ -121,7 +123,7 @@ Pengujian ini belum mencakup:
 - Pengujian performa dengan jumlah data besar.
 - Pemeriksaan konsistensi diagnosis dan kode ICD-10 berdasarkan referensi resmi.
 
-DQ-05 hanya memeriksa pola format dasar. Panel indeks membantu penelusuran, tetapi pembandingan edisi 2013 dan 2019 bukan validasi klinis atau penetapan kode final.
+DQ-05 hanya memeriksa pola format dasar. Panel indeks membantu penelusuran, tetapi pembandingan edisi 2016 dan 2019 bukan validasi klinis atau penetapan kode final.
 
 ## 9. Rencana Pengembangan Pengujian
 
