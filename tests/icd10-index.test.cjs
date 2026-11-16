@@ -177,3 +177,26 @@ test("treats continued column headings as hierarchy markers, not diagnosis entri
   assert.equal(entries[2].parent, "Abscess");
   assert.equal(entries[2].searchText.includes("continued"), false);
 });
+
+
+test("detects columns from row starts, not fragmented inline text origins", () => {
+  const items = [];
+  for (let i = 0; i < 12; i++) {
+    const y = 700 - i * 12;
+    // Each column line is split into multiple PDF.js items. The inline
+    // fragments have different x origins but must remain in their own row.
+    items.push(
+      { str: "Left term " + i, transform: [1,0,0,1,70,y], width: 48 },
+      { str: "L" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,122,y], width: 24 },
+      { str: "Right term " + i, transform: [1,0,0,1,250,y], width: 55 },
+      { str: "R" + String(i).padStart(2,"0") + ".0", transform: [1,0,0,1,310,y], width: 24 }
+    );
+  }
+  const lines = index.groupPdfTextItems(items, 595);
+  assert.equal(lines.length, 24);
+  assert.match(lines[0], /^Left term 0/);
+  assert.match(lines[11], /^Left term 11/);
+  assert.match(lines[12], /^Right term 0/);
+  assert.match(lines[23], /^Right term 11/);
+  assert.ok(!lines.some(line => line.includes("Left term") && line.includes("Right term")));
+});
