@@ -3,6 +3,7 @@
 ## [0.8.2] – 2026-11-16
 
 ### Security
+- CI run #43815590695: 37 tests, 36 passed, 0 failed, 1 skipped (optional WHO full-source PDF test; unavailable on runner).
 - CSV export prefixes formula-like values beginning with `=`, `+`, `-`, or `@` (including leading control/space characters) with an apostrophe so spreadsheet software treats them as text.
 - Added a browser regression scenario covering formula-like MRN, name, diagnosis, and ICD-10 values.
 
