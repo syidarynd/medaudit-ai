@@ -173,6 +173,9 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     );
     assert.ok(desktopOverflow <= 1, "desktop layout must not overflow horizontally; overflow=" + desktopOverflow + "px");
 
+    // Reopen the backup panel after exporting from the dashboard.
+    await page.locator('button[data-tab="backup"]').click();
+
     // Oversized field values must be rejected without replacing existing local records.
     const recordsBeforeLimitChecks = await page.evaluate(() => localStorage.getItem("medaudit_ai_cases_v02"));
     await page.locator("#jsonFile").setInputFiles({
