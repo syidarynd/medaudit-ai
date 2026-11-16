@@ -100,6 +100,67 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     assert.match(restoredResults, /brain G06\.0/);
     assert.match(restoredResults, /Ditemukan sebagai kode terminal/);
 
+    // A cache quota failure must not discard the freshly parsed in-memory reference.
+    await page.evaluate(() => {
+      Object.defineProperty(indexedDB, "open", {
+        configurable: true,
+        value: () => {
+          const request = {};
+          queueMicrotask(() => {
+            request.result = {
+              transaction: () => ({
+                objectStore: () => ({
+                  put: () => { throw new DOMException("Quota exceeded", "QuotaExceededError"); }
+                })
+              }),
+              close: () => {}
+            };
+            if (request.onsuccess) request.onsuccess();
+          });
+          return request;
+        }
+      });
+    });
+    await page.locator("#indexPdfFile").setInputFiles({
+      name: "index-fixture.pdf", mimeType: "application/pdf", buffer: createPdfFixture()
+    });
+    await page.locator("#tabularFile").setInputFiles({
+      name: "tabular-fixture.txt", mimeType: "text/plain", buffer: Buffer.from(tabular)
+    });
+    await page.locator("#loadIcdReferences").click();
+    await page.waitForFunction(() =>
+      document.querySelector("#icdIndexStatus").textContent.includes("Pencarian siap digunakan pada sesi ini")
+    );
+    assert.equal(await page.locator("#icdIndexStatus").getAttribute("class"), "warn");
+    await page.locator("#indexSearchInput").fill("brain");
+    await page.locator("#searchIcdIndex").click();
+    assert.match(await page.locator("#indexResults").innerText(), /brain G06\.0/);
+
+    // Invalid backup input must be rejected without replacing the existing local records.
+    await page.locator('button[data-tab="backup"]').click();
+    const recordsBeforeImport = await page.evaluate(() => localStorage.getItem("medaudit_ai_cases_v02"));
+    await page.locator("#jsonFile").setInputFiles({
+      name: "invalid-backup.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify({ records: [{ mrn: 123 }] }))
+    });
+    await page.locator("#importJson").click();
+    await page.waitForFunction(() => document.querySelector("#appMessage").textContent.includes("harus berupa teks"));
+    assert.equal(
+      await page.evaluate(() => localStorage.getItem("medaudit_ai_cases_v02")),
+      recordsBeforeImport,
+      "invalid JSON backup must not overwrite existing local data"
+    );
+
+    // Backup metadata must match the current application version.
+    await page.locator('button[data-tab="dashboard"]').click();
+    const backupDownloadPromise = page.waitForEvent("download");
+    await page.locator("#jsonExport").click();
+    const backupDownload = await backupDownloadPromise;
+    const backupPath = await backupDownload.path();
+    const backup = JSON.parse(await fs.promises.readFile(backupPath, "utf8"));
+    assert.equal(backup.version, "0.7.1");
+
     const gridColumns = await page.locator(".index-toolbar").first().evaluate(
       element => getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).length
     );
