@@ -40,8 +40,8 @@
     // Compatibility fallback for test doubles or PDF.js adapters without geometry.
     if (usable.length !== nonEmpty.length) {
       let text = "";
-      for (const item of nonEmpty) text += item.str + (item.hasEOL ? "\\n" : " ");
-      return text.split(/\\r?\\n/).map(line => line.trim()).filter(Boolean);
+      for (const item of nonEmpty) text += item.str + (item.hasEOL ? "\n" : " ");
+      return text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
     }
     if (!usable.length) return [];
 
@@ -97,7 +97,7 @@
       const parts = [];
       let previousRight = null;
       for (const item of lineItems) {
-        const value = String(item.str || "").replace(/\\s+/g, " ").trim();
+        const value = String(item.str || "").replace(/\s+/g, " ").trim();
         if (!value) continue;
         const x = item.transform[4];
         const gap = previousRight === null ? 0 : x - previousRight;
@@ -108,7 +108,7 @@
         parts.push(value);
         previousRight = x + (Number(item.width) || 0);
       }
-      return parts.join("").replace(/\\s+/g, " ").trim();
+      return parts.join("").replace(/\s+/g, " ").trim();
     }
 
     const fragments = [];
@@ -166,11 +166,11 @@
       const sameColumn = previous && (previous.column || 0) === column;
       const indentedContinuation = fragment.x > base + 4 &&
         !/^(?:-|–|—)/.test(text) &&
-        !/^(?:SECTION\\s|EXTERNAL CAUSES OF INJURY$|TABLE OF DRUGS)/i.test(text) &&
+        !/^(?:SECTION\s|EXTERNAL CAUSES OF INJURY$|TABLE OF DRUGS)/i.test(text) &&
         !/^[A-Z]$/.test(text);
       const closeBaseline = sameColumn && Math.abs(previous.y - fragment.y) <= 18;
       if (sameColumn && closeBaseline && indentedContinuation) {
-        previous.text = (previous.text + " " + text).replace(/\\s+/g, " ").trim();
+        previous.text = (previous.text + " " + text).replace(/\s+/g, " ").trim();
         previous.y = fragment.y;
       } else {
         merged.push({ ...fragment });
