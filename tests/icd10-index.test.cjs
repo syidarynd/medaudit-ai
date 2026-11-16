@@ -21,7 +21,7 @@ test("counts source Tabular rows separately from distinct mapped codes", () => {
     "3;N;X;01;A00;A00.-;A00;A00;Cholera;Cholera",
     "4;T;X;01;A00;A00.0;A00.0;A000;Cholera due to Vibrio cholerae 01, biovar cholerae;Cholera",
     "4;T;X;01;A00;A00.1;A00.1;A001;Cholera due to Vibrio cholerae 01, biovar eltor;Cholera"
-  ].join("\\n");
+  ].join("\n");
   const parsed = index.parseTabularText(text);
   assert.equal(parsed.rows, 3);
   assert.equal(parsed.codeMap.size, 4);
