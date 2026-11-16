@@ -209,7 +209,7 @@
     // rather than emitting misleading index records.
     if ((lines || []).some(rawLine => {
       const line = String(rawLine ?? "").replace(/\s+/g, " ").trim();
-      return /^Table of\s+land transport accidents\b/i.test(line) && extractCodes(line).length >= 4;
+      return /^Table of\\s+land transport accidents\\b/i.test(line);
     })) return [];
     for (const rawLine of lines || []) {
       if (parserState.finished) break;
