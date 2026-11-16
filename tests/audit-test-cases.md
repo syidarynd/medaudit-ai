@@ -285,7 +285,7 @@ Pengujian dinyatakan berhasil apabila:
 | Belum direkap per kasus | 59 |
 
 
-**Interpretasi rekap:** angka 59 adalah jumlah skenario dalam katalog, bukan klaim bahwa seluruh 59 skenario telah dijalankan atau gagal. Status setiap skenario manual perlu diisi berdasarkan bukti pengujian. Pengujian otomatis yang sudah berjalan mencakup unit test audit/parser, browser smoke test, pemulihan cache IndexedDB, validasi backup JSON, dan simulasi kegagalan penulisan cache.
+**Interpretasi rekap:** angka 59 adalah jumlah skenario dalam katalog, bukan klaim bahwa seluruh 59 skenario telah dijalankan atau gagal. Status setiap skenario manual perlu diisi berdasarkan bukti pengujian. Pengujian otomatis yang sudah berjalan mencakup unit test audit/parser, browser smoke test pada viewport seluler dan desktop, pemulihan cache IndexedDB, validasi backup JSON, dan simulasi kegagalan penulisan cache.
 
 ---
 
