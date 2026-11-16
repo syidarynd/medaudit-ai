@@ -205,7 +205,7 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     const csvDownload = await csvDownloadPromise;
     const csvText = await fs.promises.readFile(await csvDownload.path(), "utf8");
     assert.match(csvText, /"'=1\+1"/, "formula-like MRN must be prefixed as text");
-    assert.match(csvText, /"'+SUM\(1,1\)"/, "formula-like name must be prefixed as text");
+    assert.match(csvText, /"'\+SUM\(1,1\)"/, "formula-like name must be prefixed as text");
     assert.match(csvText, /"'@SUM\(1,1\)"/, "formula-like diagnosis must be prefixed as text");
     assert.match(csvText, /"'-1\+1"/, "formula-like code must be prefixed as text");
 
