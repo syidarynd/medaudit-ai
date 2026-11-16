@@ -62,34 +62,52 @@
       row.baseline = row.items.reduce((sum, part) => sum + part.transform[5], 0) / row.items.length;
     }
 
-    // Infer columns from the first text item on each visual baseline, not
-    // from every PDF.js text item. A single logical line is often fragmented
-    // into many items at different x positions; clustering all item origins
-    // mistakes those fragments for additional columns.
-    const rowStarts = rows.map(row => {
-      const first = row.items.reduce((a, b) =>
-        a.transform[4] <= b.transform[4] ? a : b
-      );
-      return first.transform[4];
-    }).sort((a, b) => a - b);
+    // Infer column starts from recurring, baseline-level text runs. PDF.js can
+    // split a logical line into inline fragments, so an arbitrary fragment
+    // origin must not be mistaken for a new column. A genuine second-column
+    // run recurs across many baselines and is separated from the prior run
+    // by a visible horizontal gap.
+    const originClusters = [];
+    rows.forEach((row, rowIndex) => {
+      const lineItems = row.items.slice().sort((a, b) => a.transform[4] - b.transform[4]);
+      let previousRight = null;
+      for (const item of lineItems) {
+        const x = item.transform[4];
+        const gap = previousRight === null ? Infinity : x - previousRight;
+        if (previousRight === null || gap >= 8) {
+          let cluster = originClusters.find(candidate => Math.abs(candidate.origin - x) <= 4);
+          if (!cluster) {
+            cluster = { origin: x, total: 0, count: 0, rows: new Set() };
+            originClusters.push(cluster);
+          }
+          cluster.total += x;
+          cluster.count += 1;
+          cluster.rows.add(rowIndex);
+          cluster.origin = cluster.total / cluster.count;
+        }
+        previousRight = x + (Number(item.width) || 0);
+      }
+    });
+    const recurringThreshold = Math.max(4, Math.ceil(rows.length * 0.25));
+    const recurringOrigins = originClusters
+      .filter(cluster => cluster.rows.size >= recurringThreshold)
+      .map(cluster => cluster.origin)
+      .sort((a, b) => a - b);
     let boundary = null;
     let rightOrigin = null;
-    if (rowStarts.length >= 20) {
-      // The largest stable gap between recurring row starts separates the
-      // left and right text columns. Requiring >=10 baselines per side avoids
-      // interpreting a few indented continuation lines as a second column.
+    if (recurringOrigins.length >= 2) {
       let splitAt = -1, largestGap = 0;
-      for (let i = 1; i < rowStarts.length; i++) {
-        const gap = rowStarts[i] - rowStarts[i - 1];
+      for (let i = 1; i < recurringOrigins.length; i++) {
+        const gap = recurringOrigins[i] - recurringOrigins[i - 1];
         if (gap > largestGap) {
           largestGap = gap;
           splitAt = i;
         }
       }
-      if (splitAt >= 10 && rowStarts.length - splitAt >= 10 && largestGap >= 70) {
-        const leftOrigin = rowStarts.slice(0, splitAt).reduce((a, b) => a + b, 0) / splitAt;
-        rightOrigin = rowStarts.slice(splitAt).reduce((a, b) => a + b, 0) / (rowStarts.length - splitAt);
-        if (rightOrigin - leftOrigin >= 70) boundary = (leftOrigin + rightOrigin) / 2;
+      if (splitAt > 0 && largestGap >= 70) {
+        const leftOrigin = recurringOrigins[splitAt - 1];
+        rightOrigin = recurringOrigins[splitAt];
+        boundary = (leftOrigin + rightOrigin) / 2;
       }
     }
 
