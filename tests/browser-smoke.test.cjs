@@ -172,7 +172,7 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
     const backupDownload = await backupDownloadPromise;
     const backupPath = await backupDownload.path();
     const backup = JSON.parse(await fs.promises.readFile(backupPath, "utf8"));
-    assert.equal(backup.version, "0.8.0");
+    assert.equal(backup.version, "0.8.1");
 
     const gridColumns = await page.locator(".index-toolbar").first().evaluate(
       element => getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).length
