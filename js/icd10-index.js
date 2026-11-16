@@ -130,15 +130,16 @@
       const line = String(rawLine ?? "").replace(/\u00ad/g, "-").replace(/\u00a0/g, " ")
         .replace(/\s+/g, " ").trim();
       if (!line || /^ICD-10\s+2e\s+Volume\s+3/i.test(line)) continue;
-      if (/^SECTION\s+I\s*-/i.test(line)) {
+      if (/^SECTION\s+I\b/i.test(line)) {
         parserState.section = "diseases"; parserState.stack = {}; continue;
       }
-      if (/^SECTION\s+II\s*-/i.test(line)) {
+      // WHO Volume 3 uses this running page heading for Section II; it is not
+      // printed as "SECTION II -" on each page in the PDF.
+      if (/^(?:SECTION\s+II\b|EXTERNAL CAUSES OF INJURY)$/i.test(line)) {
         parserState.section = "external_causes"; parserState.stack = {}; continue;
       }
-      // The uploaded Volume 3 places the drug/chemical table after Section II.
-      // Stop here: it is a separate table and must not be mislabeled as index entries.
-      if (/^SECTION\s+III\s*-/i.test(line)) {
+      // Section III is a separate drug/chemical table, not an index hierarchy.
+      if (/^(?:SECTION\s+III\b|TABLE OF DRUGS AND CHEMICALS)$/i.test(line)) {
         parserState.finished = true; break;
       }
       if (/^\d{1,4}$/.test(line)) continue;
