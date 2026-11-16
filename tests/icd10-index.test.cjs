@@ -162,3 +162,18 @@ test("joins indented visual continuation lines without absorbing new subentries"
     "- knee M24.5"
   ]);
 });
+
+
+test("treats continued column headings as hierarchy markers, not diagnosis entries", () => {
+  const state = { section: "diseases", stack: {} };
+  const entries = index.parseIndexLines([
+    "Abscess",
+    "-brain G06.0",
+    "Abscess—continued",
+    "-spinal cord G06.1"
+  ], 18, state);
+  assert.equal(entries.length, 3);
+  assert.equal(entries[2].term, "spinal cord G06.1");
+  assert.equal(entries[2].parent, "Abscess");
+  assert.equal(entries[2].searchText.includes("continued"), false);
+});
