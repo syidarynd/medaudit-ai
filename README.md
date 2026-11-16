@@ -146,7 +146,7 @@ Dokumentasi proyek:
 - [Skenario Uji Aturan Audit](tests/audit-test-cases.md)
 - [Panduan Indeks ICD-10](docs/icd10-index.md)
 
-Pengujian mencakup unit test otomatis dan browser smoke test Chromium pada viewport seluler. CI terakhir menjalankan 32 tes: 31 lulus, 0 gagal, 1 tes PDF WHO penuh dilewati karena file sumber tidak disimpan di repositori. Uji impor PDF 848 halaman pada browser Android fisik tetap menjadi validasi lanjutan.
+Pengujian mencakup unit test otomatis dan browser smoke test Chromium pada viewport seluler. CI pada commit `958fe456` menjalankan 34 tes: 33 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena file PDF sumber tidak tersedia di runner. Tes browser otomatis memakai Chromium pada viewport seluler; ini bukan pengganti pengujian pada perangkat Android fisik. Pengujian impor PDF WHO 848 halaman dan lima pencarian baseline pada Android fisik masih menjadi validasi lanjutan.
 
 Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengujian UI browser lintas perangkat, keamanan menyeluruh, dan performa skala besar belum diklaim selesai.
 
