@@ -30,53 +30,98 @@
 
 
   function groupPdfTextItems(items, pageWidth) {
-    const usable = (items || []).filter(item => item && String(item.str || "").trim());
+    const usable = (items || []).filter(item =>
+      item && String(item.str || "").trim() &&
+      Array.isArray(item.transform) &&
+      Number.isFinite(item.transform[4]) &&
+      Number.isFinite(item.transform[5])
+    );
     if (!usable.length) return [];
-    // PDF.js exposes baseline coordinates in transform[5]. Group by baseline,
-    // not hasEOL: hasEOL alone can merge adjacent index columns/entries.
-    if (!usable.every(item => Array.isArray(item.transform) && Number.isFinite(item.transform[4]) && Number.isFinite(item.transform[5]))) {
+
+    // Fallback for simplified/mocked PDF.js items without coordinates.
+    if (!(items || []).filter(item => item && String(item.str || "").trim())
+      .every(item => Array.isArray(item.transform) &&
+        Number.isFinite(item.transform[4]) && Number.isFinite(item.transform[5]))) {
       let text = "";
-      for (const item of usable) text += item.str + (item.hasEOL ? "\\n" : " ");
+      for (const item of (items || [])) {
+        if (!item || !String(item.str || "").trim()) continue;
+        text += item.str + (item.hasEOL ? "\n" : " ");
+      }
       return text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
     }
+
     const width = Number(pageWidth) || 0;
-    const columns = width > 100 ? [[], []] : [usable];
-    for (const item of usable) {
-      const x = item.transform[4];
-      (columns.length === 2 ? (x < width / 2 ? columns[0] : columns[1]) : columns[0]).push(item);
+    const sorted = usable.slice().sort((a, b) =>
+      b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]
+    );
+
+    // First reconstruct visual rows across the whole page. Split columns only
+    // at a large horizontal gutter; never split a long left-column line merely
+    // because it crosses the page midpoint.
+    const rows = [];
+    for (const item of sorted) {
+      const y = item.transform[5];
+      let row = rows.find(candidate => Math.abs(candidate.baseline - y) <= 2.5);
+      if (!row) {
+        row = { baseline: y, items: [] };
+        rows.push(row);
+      }
+      row.items.push(item);
+      row.baseline = row.items.reduce((sum, part) => sum + part.transform[5], 0) / row.items.length;
     }
-    const output = [];
-    for (const column of columns) {
-      const sorted = column.slice().sort((a, b) => b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]);
-      let row = [], baseline = null;
+
+    const fragments = [];
+    const gutterThreshold = width > 100 ? Math.max(28, width * 0.045) : 28;
+    for (const row of rows) {
+      const lineItems = row.items.slice().sort((a, b) => a.transform[4] - b.transform[4]);
+      let fragment = [], right = null;
       const flush = () => {
-        if (!row.length) return;
-        row.sort((a, b) => a.transform[4] - b.transform[4]);
+        if (!fragment.length) return;
         const parts = [];
         let previousRight = null;
-        for (const item of row) {
+        for (const item of fragment) {
           const value = String(item.str || "").replace(/\s+/g, " ").trim();
           if (!value) continue;
           const x = item.transform[4];
           const gap = previousRight === null ? 0 : x - previousRight;
-          if (parts.length && gap > 1.5 && !/^[,.;:)]/.test(value) && !/[(/-]$/.test(parts[parts.length - 1])) parts.push(" ");
+          if (parts.length && gap > 1.5 &&
+              !/^[,.;:)]/.test(value) && !/[(/-]$/.test(parts[parts.length - 1])) {
+            parts.push(" ");
+          }
           parts.push(value);
           previousRight = x + (Number(item.width) || 0);
         }
         const line = parts.join("").replace(/\s+/g, " ").trim();
-        if (line) output.push(line);
-        row = [];
+        if (line) fragments.push({
+          x: fragment[0].transform[4],
+          y: row.baseline,
+          text: line
+        });
+        fragment = [];
+        right = null;
       };
-      for (const item of sorted) {
-        const y = item.transform[5];
-        if (baseline !== null && Math.abs(y - baseline) > 2.5) flush();
-        if (!row.length) baseline = y;
-        else baseline = (baseline * (row.length) + y) / (row.length + 1);
-        row.push(item);
+      for (const item of lineItems) {
+        const x = item.transform[4];
+        const gap = right === null ? 0 : x - right;
+        if (fragment.length && gap > gutterThreshold) flush();
+        fragment.push(item);
+        right = x + (Number(item.width) || 0);
       }
       flush();
     }
-    return output;
+
+    // Preserve reading order: top-to-bottom within the left column, then
+    // top-to-bottom within the right column. A single-column page stays intact.
+    if (width > 100) {
+      const left = fragments.filter(fragment => fragment.x < width / 2);
+      const right = fragments.filter(fragment => fragment.x >= width / 2);
+      const order = (a, b) => b.y - a.y || a.x - b.x;
+      left.sort(order);
+      right.sort(order);
+      return [...left, ...right].map(fragment => fragment.text);
+    }
+    fragments.sort((a, b) => b.y - a.y || a.x - b.x);
+    return fragments.map(fragment => fragment.text);
   }
 
   function parseIndexLines(lines, pageNumber, state) {
