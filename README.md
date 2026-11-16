@@ -43,7 +43,7 @@ https://syidarynd.github.io/medaudit-ai/
 - Kegagalan pemrosesan file pengganti tidak menghapus referensi ICD-10 valid yang sudah tersedia di memori/cache.
 - Referensi hasil ekstraksi disimpan di IndexedDB dan dimuat otomatis pada kunjungan berikutnya di browser/perangkat yang sama.
 - Pembandingan kode indeks dengan daftar kode terminal/non-terminal pada Tabular WHO 2019.
-- Ekspor laporan ke CSV.
+- Ekspor laporan ke CSV dengan perlindungan terhadap formula spreadsheet.
 - Backup dan pemulihan data melalui JSON.
 - Validasi impor backup: batas ukuran 5 MB, maksimal 5.000 record, tipe/panjang field diperiksa sebelum penyimpanan, dan data lama dipertahankan jika validasi gagal.
 - Penyimpanan lokal menggunakan LocalStorage.
