@@ -112,7 +112,8 @@ medaudit-ai/
     ├── audit-test-cases.md
     ├── audit.test.cjs
     ├── icd10-index.test.cjs
-    └── browser-smoke.test.cjs
+    ├── browser-smoke.test.cjs
+    └── icd10-who-pdf.test.cjs (opsional; memerlukan file PDF lokal)
 ```
 
 Struktur di atas menggambarkan file dan folder utama yang tersedia pada repositori. Logika audit dan pencarian indeks dipisahkan ke modul JavaScript di folder `js/`.
@@ -151,7 +152,7 @@ Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengu
 
 ## 9. Batasan Sistem
 
-- DQ-05 hanya memeriksa pola format dasar. Panel indeks adalah alat bantu pencarian; pembandingan indeks 2013 dengan Tabular 2019 tidak memastikan ketepatan kode atau kesesuaian standar Indonesia.
+- DQ-05 hanya memeriksa pola format dasar. Panel indeks adalah alat bantu pencarian; pembandingan indeks 2016 dengan Tabular 2019 tidak memastikan ketepatan kode atau kesesuaian standar Indonesia.
 - Mesin pemeriksaan menggunakan aturan tetap (*rule-based*), belum menggunakan model AI atau LLM. DQ-10 adalah pemeriksaan silang daftar contoh terbatas, bukan validasi ICD-10 resmi.
 - Aplikasi belum memiliki autentikasi pengguna, fitur multi-user, sinkronisasi cloud, atau audit trail server-side.
 - LocalStorage tidak dirancang untuk menyimpan rekam medis pasien nyata.
