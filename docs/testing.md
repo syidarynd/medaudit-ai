@@ -155,6 +155,6 @@ Prototype untuk demonstrasi dan portofolio informatika kesehatan.
 - DQ-10 hanya membandingkan beberapa pasangan diagnosis-kode demonstrasi yang ditentukan secara eksplisit; diagnosis lain tidak dinilai.
 - Unit test mesin audit dan parser indeks serta browser smoke test Chromium dijalankan melalui GitHub Actions.
 - Perintah lokal: `npm install --no-save --no-package-lock playwright@1.58.2`, `npx playwright install chromium`, lalu `node --test tests/*.test.cjs`. Untuk mengaktifkan tes PDF WHO penuh, set `WHO_ICD10_INDEX_PDF` ke path PDF WHO Volume 3 edisi 2016.
-- Pada pemeriksaan CI terbaru: 32 tes terdaftar, 31 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena file sumber tidak tersedia di runner.
+- Pada pemeriksaan CI commit `24ababc`: 34 tes terdaftar, 33 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena file sumber tidak tersedia di runner. Angka ini adalah hasil tes otomatis, bukan hasil validasi penuh terhadap PDF WHO.
 - Browser smoke test menggunakan viewport seluler 390×844; uji pada perangkat Android fisik tetap disarankan.
 - Pengujian ini tidak membuktikan ketepatan klinis atau validitas kode ICD-10 secara menyeluruh.
