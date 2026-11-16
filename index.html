@@ -78,11 +78,11 @@ margin-top:16px
 <section id="icd10" class="view hidden">
 <div class="panel">
 <h2>Pencarian Alphabetical Index ICD-10</h2>
-<div class="notice info">Sumber indeks yang dipakai adalah ICD-10 2e Volume 3 (2013). Tabular yang dibandingkan adalah WHO ICD-10 2019. Karena edisinya berbeda, hasil cocok/tidak cocok hanya pembanding teknis, bukan validasi kode final atau standar klaim Indonesia.</div>
+<div class="notice info">Sumber indeks yang dipakai adalah ICD-10 Volume 3 (Alphabetical Index), edisi 2016. Tabular yang dibandingkan adalah WHO ICD-10 2019. Karena edisinya berbeda, hasil hanya pembanding teknis, bukan validasi kode final atau standar klaim Indonesia. Bagian III (tabel obat dan bahan kimia) belum diindeks.</div>
 <div class="notice info">Referensi diproses satu kali per browser/perangkat, lalu disimpan lokal di IndexedDB. Saat aplikasi dibuka kembali, referensi dimuat otomatis tanpa memilih ulang file. PDF/TXT asli tidak disimpan; yang disimpan hanya hasil ekstraksi terstruktur. Data tidak dikirim ke server dan tidak tersinkron antarperangkat.</div>
-<p class="muted">Penyiapan awal: pilih PDF Alphabetical Index 2013 dan file <code>icd102019syst_codes.txt</code> satu kali. Setelah itu pencarian otomatis tersedia pada kunjungan berikutnya di browser yang sama.</p>
+<p class="muted">Penyiapan awal: pilih PDF Alphabetical Index 2016 dan file <code>icd102019syst_codes.txt</code> satu kali. Setelah itu pencarian otomatis tersedia pada kunjungan berikutnya di browser yang sama.</p>
 <div class="index-toolbar">
-<div><label for="indexPdfFile">Alphabetical Index PDF (2013)</label><input id="indexPdfFile" type="file" accept="application/pdf,.pdf"></div>
+<div><label for="indexPdfFile">Alphabetical Index PDF (2016)</label><input id="indexPdfFile" type="file" accept="application/pdf,.pdf"></div>
 <div><label for="tabularFile">Tabular List WHO 2019 (TXT)</label><input id="tabularFile" type="file" accept=".txt,text/plain"></div>
 </div>
 <div class="actions"><button type="button" id="loadIcdReferences">Siapkan referensi satu kali</button><button type="button" class="secondary" id="clearIcdCache">Hapus referensi tersimpan</button></div>
@@ -305,10 +305,10 @@ $('csvExport').addEventListener('click',exportCsv);$('csvExport2').addEventListe
 function validateImport(parsed){const records=Array.isArray(parsed)?parsed:parsed&&Array.isArray(parsed.records)?parsed.records:null;if(!records)throw new Error('Format JSON harus berupa array atau objek dengan properti records.');const seenIds=new Set();const out=records.map((r,i)=>{if(!r||typeof r!=='object'||Array.isArray(r))throw new Error('Record ke-'+(i+1)+' bukan objek yang valid.');for(const k of ['mrn','name','admit','discharge','mainDx','code','notes'])if(r[k]!==undefined&&typeof r[k]!=='string')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa teks.');for(const k of ['resumeComplete','dpjpSigned'])if(r[k]!==undefined&&typeof r[k]!=='boolean')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa boolean.');const c=normalizeRecord(r);if(!c.id)throw new Error('ID record kosong pada baris '+(i+1)+'.');if(seenIds.has(c.id))throw new Error('ID record ganda: '+c.id);seenIds.add(c.id);return c;});return out;}
 $('importJson').addEventListener('click',async()=>{const file=$('jsonFile').files[0];if(!file){showMessage('Pilih file backup JSON terlebih dahulu.','error');return;}try{const parsed=JSON.parse(await file.text());const imported=validateImport(parsed);if(!confirm('Impor '+imported.length+' record dan mengganti seluruh data lokal saat ini? Pastikan sudah memiliki backup.'))return;const old=cases;cases=imported;try{localStorage.setItem(KEY,JSON.stringify(cases));storageWarning='';}catch(err){cases=old;throw new Error('Penyimpanan gagal. Data lokal lama dipertahankan.');}resetForm();$('jsonFile').value='';render();showMessage('Impor berhasil. '+cases.length+' record telah dimuat.','info');}catch(err){showMessage('Impor dibatalkan: '+err.message,'error');}});
 
-const ICD_INDEX_PAGE_LIMIT=1718;
+
 const ICD_CACHE_DB="medaudit-icd10-reference";
 const ICD_CACHE_STORE="reference";
-const ICD_CACHE_KEY="who-index-2013-tabular-2019";
+const ICD_CACHE_KEY="who-index-2016-tabular-2019";
 let icdIndexEntries=[];
 let icdTabularCodes=new Map();
 const indexStatusLabels={matched:"Ditemukan sebagai kode terminal pada Tabular WHO 2019",non_terminal:"Kategori / kode non-terminal pada Tabular WHO 2019",not_found:"Tidak ditemukan pada Tabular WHO 2019 — perlu telaah perbedaan versi",no_code:"Tidak ada kode pada baris indeks"};
@@ -327,8 +327,8 @@ async function saveIcdCache(){
  try{await new Promise((resolve,reject)=>{
   const tx=db.transaction(ICD_CACHE_STORE,"readwrite");
   tx.objectStore(ICD_CACHE_STORE).put({
-   schemaVersion:1,createdAt:new Date().toISOString(),
-   indexEdition:"ICD-10 2e Volume 3 (2013)",
+   schemaVersion:2,createdAt:new Date().toISOString(),
+   indexEdition:"ICD-10 Volume 3 (Alphabetical Index), Fifth edition 2016",
    tabularEdition:"WHO ICD-10 2019",
    entries:icdIndexEntries,
    codes:[...icdTabularCodes.entries()]
@@ -360,7 +360,7 @@ async function restoreIcdCache(){
  try{
   setIndexStatus("Memeriksa referensi ICD-10 yang tersimpan di perangkat…");
   const cached=await readIcdCache();
-  if(!cached||cached.schemaVersion!==1||!Array.isArray(cached.entries)||!Array.isArray(cached.codes)||!cached.entries.length||!cached.codes.length){
+  if(!cached||cached.schemaVersion!==2||!Array.isArray(cached.entries)||!Array.isArray(cached.codes)||!cached.entries.length||!cached.codes.length){
    setIndexStatus("Penyiapan pertama: pilih PDF dan TXT satu kali. Setelah diproses, referensi akan dimuat otomatis pada kunjungan berikutnya.","muted");
    $("indexResults").innerHTML='<div class="empty">Referensi belum disiapkan pada browser ini. Pilih kedua file satu kali.</div>';
    return;
@@ -391,15 +391,15 @@ async function loadIcdReferences(){
   pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.5.438/pdf.worker.min.mjs";
   pdfLoadingTask=pdfjsLib.getDocument({data:await pdfFile.arrayBuffer()});
   pdfDocument=await pdfLoadingTask.promise;
-  const pageLimit=Math.min(pdfDocument.numPages,ICD_INDEX_PAGE_LIMIT);
+  const pageLimit=pdfDocument.numPages;
   const parserState={section:"diseases",stack:{},letter:""};
-  for(let pageNumber=1;pageNumber<=pageLimit;pageNumber++){
+  for(let pageNumber=1;pageNumber<=pageLimit&&!parserState.finished;pageNumber++){
    const page=await pdfDocument.getPage(pageNumber);
    const content=await page.getTextContent();
    const lines=pdfPageLines(content.items,page.getViewport({scale:1}).width);
    icdIndexEntries.push(...MedAuditIndex.parseIndexLines(lines,pageNumber,parserState));
    page.cleanup();
-   if(pageNumber%10===0||pageNumber===pageLimit){
+   if(pageNumber%10===0||pageNumber===pageLimit||parserState.finished){
     progress.value=Math.round(pageNumber/pageLimit*100);
     setIndexStatus("Memproses halaman "+pageNumber+" dari "+pageLimit+" · "+icdIndexEntries.length.toLocaleString("id-ID")+" baris indeks terstruktur…");
     await new Promise(resolve=>requestAnimationFrame(resolve));
