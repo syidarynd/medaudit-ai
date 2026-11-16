@@ -30,33 +30,26 @@
 
 
   function groupPdfTextItems(items, pageWidth) {
-    const usable = (items || []).filter(item =>
-      item && String(item.str || "").trim() &&
+    const nonEmpty = (items || []).filter(item => item && String(item.str || "").trim());
+    const usable = nonEmpty.filter(item =>
       Array.isArray(item.transform) &&
       Number.isFinite(item.transform[4]) &&
       Number.isFinite(item.transform[5])
     );
-    // Fallback for simplified/mocked PDF.js items without coordinates.
-    if (!(items || []).filter(item => item && String(item.str || "").trim())
-      .every(item => Array.isArray(item.transform) &&
-        Number.isFinite(item.transform[4]) && Number.isFinite(item.transform[5]))) {
+
+    // Compatibility fallback for test doubles or PDF.js adapters without geometry.
+    if (usable.length !== nonEmpty.length) {
       let text = "";
-      for (const item of (items || [])) {
-        if (!item || !String(item.str || "").trim()) continue;
-        text += item.str + (item.hasEOL ? "\n" : " ");
-      }
-      return text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+      for (const item of nonEmpty) text += item.str + (item.hasEOL ? "\\n" : " ");
+      return text.split(/\\r?\\n/).map(line => line.trim()).filter(Boolean);
     }
     if (!usable.length) return [];
 
-    const width = Number(pageWidth) || 0;
+    // Reconstruct visual baselines first. A PDF page may contain two columns
+    // whose text starts at x=70/250 on one page and x=181/361 on another.
     const sorted = usable.slice().sort((a, b) =>
       b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]
     );
-
-    // First reconstruct visual rows across the whole page. Split columns only
-    // at a large horizontal gutter; never split a long left-column line merely
-    // because it crosses the page midpoint.
     const rows = [];
     for (const item of sorted) {
       const y = item.transform[5];
@@ -69,57 +62,70 @@
       row.baseline = row.items.reduce((sum, part) => sum + part.transform[5], 0) / row.items.length;
     }
 
-    const fragments = [];
-    const gutterThreshold = width > 100 ? Math.max(28, width * 0.045) : 28;
-    for (const row of rows) {
-      const lineItems = row.items.slice().sort((a, b) => a.transform[4] - b.transform[4]);
-      let fragment = [], right = null;
-      const flush = () => {
-        if (!fragment.length) return;
-        const parts = [];
-        let previousRight = null;
-        for (const item of fragment) {
-          const value = String(item.str || "").replace(/\s+/g, " ").trim();
-          if (!value) continue;
-          const x = item.transform[4];
-          const gap = previousRight === null ? 0 : x - previousRight;
-          if (parts.length && gap > 1.5 &&
-              !/^[,.;:)]/.test(value) && !/[(/-]$/.test(parts[parts.length - 1])) {
-            parts.push(" ");
-          }
-          parts.push(value);
-          previousRight = x + (Number(item.width) || 0);
-        }
-        const line = parts.join("").replace(/\s+/g, " ").trim();
-        if (line) fragments.push({
-          x: fragment[0].transform[4],
-          y: row.baseline,
-          text: line
-        });
-        fragment = [];
-        right = null;
-      };
-      for (const item of lineItems) {
-        const x = item.transform[4];
-        const gap = right === null ? 0 : x - right;
-        if (fragment.length && gap > gutterThreshold) flush();
-        fragment.push(item);
-        right = x + (Number(item.width) || 0);
+    // Detect the two column origins from each visual row's first x-coordinate.
+    // This avoids relying on a text-gap threshold: in the WHO PDF the gutter can
+    // be only ~20 pt, while a long line in one column may itself contain gaps.
+    const starts = rows.map(row => Math.min(...row.items.map(item => item.transform[4])));
+    let boundary = null;
+    if (starts.length >= 12) {
+      let c1 = Math.min(...starts), c2 = Math.max(...starts);
+      for (let i = 0; i < 12; i++) {
+        const left = starts.filter(x => Math.abs(x - c1) <= Math.abs(x - c2));
+        const right = starts.filter(x => Math.abs(x - c1) > Math.abs(x - c2));
+        if (!left.length || !right.length) break;
+        const next1 = left.reduce((a, b) => a + b, 0) / left.length;
+        const next2 = right.reduce((a, b) => a + b, 0) / right.length;
+        if (Math.abs(next1 - c1) + Math.abs(next2 - c2) < 0.01) break;
+        c1 = next1; c2 = next2;
       }
-      flush();
+      const low = Math.min(c1, c2), high = Math.max(c1, c2);
+      const leftCount = starts.filter(x => Math.abs(x - low) <= Math.abs(x - high)).length;
+      const rightCount = starts.length - leftCount;
+      if (high - low >= 70 && leftCount >= 5 && rightCount >= 5) boundary = (low + high) / 2;
     }
 
-    // Preserve reading order: top-to-bottom within the left column, then
-    // top-to-bottom within the right column. A single-column page stays intact.
-    if (width > 100) {
-      const left = fragments.filter(fragment => fragment.x < width / 2);
-      const right = fragments.filter(fragment => fragment.x >= width / 2);
-      const order = (a, b) => b.y - a.y || a.x - b.x;
-      left.sort(order);
-      right.sort(order);
-      return [...left, ...right].map(fragment => fragment.text);
+    function buildLine(lineItems) {
+      const parts = [];
+      let previousRight = null;
+      for (const item of lineItems) {
+        const value = String(item.str || "").replace(/\\s+/g, " ").trim();
+        if (!value) continue;
+        const x = item.transform[4];
+        const gap = previousRight === null ? 0 : x - previousRight;
+        if (parts.length && gap > 1.5 &&
+            !/^[,.;:)]/.test(value) && !/[(/-]$/.test(parts[parts.length - 1])) {
+          parts.push(" ");
+        }
+        parts.push(value);
+        previousRight = x + (Number(item.width) || 0);
+      }
+      return parts.join("").replace(/\\s+/g, " ").trim();
     }
-    fragments.sort((a, b) => b.y - a.y || a.x - b.x);
+
+    const fragments = [];
+    for (const row of rows) {
+      const lineItems = row.items.slice().sort((a, b) => a.transform[4] - b.transform[4]);
+      if (boundary === null) {
+        const text = buildLine(lineItems);
+        if (text) fragments.push({ column: 0, y: row.baseline, x: lineItems[0].transform[4], text });
+        continue;
+      }
+      const columns = [[], []];
+      for (const item of lineItems) columns[item.transform[4] < boundary ? 0 : 1].push(item);
+      columns.forEach((columnItems, column) => {
+        if (!columnItems.length) return;
+        const text = buildLine(columnItems);
+        if (text) fragments.push({ column, y: row.baseline, x: columnItems[0].transform[4], text });
+      });
+    }
+
+    // Read the complete left column before the right column, preserving
+    // top-to-bottom order inside each. On single-column pages retain page order.
+    if (boundary !== null) {
+      fragments.sort((a, b) => a.column - b.column || b.y - a.y || a.x - b.x);
+    } else {
+      fragments.sort((a, b) => b.y - a.y || a.x - b.x);
+    }
     return fragments.map(fragment => fragment.text);
   }
 
