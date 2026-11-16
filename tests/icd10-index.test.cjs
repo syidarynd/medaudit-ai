@@ -226,11 +226,26 @@ test("keeps a fragmented left-column line together when a continuation crosses t
 test("skips the WHO land transport accident matrix instead of flattening its columns", () => {
   const state = { section: "external_causes", stack: {} };
   const entries = index.parseIndexLines([
-    "Table of land transport accidents",
-    "Pedestrian V01",
-    "Pedal cyclist V10",
-    "Occupant of car V40"
+    "Table of land transport accidents V05 V15 V25 V35 V45 V55 V65 V75",
+    "Pedestrian V01 V11 V21 V31 V41 V51 V61 V71",
+    "Pedal cyclist V10 V20 V30 V40 V50 V60 V70"
   ], 677, state);
   assert.deepEqual(entries, []);
   assert.equal(state.section, "external_causes");
+
+  const crossReference = index.parseIndexLines([
+    "Table of land transport accidents V99"
+  ], 672, { section: "external_causes", stack: {} });
+  assert.equal(crossReference.length, 1);
+  assert.deepEqual(crossReference[0].codes, ["V99"]);
+});
+
+test("ignores WHO running page headers instead of indexing them as diagnoses", () => {
+  const entries = index.parseIndexLines([
+    "INTERNATIONAL CLASSIFICATION OF DISEASES",
+    "ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY",
+    "Abscess",
+    "- brain G06.0"
+  ], 21, { section: "diseases", stack: {} });
+  assert.deepEqual(entries.map(entry => entry.term), ["Abscess", "- brain G06.0"]);
 });
