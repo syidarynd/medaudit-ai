@@ -22,5 +22,17 @@ jobs:
         run: npm install --no-save --no-package-lock playwright@1.58.2
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Run unit and browser tests
+      - name: Download WHO 2016 Volume 3 PDF for full-source regression
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 4 --retry-all-errors --retry-delay 3 \
+            --user-agent "Mozilla/5.0 (compatible; MedAuditAI/1.0)" \
+            --header "Accept: application/pdf" \
+            --output /tmp/9789241549165-V3-eng.pdf \
+            "https://iris.who.int/bitstream/handle/10665/246208/9789241549165-V3-eng.pdf?sequence=3&isAllowed=y"
+          test "$(stat -c%s /tmp/9789241549165-V3-eng.pdf)" -gt 1000000
+          head -c 5 /tmp/9789241549165-V3-eng.pdf | grep -q "%PDF-"
+      - name: Run unit and browser tests including the full WHO PDF
+        env:
+          WHO_ICD10_INDEX_PDF: /tmp/9789241549165-V3-eng.pdf
         run: node --test tests/*.test.cjs
