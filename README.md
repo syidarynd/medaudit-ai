@@ -13,8 +13,8 @@ Prototipe portofolio informatika kesehatan oleh Said Ariyandi.
 |---|---|
 | Nama aplikasi | MedAudit AI |
 | Status | Prototype frontend statis |
-| Versi saat ini | Prototype v0.6.0 |
-| Target pengembangan | v0.6.0 |
+| Versi saat ini | Prototype v0.7.0 |
+| Target pengembangan | v0.7.0 |
 | Platform demo | GitHub Pages |
 | Dataset | 8 data kunjungan sintetis |
 
@@ -38,7 +38,7 @@ https://syidarynd.github.io/medaudit-ai/
 - Pencarian berdasarkan nomor rekam medis, nama/inisial fiktif, diagnosis, dan kode.
 - Filter berdasarkan status audit.
 - Pemeriksaan kualitas data berbasis aturan DQ-01 sampai DQ-10.
-- Pencarian istilah melalui Alphabetical Index ICD-10 yang disiapkan satu kali dari file sumber lokal.
+- Pencarian istilah melalui Alphabetical Index ICD-10 WHO Volume 3 edisi 2016 yang diekstrak di browser dengan pemisahan dua kolom, hierarki dash Unicode, dan rujukan silang.
 - Referensi hasil ekstraksi disimpan di IndexedDB dan dimuat otomatis pada kunjungan berikutnya di browser/perangkat yang sama.
 - Pembandingan kode indeks dengan daftar kode terminal/non-terminal pada Tabular WHO 2019.
 - Ekspor laporan ke CSV.
@@ -63,7 +63,9 @@ DQ-09 mendeteksi nomor RM duplikat antar-kunjungan. DQ-10 membandingkan pasangan
 
 ### Referensi pencarian ICD-10
 
-- Alphabetical Index: ICD-10 2e Volume 3 (2013), dipilih dan diproses secara lokal oleh pengguna.
+- Alphabetical Index: WHO ICD-10 Volume 3, Fifth edition 2016, dipilih dan diproses secara lokal oleh pengguna.
+- Parser memulai ekstraksi pada Section I, melanjutkan Section II, dan berhenti saat Section III (tabel obat/kimia) dimulai.
+- Matriks kecelakaan transportasi darat WHO dilewati secara eksplisit agar kode dari kolom tabel yang berbeda tidak digabung sebagai satu entri.
 - Tabular pembanding: WHO ICD-10 2019, file TXT dipilih secara lokal.
 - Karena edisinya berbeda, status cocok/tidak cocok hanya pembanding teknis dan tidak menetapkan validitas kode Indonesia/BPJS.
 - PDF/TXT sumber tidak disertakan dalam repositori atau diunggah ke server. Hasil ekstraksi terstruktur disimpan lokal di IndexedDB pada perangkat pengguna; tidak tersinkron antarperangkat.
@@ -143,7 +145,7 @@ Dokumentasi proyek:
 - [Skenario Uji Aturan Audit](tests/audit-test-cases.md)
 - [Panduan Indeks ICD-10](docs/icd10-index.md)
 
-Pengujian mencakup unit test otomatis dan browser smoke test Chromium pada viewport seluler. Uji langsung perangkat Android fisik tetap menjadi validasi lanjutan.
+Pengujian mencakup unit test otomatis dan browser smoke test Chromium pada viewport seluler. CI terakhir menjalankan 32 tes: 31 lulus, 0 gagal, 1 tes PDF WHO penuh dilewati karena file sumber tidak disimpan di repositori. Uji impor PDF 848 halaman pada browser Android fisik tetap menjadi validasi lanjutan.
 
 Unit test mesin audit dan parser indeks dijalankan melalui GitHub Actions. Pengujian UI browser lintas perangkat, keamanan menyeluruh, dan performa skala besar belum diklaim selesai.
 
