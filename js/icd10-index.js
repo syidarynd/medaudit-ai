@@ -203,20 +203,22 @@
     // It is not a normal alphabetical entry list; flattening it would attach
     // codes from different table columns to the same term. Skip that page
     // rather than emitting misleading index records.
-    if ((lines || []).some(rawLine =>
-      /^Table of\s+land transport accidents$/i.test(String(rawLine ?? "").replace(/\s+/g, " ").trim())
-    )) return [];
+    if ((lines || []).some(rawLine => {
+      const line = String(rawLine ?? "").replace(/\s+/g, " ").trim();
+      return /^Table of\s+land transport accidents\b/i.test(line) && extractCodes(line).length >= 4;
+    })) return [];
     for (const rawLine of lines || []) {
       if (parserState.finished) break;
       const line = String(rawLine ?? "").replace(/\u00ad/g, "-").replace(/\u00a0/g, " ")
         .replace(/\s+/g, " ").trim();
       if (!line || /^ICD-10\s+2e\s+Volume\s+3/i.test(line)) continue;
+      if (/^(?:INTERNATIONAL CLASSIFICATION OF DISEASES|ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY)$/i.test(line)) continue;
       if (/^SECTION\s+I\b/i.test(line)) {
         parserState.section = "diseases"; parserState.stack = {}; continue;
       }
       // WHO Volume 3 uses this running page heading for Section II; it is not
       // printed as "SECTION II -" on each page in the PDF.
-      if (/^(?:SECTION\s+II\b(?:\s*[-–—:].*)?|EXTERNAL CAUSES OF INJURY)$/i.test(line)) {
+      if (/^(?:SECTION\s+II\b(?:\s*[-–—:].*)?|EXTERNAL CAUSES OF INJURIES?)$/i.test(line)) {
         parserState.section = "external_causes"; parserState.stack = {}; continue;
       }
       // Section III is a separate drug/chemical table, not an index hierarchy.
