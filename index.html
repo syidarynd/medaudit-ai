@@ -302,8 +302,29 @@ function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"';}
 function exportCsv(){const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Kelas Rawat','Resume Lengkap','Autentikasi DPJP','Temuan Audit'];const rows=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,c.kelas,c.resumeComplete?'Ya':'Tidak',c.dpjpSigned?'Ya':'Tidak',audit(c,cases).map(x=>x.code+': '+x.text).join('; ')])];const csv='\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'MedAudit-AI-audit-v0.7.1.csv');}
 function exportJson(){const payload={app:'MedAudit AI',version:'0.7.1',exportedAt:new Date().toISOString(),records:cases};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'MedAudit-AI-backup-v0.7.1.json');}
 $('csvExport').addEventListener('click',exportCsv);$('csvExport2').addEventListener('click',exportCsv);$('jsonExport').addEventListener('click',exportJson);$('backupExport').addEventListener('click',exportJson);
-function validateImport(parsed){const records=Array.isArray(parsed)?parsed:parsed&&Array.isArray(parsed.records)?parsed.records:null;if(!records)throw new Error('Format JSON harus berupa array atau objek dengan properti records.');const seenIds=new Set();const out=records.map((r,i)=>{if(!r||typeof r!=='object'||Array.isArray(r))throw new Error('Record ke-'+(i+1)+' bukan objek yang valid.');for(const k of ['mrn','name','admit','discharge','mainDx','code','notes'])if(r[k]!==undefined&&typeof r[k]!=='string')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa teks.');for(const k of ['resumeComplete','dpjpSigned'])if(r[k]!==undefined&&typeof r[k]!=='boolean')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa boolean.');const c=normalizeRecord(r);if(!c.id)throw new Error('ID record kosong pada baris '+(i+1)+'.');if(seenIds.has(c.id))throw new Error('ID record ganda: '+c.id);seenIds.add(c.id);return c;});return out;}
-$('importJson').addEventListener('click',async()=>{const file=$('jsonFile').files[0];if(!file){showMessage('Pilih file backup JSON terlebih dahulu.','error');return;}try{const parsed=JSON.parse(await file.text());const imported=validateImport(parsed);if(!confirm('Impor '+imported.length+' record dan mengganti seluruh data lokal saat ini? Pastikan sudah memiliki backup.'))return;const old=cases;cases=imported;try{localStorage.setItem(KEY,JSON.stringify(cases));storageWarning='';}catch(err){cases=old;throw new Error('Penyimpanan gagal. Data lokal lama dipertahankan.');}resetForm();$('jsonFile').value='';render();showMessage('Impor berhasil. '+cases.length+' record telah dimuat.','info');}catch(err){showMessage('Impor dibatalkan: '+err.message,'error');}});
+const MAX_IMPORT_BYTES=5*1024*1024;
+const MAX_IMPORT_RECORDS=5000;
+const IMPORT_FIELD_LIMITS={id:100,mrn:40,name:80,admit:10,discharge:10,mainDx:120,code:8,notes:1000,kelas:40};
+function validateImport(parsed){
+ const records=Array.isArray(parsed)?parsed:parsed&&Array.isArray(parsed.records)?parsed.records:null;
+ if(!records)throw new Error('Format JSON harus berupa array atau objek dengan properti records.');
+ if(records.length>MAX_IMPORT_RECORDS)throw new Error('Backup melebihi batas '+MAX_IMPORT_RECORDS.toLocaleString('id-ID')+' record. Pecah file menjadi beberapa bagian sebelum impor.');
+ const seenIds=new Set();
+ return records.map((r,i)=>{
+  if(!r||typeof r!=='object'||Array.isArray(r))throw new Error('Record ke-'+(i+1)+' bukan objek yang valid.');
+  for(const k of Object.keys(IMPORT_FIELD_LIMITS)){
+   if(r[k]!==undefined&&typeof r[k]!=='string')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa teks.');
+   if(typeof r[k]==='string'&&r[k].length>IMPORT_FIELD_LIMITS[k])throw new Error('Field '+k+' pada record ke-'+(i+1)+' melebihi batas '+IMPORT_FIELD_LIMITS[k]+' karakter.');
+  }
+  for(const k of ['resumeComplete','dpjpSigned'])if(r[k]!==undefined&&typeof r[k]!=='boolean')throw new Error('Field '+k+' pada record ke-'+(i+1)+' harus berupa boolean.');
+  const c=normalizeRecord(r);
+  if(!c.id)throw new Error('ID record kosong pada baris '+(i+1)+'.');
+  if(seenIds.has(c.id))throw new Error('ID record ganda: '+c.id);
+  seenIds.add(c.id);
+  return c;
+ });
+}
+$('importJson').addEventListener('click',async()=>{const file=$('jsonFile').files[0];if(!file){showMessage('Pilih file backup JSON terlebih dahulu.','error');return;}try{if(file.size>MAX_IMPORT_BYTES)throw new Error('Ukuran file backup melebihi batas 5 MB.');const parsed=JSON.parse(await file.text());const imported=validateImport(parsed);if(!confirm('Impor '+imported.length+' record dan mengganti seluruh data lokal saat ini? Pastikan sudah memiliki backup.'))return;const old=cases;cases=imported;try{localStorage.setItem(KEY,JSON.stringify(cases));storageWarning='';}catch(err){cases=old;throw new Error('Penyimpanan gagal. Data lokal lama dipertahankan.');}resetForm();$('jsonFile').value='';render();showMessage('Impor berhasil. '+cases.length+' record telah dimuat.','info');}catch(err){showMessage('Impor dibatalkan: '+err.message,'error');}});
 
 
 const ICD_CACHE_DB="medaudit-icd10-reference";
