@@ -19,15 +19,27 @@ test("clean synthetic visit has no findings", () => {
   assert.deepEqual(engine.audit(clean, [clean]), []);
 });
 
-test("DQ-09 detects duplicate MRN case-insensitively across visits", () => {
-  const other = { ...clean, id: "2", mrn: "demo-001" };
-  const findings = engine.audit(clean, [clean, other]);
-  assert.equal(findings.filter(x => x.code === "DQ-09").length, 1);
+test("DQ-09 does not flag the same MRN on a different visit date", () => {
+  const otherVisit = { ...clean, id: "2", mrn: "demo-001", admit: "2026-10-20", discharge: "2026-10-21" };
+  const findings = engine.audit(clean, [clean, otherVisit]);
+  assert.equal(findings.some(x => x.code === "DQ-09"), false);
 });
 
-test("DQ-09 does not flag a unique MRN", () => {
-  const findings = engine.audit(clean, [clean, { ...clean, id: "2", mrn: "DEMO-002" }]);
-  assert.equal(findings.some(x => x.code === "DQ-09"), false);
+test("DQ-09 flags a likely duplicate encounter with the same MRN and encounter details", () => {
+  const duplicate = { ...clean, id: "2", mrn: "demo-001" };
+  const findings = engine.audit(clean, [clean, duplicate]);
+  assert.equal(findings.filter(x => x.code === "DQ-09").length, 1);
+  assert.match(findings.find(x => x.code === "DQ-09").text, /Kemungkinan duplikasi kunjungan/);
+});
+
+test("DQ-09 normalizes MRN case and diagnosis whitespace before matching", () => {
+  const duplicate = { ...clean, id: "2", mrn: " demo-001 ", mainDx: " demam   " };
+  assert.equal(engine.isPotentialDuplicateEncounter(clean, duplicate), true);
+});
+
+test("DQ-09 does not flag records with incomplete encounter identity", () => {
+  const incomplete = { ...clean, id: "2", admit: "" };
+  assert.equal(engine.isPotentialDuplicateEncounter(clean, incomplete), false);
 });
 
 test("DQ-10 flags a mismatch for a supported example diagnosis", () => {

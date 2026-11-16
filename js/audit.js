@@ -55,13 +55,17 @@
     if (record.resumeComplete !== true) add("DQ-07", "Resume medis belum ditandai lengkap");
     if (record.dpjpSigned !== true) add("DQ-08", "Autentikasi DPJP belum ditandai tersedia");
 
-    // DQ-09: duplicate medical-record number across distinct visits.
-    if (mrn && Array.isArray(records)) {
+    // DQ-09: detect a likely duplicate encounter, not a repeated patient MRN.
+    // One patient may legitimately have many visits under the same medical-record number.
+    if (Array.isArray(records)) {
       const duplicates = records.filter(other =>
-        other && other.id !== record.id &&
-        String(other.mrn ?? "").trim().toLocaleLowerCase() === mrn.toLocaleLowerCase()
+        other && other.id !== record.id && isPotentialDuplicateEncounter(record, other)
       );
-      if (duplicates.length) add("DQ-09", "Nomor RM terdeteksi sama pada " + duplicates.length + " data kunjungan lain");
+      if (duplicates.length) add(
+        "DQ-09",
+        "Kemungkinan duplikasi kunjungan: nomor RM, tanggal masuk/keluar, dan diagnosis utama sama pada " +
+        duplicates.length + " data lain. Verifikasi sebelum menggabungkan atau menghapus data."
+      );
     }
 
     // DQ-10: compare only diagnoses covered by the small, explicit example list.
@@ -77,8 +81,22 @@
     return findings;
   }
 
+  function isPotentialDuplicateEncounter(left = {}, right = {}) {
+    const leftMrn = String(left.mrn ?? "").trim().toLocaleLowerCase();
+    const rightMrn = String(right.mrn ?? "").trim().toLocaleLowerCase();
+    const leftAdmit = String(left.admit ?? "").trim();
+    const rightAdmit = String(right.admit ?? "").trim();
+    if (!leftMrn || !rightMrn || leftMrn !== rightMrn || !leftAdmit || leftAdmit !== rightAdmit) return false;
+    const leftDischarge = String(left.discharge ?? "").trim();
+    const rightDischarge = String(right.discharge ?? "").trim();
+    const leftDiagnosis = normalizeDiagnosis(left.mainDx);
+    const rightDiagnosis = normalizeDiagnosis(right.mainDx);
+    return leftDischarge === rightDischarge && leftDiagnosis === rightDiagnosis;
+  }
+
   const engine = Object.freeze({
     audit,
+    isPotentialDuplicateEncounter,
     auditAll(records) {
       const list = Array.isArray(records) ? records : [];
       return list.flatMap(record => audit(record, list).map(issue => ({ ...issue, mrn: record.mrn ?? "" })));

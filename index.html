@@ -67,7 +67,7 @@ margin-top:16px
 </style>
 </head>
 <body>
-<header><h1>MedAudit AI</h1><p>Healthcare Data Quality &amp; Medical Records Audit · Prototype v0.8.0</p></header>
+<header><h1>MedAudit AI</h1><p>Healthcare Data Quality &amp; Medical Records Audit · Prototype v0.8.1</p></header>
 <main>
 <div class="notice"><b>Mode demonstrasi:</b> gunakan data sintetis/fiktif saja. Data disimpan di browser melalui LocalStorage. Bukan sistem produksi, bukan database klinis, dan bukan pengganti verifikasi koder/DPJP.</div>
 <div id="appMessage" class="notice info hidden" role="status"></div>
@@ -106,7 +106,7 @@ margin-top:16px
 <div class="metric"><strong id="issues">0</strong><span>Perlu ditinjau</span></div>
 <div class="metric"><strong id="rate">0%</strong><span>Persentase tanpa temuan</span></div>
 </div>
-<div class="panel" style="margin-top:16px"><h2>Ringkasan pemeriksaan</h2><p class="muted">Audit mencakup kelengkapan data, kronologi tanggal, format dasar kode ICD-10, kelas rawat, resume, autentikasi DPJP, duplikasi nomor RM, serta pemeriksaan silang diagnosis-kode untuk contoh terbatas.</p><div id="summary" class="empty">Belum ada data.</div><div class="actions"><button id="seed">Muat data demo</button><button class="secondary" id="csvExport">Ekspor CSV</button><button class="secondary" id="jsonExport">Backup JSON</button></div></div>
+<div class="panel" style="margin-top:16px"><h2>Ringkasan pemeriksaan</h2><p class="muted">Audit mencakup kelengkapan data, kronologi tanggal, format dasar kode ICD-10, kelas rawat, resume, autentikasi DPJP, kandidat duplikasi kunjungan, serta pemeriksaan silang diagnosis-kode untuk contoh terbatas.</p><div id="summary" class="empty">Belum ada data.</div><div class="actions"><button id="seed">Muat data demo</button><button class="secondary" id="csvExport">Ekspor CSV</button><button class="secondary" id="jsonExport">Backup JSON</button></div></div>
 <div class="dashboard-grid">
   <div class="panel">
     <h2>Distribusi Status Audit</h2>
@@ -184,7 +184,7 @@ margin-top:16px
 <section id="about" class="view hidden"><div class="panel"><h2>Ruang lingkup dan batasan</h2>
 <ul><li>Prototype portofolio untuk demonstrasi audit kelengkapan dan kualitas data rekam medis.</li><li>Mesin audit menggunakan aturan sederhana (rule-based), bukan model AI/LLM.</li><li>Validasi kode ICD-10 memeriksa pola penulisan dasar. DQ-10 hanya membandingkan daftar contoh diagnosis-kode terbatas, bukan memastikan kode resmi atau ketepatan klinis.</li><li>Data disimpan di LocalStorage browser perangkat ini; hapus data situs/browser dapat menghilangkannya.</li><li>Aturan kelengkapan merupakan indikator review, bukan keputusan klinis atau keputusan klaim otomatis.</li><li>Jangan masukkan data pasien nyata, NIK, alamat, nomor telepon, atau informasi yang dapat mengidentifikasi seseorang.</li></ul>
 <p class="muted">Dikembangkan sebagai proyek demonstrasi pembelajaran informatika kesehatan. Keputusan klinis dan kodifikasi akhir tetap memerlukan validasi profesional.</p></div></section>
-<footer>MedAudit AI · Prototype v0.8.0 · Data sintetis saja</footer>
+<footer>MedAudit AI · Prototype v0.8.1 · Data sintetis saja</footer>
 </main>
 <script src="js/audit.js"></script>
 <script src="js/icd10-index.js"></script>
@@ -198,7 +198,7 @@ let storageWarning='';
 function makeId(){return 'case-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)}
 function normalizeRecord(c){
  const mrn=String(c.mrn??'').trim();
- return {id:String(c.id||mrn||makeId()),mrn,name:String(c.name??'').trim(),admit:String(c.admit??''),discharge:String(c.discharge??''),mainDx:String(c.mainDx??'').trim(),code:String(c.code??'').trim().toUpperCase(),notes:String(c.notes??''),kelas:String(c.kelas??''),resumeComplete:c.resumeComplete===true,dpjpSigned:c.dpjpSigned===true};
+ return {id:String(c.id||makeId()),mrn,name:String(c.name??'').trim(),admit:String(c.admit??''),discharge:String(c.discharge??''),mainDx:String(c.mainDx??'').trim(),code:String(c.code??'').trim().toUpperCase(),notes:String(c.notes??''),kelas:String(c.kelas??''),resumeComplete:c.resumeComplete===true,dpjpSigned:c.dpjpSigned===true};
 }
 try{const raw=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(raw))cases=raw.map(normalizeRecord);else storageWarning='Struktur data lokal tidak dikenali. Data belum dimuat.';}catch(e){storageWarning='Data lokal tidak dapat dibaca. Periksa penyimpanan browser.';}
 function showMessage(message,type='info'){const el=$('appMessage');el.textContent=message;el.className='notice '+type;el.classList.remove('hidden');}
@@ -296,11 +296,11 @@ $('caseForm').addEventListener('submit',e=>{e.preventDefault();const id=$('recor
 $('cancelEdit').addEventListener('click',resetForm);
 $('searchBox').addEventListener('input',render);$('statusFilter').addEventListener('change',render);$('clearSearch').addEventListener('click',()=>{$('searchBox').value='';$('statusFilter').value='all';render();});
 function demoRecords(){return [{mrn:'DEMO-001',name:'Pasien Contoh A',admit:'2026-10-10',discharge:'2026-10-12',mainDx:'Gastroenteritis',code:'A09',notes:'Data sintetis',kelas:'Kelas 2',resumeComplete:true,dpjpSigned:true},{mrn:'DEMO-002',name:'Pasien Contoh B',admit:'2026-11-12',discharge:'2026-11-11',mainDx:'Demam',code:'123',notes:'Contoh dengan temuan',kelas:'',resumeComplete:false,dpjpSigned:false}].map(normalizeRecord);}
-$('seed').addEventListener('click',()=>{const demo=demoRecords();demo.forEach(d=>{if(!cases.some(x=>x.mrn===d.mrn))cases.push(d)});save();showMessage('Data demo ditambahkan tanpa menggandakan nomor RM yang sudah ada.','info');});
+$('seed').addEventListener('click',()=>{const demo=demoRecords();demo.forEach(d=>{if(!cases.some(x=>MedAuditEngine.isPotentialDuplicateEncounter(x,d)))cases.push(d)});save();showMessage('Data demo ditambahkan tanpa menggandakan kandidat kunjungan yang sama. Nomor RM boleh muncul pada kunjungan berbeda.','info');});
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"';}
-function exportCsv(){const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Kelas Rawat','Resume Lengkap','Autentikasi DPJP','Temuan Audit'];const rows=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,c.kelas,c.resumeComplete?'Ya':'Tidak',c.dpjpSigned?'Ya':'Tidak',audit(c,cases).map(x=>x.code+': '+x.text).join('; ')])];const csv='\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'MedAudit-AI-audit-v0.8.0.csv');}
-function exportJson(){const payload={app:'MedAudit AI',version:'0.8.0',exportedAt:new Date().toISOString(),records:cases};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'MedAudit-AI-backup-v0.8.0.json');}
+function exportCsv(){const head=['No RM','Nama Fiktif','Tanggal Masuk','Tanggal Keluar','Diagnosis Utama','Kode ICD-10','Kelas Rawat','Resume Lengkap','Autentikasi DPJP','Temuan Audit'];const rows=[head,...cases.map(c=>[c.mrn,c.name,c.admit,c.discharge,c.mainDx,c.code,c.kelas,c.resumeComplete?'Ya':'Tidak',c.dpjpSigned?'Ya':'Tidak',audit(c,cases).map(x=>x.code+': '+x.text).join('; ')])];const csv='\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'MedAudit-AI-audit-v0.8.1.csv');}
+function exportJson(){const payload={app:'MedAudit AI',version:'0.8.1',exportedAt:new Date().toISOString(),records:cases};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'MedAudit-AI-backup-v0.8.1.json');}
 $('csvExport').addEventListener('click',exportCsv);$('csvExport2').addEventListener('click',exportCsv);$('jsonExport').addEventListener('click',exportJson);$('backupExport').addEventListener('click',exportJson);
 const MAX_IMPORT_BYTES=5*1024*1024;
 const MAX_IMPORT_RECORDS=5000;

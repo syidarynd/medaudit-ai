@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.8.1] – 2026-11-16
+
+### Fixed
+- Corrected DQ-09: a repeated medical-record number across different visits is valid and is no longer flagged by itself.
+- DQ-09 now raises a review warning only when MRN, admission date, discharge date, and normalized primary diagnosis match across separate records.
+- New records without an explicit internal ID receive a generated unique ID instead of reusing the MRN.
+- Demo seeding now checks for a likely duplicate encounter rather than blocking any repeated MRN.
+
+### Testing
+- Added regression tests for repeated MRNs on different dates, likely duplicate encounters, and normalization of case/whitespace.
+- CI run #43815019242: 37 tests, 36 passed, 0 failed, 1 skipped (optional full WHO PDF test; source unavailable on runner).
+- Added a browser test that imports two visits for the same synthetic patient and confirms distinct internal IDs and no false DQ-09 finding.
+
+### Scope
+- DQ-09 is a heuristic duplicate-candidate warning, not an automatic merge/delete decision. Review the source records before taking action.
+- The application remains a rule-based prototype and must use synthetic data only.
+
 ## [0.8.0] – 2026-11-16
 
 ### Added

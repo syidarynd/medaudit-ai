@@ -142,13 +142,17 @@ Tanggal keluar yang kosong diperbolehkan untuk kunjungan yang masih berlangsung.
 
 ---
 
-### 4.9 Pengujian DQ-09 – Duplikasi Nomor Rekam Medis
+### 4.9 Pengujian DQ-09 – Kandidat Duplikasi Kunjungan
+
+Nomor rekam medis mengidentifikasi pasien dan secara normal dapat digunakan kembali pada banyak kunjungan pasien yang sama. Karena itu, kesamaan nomor RM saja bukan duplikasi.
 
 | ID | Skenario | Hasil yang Diharapkan |
 |---|---|---|
-| TC-DQ09-01 | Nomor RM unik pada seluruh kunjungan | Tidak ada temuan DQ-09 |
-| TC-DQ09-02 | Dua kunjungan berbeda memiliki nomor RM sama | Muncul temuan DQ-09 |
-| TC-DQ09-03 | Nomor RM sama dengan perbedaan kapitalisasi | Muncul temuan DQ-09 |
+| TC-DQ09-01 | Pasien yang sama memiliki kunjungan pada tanggal masuk berbeda | Tidak ada temuan DQ-09 |
+| TC-DQ09-02 | Nomor RM, tanggal masuk/keluar, dan diagnosis utama sama pada dua record | Muncul peringatan kandidat duplikasi kunjungan |
+| TC-DQ09-03 | Nomor RM dan diagnosis sama, tetapi tanggal masuk berbeda | Tidak ada temuan DQ-09 |
+| TC-DQ09-04 | Kombinasi kunjungan sama dengan perbedaan kapitalisasi/spasi | Muncul peringatan kandidat duplikasi |
+| TC-DQ09-05 | Tanggal masuk tidak tersedia | Tidak membuat kandidat duplikasi |
 
 ### 4.10 Pengujian DQ-10 – Pemeriksaan Silang Diagnosis dan Kode
 
@@ -271,11 +275,11 @@ Pengujian dinyatakan berhasil apabila:
 | DQ-06 | 2 |
 | DQ-07 | 2 |
 | DQ-08 | 2 |
-| DQ-09 | 3 |
+| DQ-09 | 5 |
 | DQ-10 | 3 |
 | Pengujian Fungsional | 20 |
 | Pengujian Regresi | 5 |
-| **TOTAL** | **59** |
+| **TOTAL** | **61** |
 
 | Status | Jumlah |
 |---|---:|
