@@ -1,8 +1,8 @@
 # DOKUMENTASI PENGUJIAN MEDAUDIT AI
 
 **Nama aplikasi:** MedAudit AI – Healthcare Data Quality System  
-**Versi saat pengujian:** Prototype v0.5.0  
-**Target pengembangan:** v0.5.0  
+**Versi saat pengujian:** Prototype v0.7.0  
+**Target pengembangan:** v0.7.0  
 **Jenis pengujian:** Pengujian fungsional manual  
 **Dataset:** 8 data kunjungan sintetis (DEMO-101–DEMO-108)
 
@@ -21,7 +21,7 @@ Ruang lingkup pengujian:
 - Penampilan hasil audit.
 - Ekspor dan impor data.
 - Dashboard dan visualisasi hasil audit.
-- Parser lokal Alphabetical Index dan pembandingan kode terhadap Tabular WHO 2019.
+- Parser lokal WHO ICD-10 Volume 3 edisi 2016 dan pembandingan kode terhadap Tabular WHO 2019.
 
 ## 2. Lingkungan Pengujian
 
@@ -71,9 +71,9 @@ Ruang lingkup pengujian:
 
 ## 5. Pengujian Referensi Indeks ICD-10
 
-Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, hierarki istilah, rujukan silang, pemisahan kode terminal/non-terminal, pencarian konteks, serta batas Section III. Browser smoke test otomatis menggunakan Chromium viewport seluler menguji unggah PDF lokal, pembacaan Tabular, pencarian kode, dan layout responsif. Pengujian pada perangkat Android fisik pengguna masih memerlukan uji langsung.
+Unit test parser mencakup ekstraksi kode tunggal/berpasangan/wildcard, pemisahan kolom berdasarkan asal teks berulang, preservasi spasi eksplisit PDF, hierarki dash Unicode, rujukan silang, running header, matriks transportasi, awal Section I, dan batas Section III. Browser smoke test otomatis menggunakan Chromium viewport seluler menguji unggah PDF fixture, pembacaan Tabular, pencarian kode, dan layout responsif. Tes PDF WHO penuh tersedia secara opsional melalui `WHO_ICD10_INDEX_PDF` dan dilewati pada CI karena PDF berhak cipta tidak disimpan di repositori. Pengujian pada perangkat Android fisik pengguna masih memerlukan uji langsung.
 
-**Batasan:** Alphabetical Index yang dipakai berlabel Volume 3 edisi 2013, sedangkan Tabular pembanding adalah WHO 2019. Kode yang tidak ditemukan pada versi pembanding tidak otomatis invalid.
+**Batasan:** Alphabetical Index yang dipakai adalah WHO Volume 3 edisi 2016, sedangkan Tabular pembanding adalah WHO 2019. Kode yang tidak ditemukan pada versi pembanding tidak otomatis invalid.
 
 ## 6. Hasil Pengujian Dataset Sintetis
 
@@ -152,7 +152,7 @@ Prototype untuk demonstrasi dan portofolio informatika kesehatan.
 - DQ-09 membandingkan nomor RM antar-record dan mengabaikan perbedaan kapitalisasi.
 - DQ-10 hanya membandingkan beberapa pasangan diagnosis-kode demonstrasi yang ditentukan secara eksplisit; diagnosis lain tidak dinilai.
 - Unit test mesin audit dan parser indeks serta browser smoke test Chromium dijalankan melalui GitHub Actions.
-- Perintah lokal: `npm install --no-save --no-package-lock playwright@1.58.2`, `npx playwright install chromium`, lalu `node --test tests/audit.test.cjs tests/icd10-index.test.cjs tests/browser-smoke.test.cjs`.
-- Pada commit rilis v0.5.0, seluruh 16 tes otomatis lulus (9 mesin audit, 6 parser indeks, 1 browser smoke test).
+- Perintah lokal: `npm install --no-save --no-package-lock playwright@1.58.2`, `npx playwright install chromium`, lalu `node --test tests/*.test.cjs`. Untuk mengaktifkan tes PDF WHO penuh, set `WHO_ICD10_INDEX_PDF` ke path PDF WHO Volume 3 edisi 2016.
+- Pada pemeriksaan CI terbaru: 32 tes terdaftar, 31 lulus, 0 gagal, dan 1 tes impor PDF WHO penuh dilewati karena file sumber tidak tersedia di runner.
 - Browser smoke test menggunakan viewport seluler 390×844; uji pada perangkat Android fisik tetap disarankan.
 - Pengujian ini tidak membuktikan ketepatan klinis atau validitas kode ICD-10 secara menyeluruh.
