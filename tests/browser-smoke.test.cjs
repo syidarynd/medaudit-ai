@@ -165,6 +165,14 @@ test("mobile browser can import a local PDF and search the ICD-10 index", { time
       element => getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).length
     );
     assert.equal(gridColumns, 1, "mobile search toolbar should use a single column");
+
+    // The same application must remain within the desktop viewport after mobile testing.
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const desktopOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    assert.ok(desktopOverflow <= 1, "desktop layout must not overflow horizontally; overflow=" + desktopOverflow + "px");
+
     assert.deepEqual(pageErrors, []);
     await context.close();
   } finally {
