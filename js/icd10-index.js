@@ -198,7 +198,7 @@
   }
 
   function parseIndexLines(lines, pageNumber, state) {
-    const output = [], parserState = state || { section: "diseases", stack: {} };
+    const output = [], parserState = state || { section: "diseases", stack: {}, started: true };
     // WHO Volume 3 contains a multi-axis transport accident matrix page.
     // It is not a normal alphabetical entry list; flattening it would attach
     // codes from different table columns to the same term. Skip that page
@@ -213,7 +213,12 @@
         .replace(/\s+/g, " ").trim();
       if (!line || /^ICD-10\s+2e\s+Volume\s+3/i.test(line)) continue;
       if (/^(?:INTERNATIONAL CLASSIFICATION OF DISEASES|ALPHABETICAL INDEX TO DISEASES AND NATURE OF INJURY)$/i.test(line)) continue;
-      if (parserState.started === false) {\n        if (/^SECTION\\s+I(?:\\s*[-–—:].*)?$/i.test(line)) {\n          parserState.started = true; parserState.section = "diseases"; parserState.stack = {};\n        }\n        continue;\n      }\n      if (/^SECTION\\s+I(?:\\s*[-–—:].*)?$/i.test(line)) {
+      if (parserState.started === false) {
+        if (/^SECTION\s+I(?:\s*[-–—:].*)?$/i.test(line)) {
+          parserState.started = true; parserState.section = "diseases"; parserState.stack = {};
+        }
+        continue;
+      }\n      if (/^SECTION\\s+I(?:\\s*[-–—:].*)?$/i.test(line)) {
         parserState.section = "diseases"; parserState.stack = {}; continue;
       }
       // WHO Volume 3 uses this running page heading for Section II; it is not
