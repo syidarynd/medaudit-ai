@@ -221,3 +221,16 @@ test("keeps a fragmented left-column line together when a continuation crosses t
   assert.match(lines[12], /^Right entry 0$/);
   assert.ok(!lines.some(line => line.includes("Left entry") && line.includes("Right entry")));
 });
+
+
+test("skips the WHO land transport accident matrix instead of flattening its columns", () => {
+  const state = { section: "external_causes", stack: {} };
+  const entries = index.parseIndexLines([
+    "Table of land transport accidents",
+    "Pedestrian V01",
+    "Pedal cyclist V10",
+    "Occupant of car V40"
+  ], 677, state);
+  assert.deepEqual(entries, []);
+  assert.equal(state.section, "external_causes");
+});
